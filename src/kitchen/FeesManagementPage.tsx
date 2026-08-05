@@ -168,82 +168,44 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
         </div>
 
         <div className="ref-header-actions">
-          {/* Month Selector */}
-          <div className="ref-month-selector-wrap">
+          {/* Static Month Display */}
+          <div className="ref-month-selector-wrap" style={{ cursor: 'default' }}>
             <Calendar size={14} style={{ color: '#64748b' }} />
-            <select
-              value={selectedMonth}
-              onChange={e => setSelectedMonth(e.target.value)}
-              className="ref-month-select"
-            >
-              <option value="July 2026">July 2026</option>
-              <option value="June 2026">June 2026</option>
-              <option value="May 2026">May 2026</option>
-              <option value="All">All Months</option>
-            </select>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#1e293b' }}>July 2026</span>
           </div>
 
+          {/* Activity / Payment History Circle Icon */}
           <button
-            className={`ref-icon-btn ${isSearchOpen ? 'active' : ''}`}
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            title="Search Student"
-          >
-            <Search size={18} />
-          </button>
-
-          <button
-            className="ref-icon-btn"
+            className="odp-history-circle-btn"
             onClick={() => {
               if (onOpenPaymentHistory) onOpenPaymentHistory();
               else setIsAnalyticsOpen(true);
             }}
-            title="Monthly Analytics"
-          >
-            <PieChart size={18} />
-          </button>
-
-          <button
-            className="ref-icon-btn"
-            onClick={handleExportReport}
-            title="Export Report"
-          >
-            <FileSpreadsheet size={18} />
-          </button>
-
-          <button
-            className="ref-icon-btn"
-            onClick={() => {
-              if (onOpenPaymentHistory) onOpenPaymentHistory();
-              else setIsAnalyticsOpen(true);
-            }}
-            title="Activity History"
+            title="Payment History"
           >
             <History size={18} />
           </button>
         </div>
       </div>
 
-      {/* SEARCH BAR (TOGGLE / FILTER) */}
-      {(isSearchOpen || searchQuery) && (
-        <div className="ref-search-bar-wrap">
-          <Search size={18} style={{ color: '#94a3b8' }} />
-          <input
-            type="text"
-            placeholder="Search by student name or room number..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="ref-search-input"
-            autoFocus
-          />
-          {searchQuery && (
-            <button className="ref-clear-search-btn" onClick={() => setSearchQuery('')}>
-              <X size={14} />
-            </button>
-          )}
-        </div>
-      )}
+      {/* SEARCH BAR (ALWAYS VISIBLE) */}
+      <div className="ref-search-bar-wrap" style={{ marginBottom: '16px' }}>
+        <Search size={18} style={{ color: '#94a3b8' }} />
+        <input
+          type="text"
+          placeholder="Search by name or room no..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="ref-search-input"
+        />
+        {searchQuery && (
+          <button className="ref-clear-search-btn" onClick={() => setSearchQuery('')}>
+            <X size={14} />
+          </button>
+        )}
+      </div>
 
-      {/* FOUR FINANCIAL SUMMARY CARDS - EXACT 1:1 MATCH TO REFERENCE PHOTO */}
+      {/* TWO FINANCIAL SUMMARY CARDS (REVENUE & DUE ONLY) */}
       <div className="ref-summary-cards-grid">
         
         {/* CARD 1: LIGHT BLUE - TOTAL REVENUE */}
@@ -273,36 +235,6 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
           <div className="ref-card-badge badge-amber">
             <span className="ref-badge-icon">!</span>
             <span>{pendingCount} pending</span>
-          </div>
-        </div>
-
-        {/* CARD 3: LIGHT PURPLE - EXPENSES */}
-        <div
-          className="ref-summary-card card-pastel-purple"
-          onClick={() => { if (onOpenExpenses) onOpenExpenses(); }}
-          style={{ cursor: 'pointer' }}
-        >
-          <div className="ref-card-label">EXPENSES</div>
-          <div className="ref-card-value">₹53,708</div>
-          <div className="ref-card-badge badge-purple">
-            <Receipt size={15} />
-            <span>6 bills</span>
-          </div>
-        </div>
-
-        {/* CARD 4: LIGHT CYAN - STAFF MANAGEMENT */}
-        <div
-          className="ref-summary-card card-pastel-cyan"
-          onClick={() => {
-            if (onOpenStaffManagement) onOpenStaffManagement();
-          }}
-          style={{ cursor: 'pointer' }}
-        >
-          <div className="ref-card-label">STAFF MANAGEMENT</div>
-          <div className="ref-card-value">4 Staff</div>
-          <div className="ref-card-badge badge-cyan">
-            <CreditCard size={15} />
-            <span>1 unpaid</span>
           </div>
         </div>
 

@@ -512,9 +512,9 @@ function App() {
       case 'broadcast':
         return 'Broadcast';
       case 'requests':
-        return 'Users';
+        return null;
       case 'fees':
-        return 'Analytics';
+        return null;
       case 'rooms':
         return 'Room Management';
       case 'settings':
@@ -812,7 +812,7 @@ function App() {
                   setCurrentScreen('payment-verification');
                 }}
                 onOpenPaymentHistory={() => setCurrentScreen('payment-history')}
-                onOpenDuePayments={() => setCurrentScreen('due-payments')}
+                onOpenDuePayments={() => setCurrentScreen('overdue-dues')}
                 onNavigateToCollectFee={(res) => {
                   setSelectedCollectResident(res);
                   setCurrentScreen('collect-fee');
@@ -829,6 +829,10 @@ function App() {
               onBack={() => {
                 setCurrentScreen('home');
                 setActiveTab('fees');
+              }}
+              onNavigateToKitchen={() => {
+                setCurrentScreen('home');
+                setActiveTab('kitchen');
               }}
             />
           )}

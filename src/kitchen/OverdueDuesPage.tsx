@@ -49,9 +49,23 @@ export const OverdueDuesPage: React.FC<OverdueDuesPageProps> = ({
 
   return (
     <div className="odp-page-container">
-      {/* HEADER BAR (NO BACK BUTTON) */}
+      {/* HEADER BAR WITH SEARCHBAR & HISTORY ICON */}
       <div className="odp-header-bar">
-        <h1 className="odp-header-title">Overdue Dues</h1>
+        <div className="odp-search-wrap">
+          <Search size={18} className="odp-search-icon" />
+          <input
+            type="text"
+            className="odp-search-input"
+            placeholder="Search by name or room no..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button className="odp-search-clear" onClick={() => setSearchQuery('')}>
+              <X size={14} />
+            </button>
+          )}
+        </div>
         {onOpenHistory && (
           <button
             className="odp-history-circle-btn"
@@ -59,23 +73,6 @@ export const OverdueDuesPage: React.FC<OverdueDuesPageProps> = ({
             title="Payment History"
           >
             <History size={18} />
-          </button>
-        )}
-      </div>
-
-      {/* SEARCH INPUT BAR */}
-      <div className="odp-search-wrap">
-        <Search size={18} className="odp-search-icon" />
-        <input
-          type="text"
-          className="odp-search-input"
-          placeholder="Search by name or room no..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-        />
-        {searchQuery && (
-          <button className="odp-search-clear" onClick={() => setSearchQuery('')}>
-            <X size={14} />
           </button>
         )}
       </div>

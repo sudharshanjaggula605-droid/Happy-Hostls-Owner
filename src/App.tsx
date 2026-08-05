@@ -64,6 +64,8 @@ import { OpenComplaintsPage } from './kitchen/OpenComplaintsPage';
 import { RevenueAnalyticsPage } from './kitchen/RevenueAnalyticsPage';
 import { GuestsDirectoryPage } from './kitchen/GuestsDirectoryPage';
 import { SuccessRatePage } from './kitchen/SuccessRatePage';
+import { SubscriptionPlansPage } from './kitchen/SubscriptionPlansPage';
+import type { PlanType } from './kitchen/SubscriptionPlansPage';
 import { NotificationsPage } from './NotificationsPage';
 import { LaundryPage, CreateLaundryOrderPage, initialLaundryOrders } from './laundry';
 import { SettingsPage } from './settings/SettingsPage';
@@ -74,9 +76,10 @@ import type { LaundryOrder } from './laundry';
 function App() {
   // Navigation & View States
   const [currentHostelName, setCurrentHostelName] = useState('Happy Hostels');
+  const [currentPlan, setCurrentPlan] = useState<PlanType>('Gold');
   const [activeTab, setActiveTab] = useState<'home' | 'requests' | 'fees' | 'rooms' | 'laundry' | 'broadcast' | 'settings' | 'kitchen'>('home');
   const [kitchenTab, setKitchenTab] = useState<'menu' | 'pantry' | 'expenses' | 'suppliers'>('menu');
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'edit-menu' | 'add-pantry' | 'update-stock' | 'log-expense' | 'create-laundry-order' | 'add-user' | 'payment-verification' | 'payment-history' | 'due-payments' | 'collect-fee' | 'staff-management' | 'pay-staff-salary' | 'staff-attendance' | 'staff-payment-history' | 'expenses-management' | 'notifications' | 'occupancy-rate' | 'booking-requests' | 'overdue-dues' | 'open-complaints' | 'revenue-analytics' | 'guests-directory' | 'success-rate'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'edit-menu' | 'add-pantry' | 'update-stock' | 'log-expense' | 'create-laundry-order' | 'add-user' | 'payment-verification' | 'payment-history' | 'due-payments' | 'collect-fee' | 'staff-management' | 'pay-staff-salary' | 'staff-attendance' | 'staff-payment-history' | 'expenses-management' | 'notifications' | 'occupancy-rate' | 'booking-requests' | 'overdue-dues' | 'open-complaints' | 'revenue-analytics' | 'guests-directory' | 'success-rate' | 'subscription-plans'>('home');
   const [selectedVerificationFee, setSelectedVerificationFee] = useState<FeeTransaction | null>(null);
   const [selectedCollectResident, setSelectedCollectResident] = useState<{ id: string; name: string; roomNumber: string; amount?: number } | null>(null);
   const [selectedPayStaff, setSelectedPayStaff] = useState<{ name: string; role?: string; salaryMonthly: number; absentDays?: number } | null>(null);
@@ -95,6 +98,7 @@ function App() {
   const [requestSearchQuery] = useState('');
   const [requestFilter] = useState<'All' | RequestStatus>('All');
   const [roomFloorFilter, setRoomFloorFilter] = useState<string>('All');
+  void setRoomFloorFilter;
   const [feeSearchQuery, setFeeSearchQuery] = useState('');
   const [feeMonthFilter, setFeeMonthFilter] = useState<string>('All');
   const [feeStatusFilter, setFeeStatusFilter] = useState<'All' | PaymentStatus>('All');
@@ -107,6 +111,7 @@ function App() {
 
   // Hostel Data States
   const [hostelStats] = useState(initialHostelStats);
+  void hostelStats;
   const [hostelRooms] = useState<HostelRoom[]>(initialHostelRooms);
   const [residentRequests, setResidentRequests] = useState<ResidentRequest[]>(initialResidentRequests);
   const [feeTransactions, setFeeTransactions] = useState<FeeTransaction[]>(initialFeeTransactions);
@@ -441,6 +446,7 @@ function App() {
     if (roomFloorFilter === 'All') return true;
     return room.floor === roomFloorFilter;
   });
+  void filteredRooms;
 
   void feeSearchQuery;
   void setFeeSearchQuery;
@@ -481,6 +487,7 @@ function App() {
     if (currentScreen === 'log-expense') return 'Log Kitchen Expense';
     if (currentScreen === 'create-laundry-order') return 'Create Laundry Order';
     if (currentScreen === 'add-user') return 'Add User';
+    if (currentScreen === 'subscription-plans') return 'Subscription Plans';
 
     switch (activeTab) {
       case 'home':
@@ -595,7 +602,7 @@ function App() {
                         setCurrentScreen('home');
                       }}
                     >
-                      <span className="profile-dropdown-item-icon">⚙️</span>
+                      <span className="profile-dropdown-item-icon"><SettingsIcon size={16} /></span>
                       <span>Profile Settings</span>
                     </button>
                     {/* Logout */}
@@ -606,7 +613,7 @@ function App() {
                         if (showToast) showToast('You have been logged out.');
                       }}
                     >
-                      <span className="profile-dropdown-item-icon">🚪</span>
+                      <span className="profile-dropdown-item-icon"><DoorOpen size={16} /></span>
                       <span>Logout</span>
                     </button>
                   </div>
@@ -653,12 +660,23 @@ function App() {
               <KitchenHomePage 
                 userName="Vijaya"
                 currentHostel={currentHostelName}
+                currentPlan={currentPlan}
                 onSelectHostel={(name) => setCurrentHostelName(name)}
                 onNavigateTab={(tab) => setActiveTab(tab as any)} 
                 onNavigateScreen={(screen) => setCurrentScreen(screen as any)}
                 showToast={showToast} 
               />
             </div>
+          )}
+
+          {/* SUBSCRIPTION PLANS SCREEN */}
+          {currentScreen === 'subscription-plans' && (
+            <SubscriptionPlansPage 
+              currentPlan={currentPlan}
+              onUpdatePlan={(newPlan) => setCurrentPlan(newPlan)}
+              onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }}
+              showToast={showToast}
+            />
           )}
 
           {/* DEDICATED CARD PAGES */}

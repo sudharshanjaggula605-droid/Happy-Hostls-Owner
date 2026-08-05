@@ -9,6 +9,8 @@ import {
   ChevronRight,
   ChevronDown,
   Crown,
+  Award,
+  Sparkles,
   UserCheck,
   Megaphone,
   BarChart2,
@@ -18,6 +20,7 @@ import {
 interface KitchenHomePageProps {
   userName?: string;
   currentHostel?: string;
+  currentPlan?: 'Bronze' | 'Gold' | 'Platinum';
   onSelectHostel?: (hostelName: string) => void;
   onNavigateTab?: (tab: 'requests' | 'fees' | 'rooms' | 'laundry' | 'broadcast' | 'settings' | 'kitchen') => void;
   onNavigateScreen?: (screen: string) => void;
@@ -27,6 +30,7 @@ interface KitchenHomePageProps {
 export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({ 
   userName = 'Vijaya',
   currentHostel = 'Happy Hostels',
+  currentPlan = 'Gold',
   onSelectHostel,
   onNavigateTab, 
   onNavigateScreen,
@@ -74,10 +78,17 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
           </div>
 
           <div className="header-top-right">
-            <div className="gold-plan-badge">
-              <Crown size={12} className="gold-crown-icon" />
-              <span>GOLD PLAN</span>
-            </div>
+            <button 
+              type="button" 
+              className={`gold-plan-badge badge-${currentPlan.toLowerCase()}`}
+              onClick={() => onNavigateScreen && onNavigateScreen('subscription-plans')}
+              title="Click to view & upgrade Subscription Plans"
+            >
+              {currentPlan === 'Bronze' && <Award size={12} className="gold-crown-icon" />}
+              {currentPlan === 'Gold' && <Crown size={12} className="gold-crown-icon" />}
+              {currentPlan === 'Platinum' && <Sparkles size={12} className="gold-crown-icon" />}
+              <span>{currentPlan.toUpperCase()} PLAN</span>
+            </button>
           </div>
         </div>
 

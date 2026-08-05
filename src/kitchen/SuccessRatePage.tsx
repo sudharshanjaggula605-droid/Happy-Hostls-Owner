@@ -20,10 +20,7 @@ export const SuccessRatePage: React.FC<SuccessRatePageProps> = ({ onBack }) => {
     <div className="srp-page-container">
       {/* HEADER */}
       <div className="srp-header-bar">
-        <button className="srp-back-btn" onClick={onBack}>
-          <ChevronLeft size={20} color="#2563eb" />
-          <span className="srp-back-text">Back</span>
-        </button>
+        
         <h1 className="srp-header-title">Performance & Success Rate</h1>
       </div>
 

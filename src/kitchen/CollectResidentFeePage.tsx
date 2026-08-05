@@ -110,10 +110,7 @@ export const CollectResidentFeePage: React.FC<CollectResidentFeePageProps> = ({
       
       {/* HEADER BAR (EXACT MATCH TO REFERENCE PHOTO) */}
       <div className="crf-header-bar">
-        <button className="crf-back-btn" onClick={onBack} type="button">
-          <ChevronLeft size={20} className="text-blue-600" />
-          <span className="crf-back-text">Back</span>
-        </button>
+        
         <h1 className="crf-header-title">Collect Resident Fee</h1>
       </div>
 

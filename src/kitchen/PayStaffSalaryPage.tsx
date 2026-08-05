@@ -20,7 +20,7 @@ interface PayStaffSalaryPageProps {
     absentDays?: number;
   } | null;
   onBack: () => void;
-  onDisburseSalary: (staffName: string, amount: number, month: string, channel: string) => void;
+  onDisburseSalary: (staffName: string, amount: number, month: string, channel: string, transactionId?: string) => void;
 }
 
 export const PayStaffSalaryPage: React.FC<PayStaffSalaryPageProps> = ({
@@ -82,6 +82,7 @@ export const PayStaffSalaryPage: React.FC<PayStaffSalaryPageProps> = ({
   const [salaryAmount, setSalaryAmount] = useState<string>(activeStaff.netPay.toString());
   const [salaryMonth, setSalaryMonth] = useState<string>('July');
   const [paymentChannel, setPaymentChannel] = useState<string>('UPI (Google Pay / PhonePe)');
+  const [transactionId, setTransactionId] = useState<string>('');
 
   const handleStaffSelect = (id: string) => {
     setSelectedStaffId(id);
@@ -94,7 +95,7 @@ export const PayStaffSalaryPage: React.FC<PayStaffSalaryPageProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const amountNum = parseFloat(salaryAmount) || activeStaff.netPay;
-    onDisburseSalary(activeStaff.name, amountNum, salaryMonth, paymentChannel);
+    onDisburseSalary(activeStaff.name, amountNum, salaryMonth, paymentChannel, transactionId);
   };
 
   return (
@@ -102,32 +103,15 @@ export const PayStaffSalaryPage: React.FC<PayStaffSalaryPageProps> = ({
       
       {/* HEADER BAR (EXACT MATCH TO REFERENCE PHOTO) */}
       <div className="pss-header-bar">
-        <button className="pss-back-btn" onClick={onBack} type="button">
-          <ChevronLeft size={20} className="text-blue-600" />
-          <span className="pss-back-text">Back</span>
-        </button>
+        
         <h1 className="pss-header-title">Pay Staff Salary</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="pss-form-container">
         
-        {/* FIELD 1: SELECT STAFF MEMBER */}
-        <div className="pss-field-group">
-          <label className="pss-field-label">Select Staff Member</label>
-          <div className="pss-select-wrap">
-            <select
-              className="pss-select-input"
-              value={selectedStaffId}
-              onChange={e => handleStaffSelect(e.target.value)}
-            >
-              {staffList.map(st => (
-                <option key={st.id} value={st.id}>
-                  {st.statusLabel}
-                </option>
-              ))}
-            </select>
-            <ChevronDown size={18} className="pss-select-arrow" />
-          </div>
+        {/* SELECT STAFF MEMBER DROPDOWN REMOVED */}
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-color)' }}>{activeStaff.statusLabel}</h2>
         </div>
 
         {/* SALARY CALCULATION SUMMARY CARD (GREY BOX WITH DASHED BORDER) */}
@@ -198,6 +182,21 @@ export const PayStaffSalaryPage: React.FC<PayStaffSalaryPageProps> = ({
             <ChevronDown size={18} className="pss-select-arrow" />
           </div>
         </div>
+
+        {/* CONDITIONAL FIELD: TRANSACTION ID */}
+        {paymentChannel !== 'Cash Payment' && paymentChannel !== 'Cheque' && (
+          <div className="pss-field-group">
+            <label className="pss-field-label">Transaction ID</label>
+            <input
+              type="text"
+              className="pss-text-input"
+              value={transactionId}
+              onChange={e => setTransactionId(e.target.value)}
+              placeholder="e.g. UTR / Ref Number"
+              required
+            />
+          </div>
+        )}
 
         {/* DISBURSE SALARY BUTTON (LARGE SOLID BLUE BUTTON WITH WHITE CHECKMARK CIRCLE) */}
         <div className="pss-submit-wrap">

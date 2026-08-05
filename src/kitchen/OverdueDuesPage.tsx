@@ -27,10 +27,7 @@ export const OverdueDuesPage: React.FC<OverdueDuesPageProps> = ({ onBack, onNavi
     <div className="odp-page-container">
       {/* HEADER */}
       <div className="odp-header-bar">
-        <button className="odp-back-btn" onClick={onBack}>
-          <ChevronLeft size={20} color="#2563eb" />
-          <span className="odp-back-text">Back</span>
-        </button>
+        
         <h1 className="odp-header-title">Overdue Dues</h1>
       </div>
 

@@ -27,10 +27,7 @@ export const GuestsDirectoryPage: React.FC<GuestsDirectoryPageProps> = ({ onBack
     <div className="gdp-page-container">
       {/* HEADER */}
       <div className="gdp-header-bar">
-        <button className="gdp-back-btn" onClick={onBack}>
-          <ChevronLeft size={20} color="#2563eb" />
-          <span className="gdp-back-text">Back</span>
-        </button>
+        
         <h1 className="gdp-header-title">Guests & Residents</h1>
       </div>
 

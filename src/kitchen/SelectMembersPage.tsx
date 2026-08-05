@@ -68,14 +68,7 @@ export const SelectMembersPage: React.FC<SelectMembersPageProps> = ({
       <div className="select-members-page-card">
         {/* Header Bar inside Card */}
         <div className="fullpage-card-header">
-          <button 
-            type="button" 
-            className="fullpage-back-btn" 
-            onClick={onBack}
-            aria-label="Back to Broadcast"
-          >
-            <ArrowLeft size={18} />
-          </button>
+          
 
           <div className="fullpage-title-box">
             <div className="members-header-icon-box">

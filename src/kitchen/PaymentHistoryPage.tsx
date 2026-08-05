@@ -86,10 +86,7 @@ export const PaymentHistoryPage: React.FC<PaymentHistoryPageProps> = ({ onBack }
       
       {/* TOP HEADER BAR (EXACT MATCH TO REFERENCE PHOTO) */}
       <div className="ph-header-bar">
-        <button className="ph-back-btn" onClick={onBack}>
-          <ChevronLeft size={20} className="text-blue-600" />
-          <span className="ph-back-text">Back</span>
-        </button>
+        
         <h1 className="ph-header-title">Payment History</h1>
       </div>
 

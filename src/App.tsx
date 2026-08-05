@@ -1,32 +1,32 @@
-import { useState } from 'react';
-import { 
-  Home as HomeIcon, 
-  CreditCard, 
-  Settings as SettingsIcon, 
-  Bell, 
-  ArrowLeft, 
-  AlertTriangle, 
-  Plus, 
-  Search, 
-  Phone, 
-  Utensils, 
-  ChevronRight, 
-  DoorOpen, 
-  MoreHorizontal, 
-  Shirt, 
-  Megaphone, 
-  X, 
-  Building, 
-  CheckCircle, 
+import { useState, useRef, useEffect } from 'react';
+import {
+  Home as HomeIcon,
+  CreditCard,
+  Settings as SettingsIcon,
+  Bell,
+  ArrowLeft,
+  AlertTriangle,
+  Plus,
+  Search,
+  Phone,
+  Utensils,
+  ChevronRight,
+  DoorOpen,
+  MoreHorizontal,
+  Shirt,
+  Megaphone,
+  X,
+  Building,
+  CheckCircle,
   FileText,
   Edit3,
   Trash2,
   Users
 } from 'lucide-react';
-import type { 
-  DayOfWeek, 
-  PantryItem, 
-  KitchenExpense, 
+import type {
+  DayOfWeek,
+  PantryItem,
+  KitchenExpense,
   Supplier,
   HostelRoom,
   ResidentRequest,
@@ -34,10 +34,10 @@ import type {
   RequestStatus,
   PaymentStatus
 } from './types';
-import { 
-  initialWeeklyMenu, 
-  initialPantryItems, 
-  initialExpenses, 
+import {
+  initialWeeklyMenu,
+  initialPantryItems,
+  initialExpenses,
   initialSuppliers,
   initialHostelStats,
   initialHostelRooms,
@@ -83,7 +83,7 @@ function App() {
   const [selectedAttendanceStaff, setSelectedAttendanceStaff] = useState<{ name: string; role?: string; presentDays?: number; absentDays?: number } | null>(null);
   const [laundryOrders, setLaundryOrders] = useState<LaundryOrder[]>(initialLaundryOrders);
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>(['m2', 'm3']);
-  
+
   // Drawer & Modal States
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -150,7 +150,41 @@ function App() {
   const [expenseDescription, setExpenseDescription] = useState('');
   const [expenseDate] = useState(new Date().toISOString().substring(0, 10));
 
+  // Global Navigation History
+  const [historyStack, setHistoryStack] = useState<{screen: string, tab: string}[]>([{screen: 'home', tab: 'home'}]);
+  const isBackNav = useRef(false);
 
+  useEffect(() => {
+    if (isBackNav.current) {
+      isBackNav.current = false;
+    } else {
+      setHistoryStack(prev => {
+        const last = prev[prev.length - 1];
+        if (last && (last.screen !== currentScreen || last.tab !== activeTab)) {
+          return [...prev, { screen: currentScreen, tab: activeTab }];
+        }
+        return prev;
+      });
+    }
+  }, [currentScreen, activeTab]);
+
+  const handleGlobalBack = () => {
+    setHistoryStack(prev => {
+      if (prev.length > 1) {
+        isBackNav.current = true;
+        const newHistory = prev.slice(0, -1);
+        const target = newHistory[newHistory.length - 1];
+        setCurrentScreen(target.screen as any);
+        setActiveTab(target.tab as any);
+        return newHistory;
+      } else {
+        isBackNav.current = true;
+        setCurrentScreen('home');
+        setActiveTab('home');
+        return [{screen: 'home', tab: 'home'}];
+      }
+    });
+  };
 
   // UI Toast State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -430,8 +464,8 @@ function App() {
   // Filter Computations (requestFilter/requestSearchQuery kept for future use)
   const _filteredRequests = residentRequests.filter(req => {
     const matchesSearch = req.residentName.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
-                          req.roomNumber.includes(requestSearchQuery) ||
-                          req.details.toLowerCase().includes(requestSearchQuery.toLowerCase());
+      req.roomNumber.includes(requestSearchQuery) ||
+      req.details.toLowerCase().includes(requestSearchQuery.toLowerCase());
     const matchesStatus = requestFilter === 'All' || req.status === requestFilter;
     return matchesSearch && matchesStatus;
   });
@@ -454,15 +488,15 @@ function App() {
   void handleSendReminder;
 
   const selectedPantryItemForUpdate = pantryItems.find(item => item.id === updatingItemId);
-  const updatedTotalStockCalculated = selectedPantryItemForUpdate 
-    ? (selectedPantryItemForUpdate.stock + (parseFloat(addStockAmount) || 0)) 
+  const updatedTotalStockCalculated = selectedPantryItemForUpdate
+    ? (selectedPantryItemForUpdate.stock + (parseFloat(addStockAmount) || 0))
     : 0;
 
   const lowStockCount = pantryItems.filter(item => item.stock <= item.threshold).length;
 
   const filteredExpenses = expenses.filter(exp => {
     const matchesSearch = exp.description.toLowerCase().includes(expenseSearchQuery.toLowerCase()) ||
-                          exp.category.toLowerCase().includes(expenseSearchQuery.toLowerCase());
+      exp.category.toLowerCase().includes(expenseSearchQuery.toLowerCase());
     const matchesCategory = expenseCategoryFilter === 'All' || exp.category === expenseCategoryFilter;
     return matchesSearch && matchesCategory;
   });
@@ -484,7 +518,7 @@ function App() {
 
     switch (activeTab) {
       case 'home':
-        return 'Home';
+        return null;
       case 'kitchen':
         return 'Kitchen Management';
       case 'laundry':
@@ -500,14 +534,14 @@ function App() {
       case 'settings':
         return 'Settings';
       default:
-        return 'Home';
+        return null;
     }
   };
 
   return (
     <div className="app-simulator">
       <div className="app-screen">
-        
+
         {/* VIRTUAL STATUS BAR */}
         <div className="phone-status-bar">
           <span className="status-bar-time">9:41</span>
@@ -532,22 +566,16 @@ function App() {
         {/* DYNAMIC HEADER BAR WITH HOSTEL NAME */}
         <header className="app-header">
           <div className="header-left">
+            {(currentScreen !== 'home' || activeTab !== 'home') && (
+              <button className="header-btn" onClick={handleGlobalBack} aria-label="Go back">
+                <ArrowLeft size={18} />
+              </button>
+            )}
+
             <span className="header-logo-icon">
               <Building size={18} />
             </span>
 
-            {(currentScreen !== 'home' || activeTab !== 'home') && (
-              <button className="header-btn" onClick={() => {
-                if (currentScreen !== 'home') {
-                  setCurrentScreen('home');
-                } else {
-                  setActiveTab('home');
-                }
-              }} aria-label="Go back">
-                <ArrowLeft size={18} />
-              </button>
-            )}
-            
             <h1 className="header-title">
               {currentHostelName}
             </h1>
@@ -617,7 +645,7 @@ function App() {
         </header>
 
         {/* DYNAMIC PAGE TITLE BELOW NAVBAR (Hidden on Home page) */}
-        {(currentScreen !== 'home' || activeTab !== 'home') && (
+        {(currentScreen !== 'home' || activeTab !== 'home') && getPageTitle() && (
           <div className="page-title-banner">
             <h2 className="page-title-text">{getPageTitle()}</h2>
           </div>
@@ -625,7 +653,7 @@ function App() {
 
         {/* MAIN CONTENT CONTAINER */}
         <main className="app-content">
-          
+
           {/* TOAST NOTIFICATION */}
           {toastMessage && (
             <div className="toast-msg" role="alert" aria-live="polite">
@@ -650,13 +678,13 @@ function App() {
           {/* SCREEN 1: REDESIGNED HOME DASHBOARD */}
           {currentScreen === 'home' && activeTab === 'home' && (
             <div className="home-screen-container">
-              <KitchenHomePage 
+              <KitchenHomePage
                 userName="Vijaya"
                 currentHostel={currentHostelName}
                 onSelectHostel={(name) => setCurrentHostelName(name)}
-                onNavigateTab={(tab) => setActiveTab(tab as any)} 
+                onNavigateTab={(tab) => setActiveTab(tab as any)}
                 onNavigateScreen={(screen) => setCurrentScreen(screen as any)}
-                showToast={showToast} 
+                showToast={showToast}
               />
             </div>
           )}
@@ -671,8 +699,8 @@ function App() {
           )}
 
           {currentScreen === 'overdue-dues' && (
-            <OverdueDuesPage 
-              onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }} 
+            <OverdueDuesPage
+              onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }}
               onNavigateToCollectFee={(res) => {
                 setSelectedCollectResident(res);
                 setCurrentScreen('collect-fee');
@@ -700,8 +728,8 @@ function App() {
           {/* SCREEN 2: USERS HISTORY PAGE (REQUESTS NAVIGATION) */}
           {currentScreen === 'home' && activeTab === 'requests' && (
             <div className="p-16">
-              <UsersHistoryPage 
-                showToast={showToast} 
+              <UsersHistoryPage
+                showToast={showToast}
                 onNavigateToAddUser={() => setCurrentScreen('add-user')}
               />
             </div>
@@ -710,7 +738,7 @@ function App() {
           {/* FULL-SCREEN ADD USER PAGE */}
           {currentScreen === 'add-user' && (
             <div className="p-16">
-              <AddUserPage 
+              <AddUserPage
                 onSuccess={() => {
                   setCurrentScreen('home');
                   setActiveTab('requests');
@@ -730,7 +758,7 @@ function App() {
           {/* SCREEN 4: REDESIGNED FEES MANAGEMENT (REFERENCE IMAGE MATCH) */}
           {currentScreen === 'home' && activeTab === 'fees' && (
             <div className="p-16">
-              <FeesManagementPage 
+              <FeesManagementPage
                 feeTransactions={feeTransactions}
                 setFeeTransactions={setFeeTransactions}
                 showToast={showToast}
@@ -764,7 +792,7 @@ function App() {
 
           {/* SCREEN: FULL-SCREEN PAYMENT VERIFICATION DETAILS */}
           {currentScreen === 'payment-verification' && selectedVerificationFee && (
-            <PaymentVerificationPage 
+            <PaymentVerificationPage
               transaction={selectedVerificationFee}
               onBack={() => {
                 setSelectedVerificationFee(null);
@@ -778,7 +806,7 @@ function App() {
 
           {/* SCREEN: FULL-SCREEN PAYMENT HISTORY */}
           {currentScreen === 'payment-history' && (
-            <PaymentHistoryPage 
+            <PaymentHistoryPage
               onBack={() => {
                 setCurrentScreen('home');
                 setActiveTab('fees');
@@ -788,7 +816,7 @@ function App() {
 
           {/* SCREEN: FULL-SCREEN DUE PAYMENTS */}
           {currentScreen === 'due-payments' && (
-            <DuePaymentsPage 
+            <DuePaymentsPage
               onBack={() => {
                 setCurrentScreen('home');
                 setActiveTab('fees');
@@ -803,7 +831,7 @@ function App() {
 
           {/* SCREEN: FULL-SCREEN COLLECT RESIDENT FEE */}
           {currentScreen === 'collect-fee' && (
-            <CollectResidentFeePage 
+            <CollectResidentFeePage
               initialResident={selectedCollectResident}
               onBack={() => {
                 setSelectedCollectResident(null);
@@ -832,7 +860,7 @@ function App() {
 
           {/* SCREEN: FULL-SCREEN STAFF MANAGEMENT */}
           {currentScreen === 'staff-management' && (
-            <StaffManagementPage 
+            <StaffManagementPage
               onBack={() => {
                 setCurrentScreen('home');
                 setActiveTab('fees');
@@ -854,7 +882,7 @@ function App() {
 
           {/* SCREEN: FULL-SCREEN PAY STAFF SALARY */}
           {currentScreen === 'pay-staff-salary' && (
-            <PayStaffSalaryPage 
+            <PayStaffSalaryPage
               initialStaff={selectedPayStaff}
               onBack={() => {
                 setSelectedPayStaff(null);
@@ -870,7 +898,7 @@ function App() {
 
           {/* SCREEN: FULL-SCREEN STAFF ATTENDANCE */}
           {currentScreen === 'staff-attendance' && (
-            <StaffAttendancePage 
+            <StaffAttendancePage
               initialStaff={selectedAttendanceStaff}
               onBack={() => {
                 setSelectedAttendanceStaff(null);
@@ -881,7 +909,7 @@ function App() {
 
           {/* SCREEN: FULL-SCREEN STAFF PAYMENT HISTORY */}
           {currentScreen === 'staff-payment-history' && (
-            <StaffPaymentHistoryPage 
+            <StaffPaymentHistoryPage
               onBack={() => setCurrentScreen('staff-management')}
             />
           )}
@@ -890,8 +918,8 @@ function App() {
           {/* SCREEN 5: LAUNDRY MANAGEMENT */}
           {currentScreen === 'home' && activeTab === 'laundry' && (
             <div className="p-16">
-              <LaundryPage 
-                showToast={showToast} 
+              <LaundryPage
+                showToast={showToast}
                 ordersList={laundryOrders}
                 onNavigateToCreateOrder={() => setCurrentScreen('create-laundry-order')}
               />
@@ -901,7 +929,7 @@ function App() {
           {/* SCREEN: CREATE LAUNDRY ORDER */}
           {currentScreen === 'create-laundry-order' && (
             <div className="p-16">
-              <CreateLaundryOrderPage 
+              <CreateLaundryOrderPage
                 onSaveOrder={(newOrder) => {
                   setLaundryOrders([newOrder, ...laundryOrders]);
                   if (showToast) showToast(`Laundry Order ${newOrder.orderId} created successfully!`);
@@ -921,8 +949,8 @@ function App() {
           {/* SCREEN 6: BROADCAST SYSTEM */}
           {currentScreen === 'home' && activeTab === 'broadcast' && (
             <div className="p-16">
-              <KitchenBroadcastPage 
-                showToast={showToast} 
+              <KitchenBroadcastPage
+                showToast={showToast}
                 selectedMemberIds={selectedMemberIds}
                 onToggleMember={handleToggleMember}
                 onClearAllMembers={handleClearAllMembers}
@@ -940,7 +968,7 @@ function App() {
           {/* DEDICATED KITCHEN MANAGEMENT PAGE */}
           {currentScreen === 'home' && activeTab === 'kitchen' && (
             <div className="p-16">
-              
+
 
 
               {/* 2 Action Buttons Row */}
@@ -964,25 +992,25 @@ function App() {
 
               {/* Kitchen Navigation Tabs */}
               <div className="kitchen-tabs-nav">
-                <button 
+                <button
                   className={`kitchen-tab-btn ${kitchenTab === 'menu' ? 'active' : ''}`}
                   onClick={() => setKitchenTab('menu')}
                 >
                   Weekly Menu
                 </button>
-                <button 
+                <button
                   className={`kitchen-tab-btn ${kitchenTab === 'pantry' ? 'active' : ''}`}
                   onClick={() => setKitchenTab('pantry')}
                 >
                   Pantry Inventory
                 </button>
-                <button 
+                <button
                   className={`kitchen-tab-btn ${kitchenTab === 'expenses' ? 'active' : ''}`}
                   onClick={() => setKitchenTab('expenses')}
                 >
                   Kitchen Expenses
                 </button>
-                <button 
+                <button
                   className={`kitchen-tab-btn ${kitchenTab === 'suppliers' ? 'active' : ''}`}
                   onClick={() => setKitchenTab('suppliers')}
                 >
@@ -1005,7 +1033,7 @@ function App() {
                         <div key={day} className="day-menu-card-compact">
                           <div className="day-card-compact-header">
                             <span className="day-card-compact-name">{day}</span>
-                            <button 
+                            <button
                               className="edit-btn-compact"
                               onClick={() => navigateToEditMenu(day)}
                               aria-label={`Edit ${day} menu`}
@@ -1045,8 +1073,8 @@ function App() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                     <h2 className="weekly-menu-title" style={{ marginBottom: 0 }}>Pantry Inventory ({pantryItems.length})</h2>
-                    <button 
-                      className="quick-action-pill" 
+                    <button
+                      className="quick-action-pill"
                       style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none' }}
                       onClick={navigateToAddPantry}
                     >
@@ -1090,15 +1118,15 @@ function App() {
                                 <span className="pantry-stock-min">(Min: {item.threshold})</span>
                               </div>
                             </div>
-                             <div style={{ display: 'flex', gap: '8px' }}>
-                              <button 
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button
                                 type="button"
                                 className="pantry-add-stock-btn"
                                 onClick={() => navigateToUpdateStock(item.id)}
                               >
                                 <Plus size={14} /> Add Stock
                               </button>
-                              <button 
+                              <button
                                 type="button"
                                 className="pantry-delete-btn"
                                 onClick={() => handleDeletePantryItem(item.id)}
@@ -1122,7 +1150,7 @@ function App() {
                   <div className="search-filter-wrap">
                     <div className="search-box-modern">
                       <Search size={16} style={{ color: 'var(--text-muted)' }} />
-                      <input 
+                      <input
                         type="text"
                         placeholder="Search expenses..."
                         className="search-box-input"
@@ -1138,7 +1166,7 @@ function App() {
 
                     <div className="filter-pills-row">
                       {['All', 'Grocery / Grains', 'Dairy', 'Eggs / Poultry', 'Veggies / Fruits'].map(cat => (
-                        <button 
+                        <button
                           key={cat}
                           className={`pill-btn ${expenseCategoryFilter === cat ? 'active' : ''}`}
                           onClick={() => setExpenseCategoryFilter(cat)}
@@ -1161,8 +1189,8 @@ function App() {
                   {/* Section Title & Action Button */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <h2 className="payment-ledger-title" style={{ marginBottom: 0 }}>Payment Ledger</h2>
-                    <button 
-                      className="quick-action-pill" 
+                    <button
+                      className="quick-action-pill"
                       style={{ background: 'var(--primary-gradient)', color: 'white', border: 'none' }}
                       onClick={navigateToLogExpense}
                     >
@@ -1210,8 +1238,8 @@ function App() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                     <h2 className="weekly-menu-title" style={{ marginBottom: 0 }}>Suppliers ({filteredSuppliers.length})</h2>
-                    <button 
-                      className="quick-action-pill" 
+                    <button
+                      className="quick-action-pill"
                       style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none' }}
                       onClick={openAddSupplierModal}
                     >
@@ -1222,7 +1250,7 @@ function App() {
                   {/* Clean Search Box */}
                   <div className="search-box-modern" style={{ marginBottom: '14px' }}>
                     <Search size={16} style={{ color: 'var(--text-muted)' }} />
-                    <input 
+                    <input
                       type="text"
                       placeholder="Search supplier, contact, or items..."
                       className="search-box-input"
@@ -1278,14 +1306,14 @@ function App() {
                               </span>
 
                               <div className="supplier-actions-wrap">
-                                <button 
+                                <button
                                   type="button"
                                   className="supplier-action-edit"
                                   onClick={() => openEditSupplierModal(sup)}
                                 >
                                   <Edit3 size={13} /> Edit
                                 </button>
-                                <button 
+                                <button
                                   type="button"
                                   className="supplier-action-delete"
                                   onClick={() => handleDeleteSupplier(sup.id, sup.name)}
@@ -1321,49 +1349,49 @@ function App() {
 
                 <div className="modern-field-group">
                   <label className="modern-field-label">🥞 Breakfast Menu</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
                     placeholder="e.g. Idli, Sambar, Chutney, Tea"
-                    className="modern-form-input" 
-                    value={menuBreakfast} 
-                    onChange={(e) => setMenuBreakfast(e.target.value)} 
+                    className="modern-form-input"
+                    value={menuBreakfast}
+                    onChange={(e) => setMenuBreakfast(e.target.value)}
                   />
                 </div>
 
                 <div className="modern-field-group">
                   <label className="modern-field-label">🍛 Lunch Menu</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
                     placeholder="e.g. Rice, Dal Tadka, Paneer Butter Masala, Roti"
-                    className="modern-form-input" 
-                    value={menuLunch} 
-                    onChange={(e) => setMenuLunch(e.target.value)} 
+                    className="modern-form-input"
+                    value={menuLunch}
+                    onChange={(e) => setMenuLunch(e.target.value)}
                   />
                 </div>
 
                 <div className="modern-field-group">
                   <label className="modern-field-label">☕ Evening Snacks</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
                     placeholder="e.g. Samosa, Green Chutney, Coffee"
-                    className="modern-form-input" 
-                    value={menuSnacks} 
-                    onChange={(e) => setMenuSnacks(e.target.value)} 
+                    className="modern-form-input"
+                    value={menuSnacks}
+                    onChange={(e) => setMenuSnacks(e.target.value)}
                   />
                 </div>
 
                 <div className="modern-field-group">
                   <label className="modern-field-label">🍽️ Dinner Menu</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     required
                     placeholder="e.g. Veg Biryani, Mirchi Ka Salan, Raitha"
-                    className="modern-form-input" 
-                    value={menuDinner} 
-                    onChange={(e) => setMenuDinner(e.target.value)} 
+                    className="modern-form-input"
+                    value={menuDinner}
+                    onChange={(e) => setMenuDinner(e.target.value)}
                   />
                 </div>
 
@@ -1388,50 +1416,50 @@ function App() {
 
                 <div className="modern-field-group">
                   <label className="modern-field-label">Item Name</label>
-                  <input 
-                    type="text" 
-                    required 
+                  <input
+                    type="text"
+                    required
                     placeholder="e.g. Amul Milk, Fresh Eggs, Rice"
-                    className="modern-form-input" 
-                    value={pantryName} 
-                    onChange={(e) => setPantryName(e.target.value)} 
+                    className="modern-form-input"
+                    value={pantryName}
+                    onChange={(e) => setPantryName(e.target.value)}
                   />
                 </div>
 
                 <div className="modern-two-cols">
                   <div className="modern-field-group">
                     <label className="modern-field-label">Unit Price (₹)</label>
-                    <input 
-                      type="number" 
-                      required 
+                    <input
+                      type="number"
+                      required
                       placeholder="60"
-                      className="modern-form-input" 
-                      value={pantryPrice} 
-                      onChange={(e) => setPantryPrice(e.target.value)} 
+                      className="modern-form-input"
+                      value={pantryPrice}
+                      onChange={(e) => setPantryPrice(e.target.value)}
                     />
                   </div>
                   <div className="modern-field-group">
                     <label className="modern-field-label">Initial Stock</label>
-                    <input 
-                      type="number" 
-                      required 
+                    <input
+                      type="number"
+                      required
                       placeholder="10"
-                      className="modern-form-input" 
-                      value={pantryStock} 
-                      onChange={(e) => setPantryStock(e.target.value)} 
+                      className="modern-form-input"
+                      value={pantryStock}
+                      onChange={(e) => setPantryStock(e.target.value)}
                     />
                   </div>
                 </div>
 
                 <div className="modern-field-group">
                   <label className="modern-field-label">Low Stock Alert Threshold</label>
-                  <input 
-                    type="number" 
-                    required 
+                  <input
+                    type="number"
+                    required
                     placeholder="20"
-                    className="modern-form-input" 
-                    value={pantryThreshold} 
-                    onChange={(e) => setPantryThreshold(e.target.value)} 
+                    className="modern-form-input"
+                    value={pantryThreshold}
+                    onChange={(e) => setPantryThreshold(e.target.value)}
                   />
                 </div>
 
@@ -1464,14 +1492,14 @@ function App() {
 
                 <div className="modern-field-group">
                   <label className="modern-field-label">Add Stock Amount ({selectedPantryItemForUpdate.unit})</label>
-                  <input 
-                    type="number" 
-                    min="1" 
-                    required 
+                  <input
+                    type="number"
+                    min="1"
+                    required
                     placeholder="e.g. 5"
-                    className="modern-form-input" 
-                    value={addStockAmount} 
-                    onChange={(e) => setAddStockAmount(e.target.value)} 
+                    className="modern-form-input"
+                    value={addStockAmount}
+                    onChange={(e) => setAddStockAmount(e.target.value)}
                   />
                 </div>
 
@@ -1501,27 +1529,27 @@ function App() {
 
                 <div className="modern-field-group">
                   <label className="modern-field-label">Amount (₹)</label>
-                  <input 
-                    type="number" 
-                    min="1" 
-                    required 
+                  <input
+                    type="number"
+                    min="1"
+                    required
                     placeholder="e.g. 1500"
-                    className="modern-form-input" 
-                    value={expenseAmount} 
-                    onChange={(e) => setExpenseAmount(e.target.value)} 
+                    className="modern-form-input"
+                    value={expenseAmount}
+                    onChange={(e) => setExpenseAmount(e.target.value)}
                   />
                 </div>
 
                 <div className="modern-field-group">
                   <label className="modern-field-label">Description</label>
-                  <textarea 
-                    required 
-                    rows={3} 
+                  <textarea
+                    required
+                    rows={3}
                     placeholder="Provide details about the kitchen purchase..."
-                    className="modern-form-input" 
+                    className="modern-form-input"
                     style={{ resize: 'none' }}
-                    value={expenseDescription} 
-                    onChange={(e) => setExpenseDescription(e.target.value)} 
+                    value={expenseDescription}
+                    onChange={(e) => setExpenseDescription(e.target.value)}
                   />
                 </div>
 
@@ -1592,7 +1620,7 @@ function App() {
               </div>
 
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button 
+                <button
                   className="btn-action-sm btn-action-approve"
                   style={{ flex: 1, padding: '10px' }}
                   onClick={() => {
@@ -1672,8 +1700,8 @@ function App() {
                 <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--primary)', marginTop: '4px' }}>₹{isPayModalOpen.amount.toLocaleString('en-IN')}</div>
               </div>
 
-              <button 
-                className="btn-action-sm btn-action-approve" 
+              <button
+                className="btn-action-sm btn-action-approve"
                 style={{ width: '100%', padding: '10px', fontSize: '12px' }}
                 onClick={() => handleRecordFeePayment(isPayModalOpen.id)}
               >
@@ -1688,7 +1716,7 @@ function App() {
           <div className="modal-overlay-backdrop bottom-sheet-align" onClick={() => setIsMoreMenuOpen(false)}>
             <div className="bottom-sheet-content" onClick={(e) => e.stopPropagation()}>
               <div className="bottom-sheet-handle" />
-              
+
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <span style={{ fontSize: '12px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)' }}>More Modules</span>
                 <button style={{ background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setIsMoreMenuOpen(false)}>
@@ -1697,7 +1725,7 @@ function App() {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <button 
+                <button
                   className={`announcement-card ${activeTab === 'kitchen' ? 'active' : ''}`}
                   style={{ display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left', border: activeTab === 'kitchen' ? '1px solid var(--primary)' : '1px solid var(--border-color)', cursor: 'pointer' }}
                   onClick={() => {
@@ -1716,7 +1744,7 @@ function App() {
                   <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
                 </button>
 
-                <button 
+                <button
                   className="announcement-card"
                   style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
                   onClick={() => {
@@ -1735,7 +1763,7 @@ function App() {
                   <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
                 </button>
 
-                <button 
+                <button
                   className="announcement-card"
                   style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
                   onClick={() => {
@@ -1754,7 +1782,7 @@ function App() {
                   <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
                 </button>
 
-                <button 
+                <button
                   className="announcement-card"
                   style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
                   onClick={() => {
@@ -1779,7 +1807,7 @@ function App() {
 
         {/* FIXED BOTTOM NAVIGATION BAR */}
         <nav className="phone-nav-bar">
-          <button 
+          <button
             className={`nav-tab-btn ${activeTab === 'home' ? 'active' : ''}`}
             onClick={() => {
               setActiveTab('home');
@@ -1790,8 +1818,8 @@ function App() {
             <span className="nav-tab-icon"><HomeIcon size={20} /></span>
             <span>Home</span>
           </button>
-          
-          <button 
+
+          <button
             className={`nav-tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
             onClick={() => {
               setActiveTab('requests');
@@ -1802,8 +1830,8 @@ function App() {
             <span className="nav-tab-icon"><Users size={20} /></span>
             <span>Users</span>
           </button>
-          
-          <button 
+
+          <button
             className={`nav-tab-btn ${activeTab === 'fees' ? 'active' : ''}`}
             onClick={() => {
               setActiveTab('fees');
@@ -1815,7 +1843,7 @@ function App() {
             <span>Fee Mgmt</span>
           </button>
 
-          <button 
+          <button
             className={`nav-tab-btn ${activeTab === 'rooms' ? 'active' : ''}`}
             onClick={() => {
               setActiveTab('rooms');
@@ -1826,8 +1854,8 @@ function App() {
             <span className="nav-tab-icon"><DoorOpen size={20} /></span>
             <span>Room Mgmt</span>
           </button>
-          
-          <button 
+
+          <button
             className={`nav-tab-btn ${isMoreMenuOpen || ['settings', 'laundry', 'broadcast'].includes(activeTab) ? 'active' : ''}`}
             onClick={() => {
               setIsMoreMenuOpen(prev => !prev);

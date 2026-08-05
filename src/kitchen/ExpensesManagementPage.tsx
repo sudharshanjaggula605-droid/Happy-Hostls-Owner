@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import React, { useState, useRef } from 'react';
 import { 
   ChevronLeft, 
@@ -23,11 +23,7 @@ import {
   ArrowLeft,
   Check
 } from 'lucide-react';
-=======
-import React, { useState } from 'react';
-import { Search, X, History, ChevronRight } from 'lucide-react';
 import type { KitchenExpense } from '../types';
->>>>>>> 8af97f2c2e461f37b3bc5d5395196ed507d6c6df
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  DATA TYPES                                                                */
@@ -46,7 +42,7 @@ export interface ExpenseItem {
   status: 'Paid' | 'Pending' | 'Overdue';
 }
 
-<<<<<<< HEAD
+
 export interface ExpensesManagementPageProps {
   onBack: () => void;
   onNavigateToKitchen?: () => void;
@@ -57,11 +53,11 @@ export interface ExpensesManagementPageProps {
 /*  INITIAL MOCK EXPENSE DATA                                                  */
 /* ─────────────────────────────────────────────────────────────────────────── */
 const INITIAL_EXPENSES: ExpenseItem[] = [
-=======
+
 interface ExpensesManagementPageProps {
   onBack?: () => void;
   expenses?: KitchenExpense[];
-}
+}]
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  DEFAULT EXPENSE DATA                                                       */
@@ -96,7 +92,7 @@ const DEFAULT_ALL_EXPENSES: ExpenseItem[] = [
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  CATEGORY METADATA CONFIG                                                   */
 /* ─────────────────────────────────────────────────────────────────────────── */
-<<<<<<< HEAD
+
 const CATEGORY_CONFIG = {
   kitchen: {
     label: 'Kitchen Bills',

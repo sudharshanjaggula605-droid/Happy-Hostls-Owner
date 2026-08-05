@@ -633,8 +633,18 @@ function App() {
         {(currentScreen !== 'home' || activeTab !== 'home') && getPageTitle() && (
           <div className="page-title-banner">
             <h2 className="page-title-text">{getPageTitle()}</h2>
+            {activeTab === 'rooms' && (
+              <button
+                type="button"
+                className="header-add-bed-btn"
+                onClick={() => window.dispatchEvent(new CustomEvent('open-add-bed'))}
+              >
+                <Plus size={15} /> Add Bed
+              </button>
+            )}
           </div>
         )}
+
 
         {/* MAIN CONTENT CONTAINER */}
         <main className="app-content">

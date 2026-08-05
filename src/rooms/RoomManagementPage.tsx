@@ -21,7 +21,8 @@ import {
   Download,
   Settings as SettingsIcon,
   HelpCircle,
-  LogOut
+  LogOut,
+  CheckCircle2
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -1100,6 +1101,13 @@ export const RoomManagementPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
   const [dashTab, setDashTab] = useState<'floors' | 'beds' | 'stats'>('floors');
 
+  useEffect(() => {
+    const handleOpenAddBed = () => setCurrentView('add-bed');
+    window.addEventListener('open-add-bed', handleOpenAddBed);
+    return () => window.removeEventListener('open-add-bed', handleOpenAddBed);
+  }, []);
+
+
   /* ── Selected Pointers for Detail Views ── */
   const [selectedFloorId, setSelectedFloorId] = useState<string>('f-1');
   const [selectedRoomId, setSelectedRoomId] = useState<string>('r-101');
@@ -1145,9 +1153,25 @@ export const RoomManagementPage: React.FC = () => {
   const [formStudentName, setFormStudentName] = useState('');
   const [formStudentPhone, setFormStudentPhone] = useState('');
 
-  // Add Room Form
+  // Step-by-Step Add Room Form State
+  const [addRoomStep, setAddRoomStep] = useState<number>(1);
   const [formRoomNumberInput, setFormRoomNumberInput] = useState('Room 107');
-  const [formRoomTypeInput, setFormRoomTypeInput] = useState('Single Sharing');
+  const [formRoomTypeInput, setFormRoomTypeInput] = useState('Double Sharing');
+  const [formBedCount, setFormBedCount] = useState<number>(2);
+  const [formBedTypeInput, setFormBedTypeInput] = useState<string>('Single Bed');
+  const [formRentAmount, setFormRentAmount] = useState<number>(8000);
+  const [formRoomDesc, setFormRoomDesc] = useState<string>('Well furnished room with attached bathroom.');
+  const [formSelectedAmenities, setFormSelectedAmenities] = useState<string[]>([
+    'Wi-Fi',
+    'AC',
+    'Attached Bath'
+  ]);
+
+  const toggleAmenity = (amenity: string) => {
+    setFormSelectedAmenities(prev =>
+      prev.includes(amenity) ? prev.filter(a => a !== amenity) : [...prev, amenity]
+    );
+  };
 
   /* ── Computed Metrics across active Hostel ── */
   let computedTotalBeds = 0;
@@ -1324,29 +1348,51 @@ export const RoomManagementPage: React.FC = () => {
 
   const handleSaveRoom = () => {
     if (!formRoomNumberInput.trim()) return;
+
+    const roomNumClean = formRoomNumberInput.trim();
+    const bedLetterPrefix = roomNumClean.replace(/\s+/g, '');
+
+    const generatedBeds: Bed[] = Array.from({ length: formBedCount }, (_, idx) => {
+      const letter = String.fromCharCode(65 + idx);
+      return {
+        id: `b-${Date.now()}-${idx + 1}`,
+        bedNumber: `${bedLetterPrefix}-${letter}`,
+        bedType: formBedTypeInput,
+        status: 'vacant',
+        sortIndex: idx + 1,
+        monthlyRent: formRentAmount
+      };
+    });
+
+    const targetFloor = activeHostel.floors.find(f => f.id === formFloorId);
+
     const newRoom: Room = {
       id: `r-${Date.now()}`,
-      roomNumber: formRoomNumberInput.trim(),
+      roomNumber: roomNumClean,
       floorId: formFloorId,
-      floorName: activeHostel.floors.find(f => f.id === formFloorId)?.floorName || 'Floor 1',
+      floorName: targetFloor?.floorName || 'Floor 1',
       roomType: formRoomTypeInput,
-      monthlyRent: 8000,
-      amenities: ['Wi-Fi', 'AC', 'Attached Bath'],
-      beds: [
-        { id: `b-${Date.now()}-1`, bedNumber: `${formRoomNumberInput.replace(/\s+/g, '')}-A`, bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 8000 },
-        { id: `b-${Date.now()}-2`, bedNumber: `${formRoomNumberInput.replace(/\s+/g, '')}-B`, bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 8000 }
-      ]
+      monthlyRent: formRentAmount,
+      description: formRoomDesc,
+      amenities: formSelectedAmenities,
+      beds: generatedBeds
     };
 
     updateFloors(
       activeHostel.floors.map(f => {
         if (f.id === formFloorId) {
-          return { ...f, rooms: [...f.rooms, newRoom] };
+          return {
+            ...f,
+            totalRooms: (f.totalRooms || f.rooms.length) + 1,
+            totalBeds: (f.totalBeds || 0) + generatedBeds.length,
+            rooms: [...f.rooms, newRoom]
+          };
         }
         return f;
       })
     );
 
+    setAddRoomStep(1);
     setCurrentView('dashboard');
   };
 
@@ -1429,96 +1475,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'dashboard' && (
         <div className="bm-ref-screen animate-fade-in" style={{ paddingBottom: 80 }}>
           
-          {/* Hero Header Banner */}
-          <div
-            style={{
-              background: 'linear-gradient(135deg, #1e1b4b, #312e81)',
-              borderRadius: '20px',
-              padding: '18px 16px',
-              color: '#ffffff',
-              marginBottom: '14px',
-              boxShadow: '0 4px 14px rgba(49, 46, 129, 0.25)'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <select
-                  value={activeHostelId}
-                  onChange={e => setActiveHostelId(e.target.value)}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.15)',
-                    color: '#ffffff',
-                    border: '1px solid rgba(255, 255, 255, 0.25)',
-                    borderRadius: '12px',
-                    padding: '4px 10px',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    outline: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {hostels.map(h => (
-                    <option key={h.id} value={h.id} style={{ color: '#0f172a' }}>
-                      {h.name}
-                    </option>
-                  ))}
-                </select>
-                <h1 style={{ fontSize: '20px', fontWeight: 800, margin: '6px 0 0 0', fontFamily: 'Outfit, sans-serif' }}>
-                  Bed Management
-                </h1>
-              </div>
 
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <button
-                  style={{
-                    background: '#10b981',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '20px',
-                    padding: '8px 14px',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)'
-                  }}
-                  onClick={() => {
-                    const vacant = allBedsWithMetadata.find(b => b.bed.status === 'vacant');
-                    if (vacant) setAllocateTargetBedId(vacant.bed.id);
-                    setCurrentView('allocate-bed');
-                  }}
-                >
-                  + Allocate Bed
-                </button>
-                <button
-                  className="bm-ref-bell-btn"
-                  onClick={() => setCurrentView('notifications')}
-                  title="Notifications"
-                  style={{ background: 'rgba(255, 255, 255, 0.15)', color: '#ffffff' }}
-                >
-                  <Bell size={18} color="#ffffff" />
-                  <span className="bm-ref-bell-badge">1</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Quick Metrics Bar */}
-            <div style={{ display: 'flex', gap: 12, marginTop: 14, background: 'rgba(255, 255, 255, 0.1)', padding: '10px 12px', borderRadius: '14px' }}>
-              <div style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: '16px', fontWeight: 800 }}>{computedTotalBeds}</div>
-                <div style={{ fontSize: '10.5px', opacity: 0.8 }}>Total Beds</div>
-              </div>
-              <div style={{ width: '1px', background: 'rgba(255, 255, 255, 0.2)' }} />
-              <div style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: '16px', fontWeight: 800, color: '#6ee7b7' }}>{computedOccupiedBeds}</div>
-                <div style={{ fontSize: '10.5px', opacity: 0.8 }}>Occupied</div>
-              </div>
-              <div style={{ width: '1px', background: 'rgba(255, 255, 255, 0.2)' }} />
-              <div style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: '16px', fontWeight: 800, color: '#fcd34d' }}>{computedVacantBeds}</div>
-                <div style={{ fontSize: '10.5px', opacity: 0.8 }}>Vacant</div>
-              </div>
-            </div>
-          </div>
 
           {/* Clean Segmented Tab Switcher */}
           <div
@@ -1590,7 +1547,7 @@ export const RoomManagementPage: React.FC = () => {
           {dashTab === 'floors' && (
             <div className="animate-fade-in">
               <div className="bm-ref-search-row" style={{ marginBottom: 12 }}>
-                <div className="bm-ref-search-box">
+                <div className="bm-ref-search-box" style={{ flex: 1 }}>
                   <Search size={18} className="bm-ref-search-icon" />
                   <input
                     type="text"
@@ -1599,19 +1556,10 @@ export const RoomManagementPage: React.FC = () => {
                     onChange={e => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <button
-                  className="bm-ref-filter-icon-btn"
-                  onClick={() => setCurrentView('filters')}
-                >
-                  <Filter size={18} color="#6366f1" />
-                </button>
               </div>
 
               <div className="bm-ref-section-header">
                 <h2 className="bm-ref-section-title">All Floors Overview</h2>
-                <button className="bm-ref-view-all-btn" onClick={() => setCurrentView('floors-list')}>
-                  View List <ChevronRight size={16} />
-                </button>
               </div>
 
               <div className="bm-ref-cards-list" style={{ marginTop: 8 }}>
@@ -1834,13 +1782,6 @@ export const RoomManagementPage: React.FC = () => {
             </div>
           )}
 
-          {/* Floating Action Button */}
-          <button
-            className="bm-ref-fab-btn"
-            onClick={() => setCurrentView('add-bed')}
-          >
-            <Plus size={20} /> Add Bed
-          </button>
         </div>
       )}
 
@@ -1849,7 +1790,9 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'floors-list' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">Floors</h1>
           </div>
 
@@ -1906,7 +1849,9 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'floor-details' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">{currentFloorObj.floorName}</h1>
             <MoreVertical size={20} color="#64748b" style={{ marginLeft: 'auto' }} />
           </div>
@@ -2011,19 +1956,18 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'rooms-list' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">Rooms</h1>
             <MoreVertical size={20} color="#64748b" style={{ marginLeft: 'auto' }} />
           </div>
 
           <div className="bm-ref-search-row">
-            <div className="bm-ref-search-box">
+            <div className="bm-ref-search-box" style={{ flex: 1 }}>
               <Search size={18} className="bm-ref-search-icon" />
               <input type="text" placeholder="Search room" />
             </div>
-            <button className="bm-ref-filter-icon-btn" onClick={() => setCurrentView('filters')}>
-              <Filter size={18} color="#6366f1" />
-            </button>
           </div>
 
           <div className="bm-ref-rooms-cards-grid">
@@ -2067,7 +2011,9 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'room-details' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('floor-details')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">{currentRoomObj?.roomNumber || 'Room Details'}</h1>
             <MoreVertical size={20} color="#64748b" style={{ marginLeft: 'auto' }} />
           </div>
@@ -2182,7 +2128,9 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'beds-in-room' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('room-details')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">
               {selectedStatusFilter !== 'All Status'
                 ? `${selectedStatusFilter.charAt(0).toUpperCase() + selectedStatusFilter.slice(1)} Beds`
@@ -2266,7 +2214,9 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'bed-details' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('room-details')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">Bed Details</h1>
           </div>
 
@@ -2362,7 +2312,9 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'add-bed' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">Add Bed</h1>
           </div>
 
@@ -2470,49 +2422,380 @@ export const RoomManagementPage: React.FC = () => {
         </div>
       )}
 
-      {/* ────────────────── SCREEN: ADD ROOM (< Add Room) ────────────────── */}
+      {/* ────────────────── SCREEN: STEP-BY-STEP ADD ROOM ────────────────── */}
       {currentView === 'add-room' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
-            <h1 className="bm-ref-sub-title">Add Room</h1>
-          </div>
-
-          <div className="bm-ref-form-card">
-            <label className="bm-ref-form-lbl">Floor *</label>
-            <select
-              className="bm-ref-form-input"
-              value={formFloorId}
-              onChange={e => setFormFloorId(e.target.value)}
+            <button
+              className="bm-ref-back-btn"
+              onClick={() => {
+                if (addRoomStep > 1) {
+                  setAddRoomStep(prev => prev - 1);
+                } else {
+                  setCurrentView('dashboard');
+                }
+              }}
             >
-              {activeHostel.floors.map(f => (
-                <option key={f.id} value={f.id}>{f.floorName}</option>
-              ))}
-            </select>
-
-            <label className="bm-ref-form-lbl">Room Number *</label>
-            <input
-              type="text"
-              className="bm-ref-form-input"
-              placeholder="e.g. Room 107"
-              value={formRoomNumberInput}
-              onChange={e => setFormRoomNumberInput(e.target.value)}
-            />
-
-            <label className="bm-ref-form-lbl">Room Type *</label>
-            <select
-              className="bm-ref-form-input"
-              value={formRoomTypeInput}
-              onChange={e => setFormRoomTypeInput(e.target.value)}
-            >
-              <option value="Single Sharing">Single Sharing</option>
-              <option value="Double Sharing">Double Sharing</option>
-            </select>
-
-            <button className="bm-ref-btn-primary" onClick={handleSaveRoom}>
-              Save Room
+              <ArrowLeft size={18} />
             </button>
+            <div>
+              <h1 className="bm-ref-sub-title">Add New Room</h1>
+              <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>
+                Step {addRoomStep} of 4 • {addRoomStep === 1 ? 'Basic Info' : addRoomStep === 2 ? 'Beds Setup' : addRoomStep === 3 ? 'Rent & Amenities' : 'Review & Confirm'}
+              </div>
+            </div>
           </div>
+
+          {/* STEP PROGRESS INDICATOR PILLS */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
+            {[
+              { step: 1, label: '1. Basic Info' },
+              { step: 2, label: '2. Beds Setup' },
+              { step: 3, label: '3. Rent & Amenities' },
+              { step: 4, label: '4. Summary' }
+            ].map(s => {
+              const isActive = addRoomStep === s.step;
+              const isCompleted = addRoomStep > s.step;
+
+              return (
+                <button
+                  key={s.step}
+                  type="button"
+                  onClick={() => setAddRoomStep(s.step)}
+                  style={{
+                    flex: 1,
+                    minWidth: 80,
+                    padding: '8px 6px',
+                    borderRadius: 12,
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: isActive
+                      ? 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)'
+                      : isCompleted
+                      ? '#dcfce7'
+                      : '#f1f5f9',
+                    color: isActive ? '#ffffff' : isCompleted ? '#15803d' : '#64748b',
+                    boxShadow: isActive ? '0 2px 8px rgba(79, 70, 229, 0.3)' : 'none',
+                    transition: 'all 0.2s ease',
+                    textAlign: 'center'
+                  }}
+                >
+                  {isCompleted ? '✓ ' : ''}{s.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* ───────── STEP 1: BASIC INFORMATION ───────── */}
+          {addRoomStep === 1 && (
+            <div className="bm-ref-form-card animate-fade-in">
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Building size={18} color="#4f46e5" /> Step 1: Select Floor & Room Details
+              </div>
+
+              <label className="bm-ref-form-lbl">Select Floor *</label>
+              <select
+                className="bm-ref-form-input"
+                value={formFloorId}
+                onChange={e => setFormFloorId(e.target.value)}
+              >
+                {activeHostel.floors.map(f => (
+                  <option key={f.id} value={f.id}>
+                    {f.floorName} ({f.rooms.length} Rooms existing)
+                  </option>
+                ))}
+              </select>
+
+              <label className="bm-ref-form-lbl" style={{ marginTop: 12 }}>Room Number / Name *</label>
+              <input
+                type="text"
+                className="bm-ref-form-input"
+                placeholder="e.g. Room 107"
+                value={formRoomNumberInput}
+                onChange={e => setFormRoomNumberInput(e.target.value)}
+              />
+
+              <label className="bm-ref-form-lbl" style={{ marginTop: 12 }}>Room Sharing Type *</label>
+              <select
+                className="bm-ref-form-input"
+                value={formRoomTypeInput}
+                onChange={e => {
+                  const val = e.target.value;
+                  setFormRoomTypeInput(val);
+                  if (val === 'Single Sharing') setFormBedCount(1);
+                  else if (val === 'Double Sharing') setFormBedCount(2);
+                  else if (val === 'Triple Sharing') setFormBedCount(3);
+                  else if (val === 'Four Sharing') setFormBedCount(4);
+                  else if (val === 'Executive Suite') setFormBedCount(2);
+                }}
+              >
+                <option value="Single Sharing">Single Sharing (1 Bed)</option>
+                <option value="Double Sharing">Double Sharing (2 Beds)</option>
+                <option value="Triple Sharing">Triple Sharing (3 Beds)</option>
+                <option value="Four Sharing">Four Sharing (4 Beds)</option>
+                <option value="Executive Suite">Executive Suite (2 Beds)</option>
+              </select>
+
+              <button
+                type="button"
+                className="bm-ref-btn-primary"
+                style={{ marginTop: 20 }}
+                onClick={() => {
+                  if (!formRoomNumberInput.trim()) {
+                    alert('Please enter a room number');
+                    return;
+                  }
+                  setAddRoomStep(2);
+                }}
+              >
+                Next: Beds Setup →
+              </button>
+            </div>
+          )}
+
+          {/* ───────── STEP 2: BEDS SETUP ───────── */}
+          {addRoomStep === 2 && (
+            <div className="bm-ref-form-card animate-fade-in">
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <BedDouble size={18} color="#4f46e5" /> Step 2: Configure Beds Capacity
+              </div>
+
+              <label className="bm-ref-form-lbl">Total Beds Capacity in Room *</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                <button
+                  type="button"
+                  style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid #cbd5e1', background: '#f8fafc', fontSize: 18, fontWeight: 800, cursor: 'pointer' }}
+                  onClick={() => setFormBedCount(prev => Math.max(1, prev - 1))}
+                >
+                  -
+                </button>
+                <span style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', minWidth: 40, textAlign: 'center' }}>
+                  {formBedCount} Bed{formBedCount > 1 ? 's' : ''}
+                </span>
+                <button
+                  type="button"
+                  style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid #cbd5e1', background: '#f8fafc', fontSize: 18, fontWeight: 800, cursor: 'pointer' }}
+                  onClick={() => setFormBedCount(prev => Math.min(8, prev + 1))}
+                >
+                  +
+                </button>
+              </div>
+
+              <label className="bm-ref-form-lbl">Bed Type *</label>
+              <select
+                className="bm-ref-form-input"
+                value={formBedTypeInput}
+                onChange={e => setFormBedTypeInput(e.target.value)}
+              >
+                <option value="Single Bed">Single Bed</option>
+                <option value="Bunk Bed">Bunk Bed</option>
+              </select>
+
+              {/* Generated Beds Preview */}
+              <div style={{ marginTop: 16, background: '#f8fafc', padding: 12, borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 8 }}>
+                  Generated Beds List Preview:
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {Array.from({ length: formBedCount }).map((_, i) => {
+                    const bedLetter = String.fromCharCode(65 + i);
+                    const bedNum = `${formRoomNumberInput.replace(/\s+/g, '')}-${bedLetter}`;
+                    return (
+                      <span
+                        key={i}
+                        style={{
+                          fontSize: 11.5,
+                          fontWeight: 700,
+                          padding: '4px 10px',
+                          borderRadius: 8,
+                          background: '#dcfce7',
+                          color: '#15803d',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4
+                        }}
+                      >
+                        🛏️ {bedNum} (Vacant)
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                <button
+                  type="button"
+                  className="bm-ref-outline-btn purple"
+                  style={{ flex: 1 }}
+                  onClick={() => setAddRoomStep(1)}
+                >
+                  ← Back
+                </button>
+                <button
+                  type="button"
+                  className="bm-ref-btn-primary"
+                  style={{ flex: 2 }}
+                  onClick={() => setAddRoomStep(3)}
+                >
+                  Next: Rent & Amenities →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ───────── STEP 3: RENT & AMENITIES ───────── */}
+          {addRoomStep === 3 && (
+            <div className="bm-ref-form-card animate-fade-in">
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Key size={18} color="#4f46e5" /> Step 3: Rent & Amenities Selection
+              </div>
+
+              <label className="bm-ref-form-lbl">Monthly Rent per Bed (₹) *</label>
+              <input
+                type="number"
+                className="bm-ref-form-input"
+                placeholder="8000"
+                value={formRentAmount}
+                onChange={e => setFormRentAmount(Number(e.target.value))}
+              />
+
+              <label className="bm-ref-form-lbl" style={{ marginTop: 12 }}>Room Amenities *</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6, marginBottom: 12 }}>
+                {[
+                  { name: 'Wi-Fi', icon: <Wifi size={13} /> },
+                  { name: 'AC', icon: <Tv size={13} /> },
+                  { name: 'Attached Bath', icon: <Bath size={13} /> },
+                  { name: 'Wardrobe', icon: <DoorOpen size={13} /> },
+                  { name: 'TV', icon: <Tv size={13} /> },
+                  { name: 'Balcony', icon: <Building size={13} /> },
+                  { name: 'Study Table', icon: <FileText size={13} /> },
+                  { name: 'Geyser', icon: <Wrench size={13} /> }
+                ].map(item => {
+                  const isSelected = formSelectedAmenities.includes(item.name);
+                  return (
+                    <button
+                      key={item.name}
+                      type="button"
+                      onClick={() => toggleAmenity(item.name)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '6px 12px',
+                        borderRadius: 20,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        border: isSelected ? '1px solid #6366f1' : '1px solid #cbd5e1',
+                        background: isSelected ? '#eeedfe' : '#ffffff',
+                        color: isSelected ? '#4f46e5' : '#475569',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {item.icon} {item.name} {isSelected ? '✓' : '+'}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <label className="bm-ref-form-lbl">Room Description / Notes</label>
+              <textarea
+                className="bm-ref-form-input textarea"
+                placeholder="e.g. Well furnished single sharing room with attached bathroom."
+                value={formRoomDesc}
+                onChange={e => setFormRoomDesc(e.target.value)}
+              />
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+                <button
+                  type="button"
+                  className="bm-ref-outline-btn purple"
+                  style={{ flex: 1 }}
+                  onClick={() => setAddRoomStep(2)}
+                >
+                  ← Back
+                </button>
+                <button
+                  type="button"
+                  className="bm-ref-btn-primary"
+                  style={{ flex: 2 }}
+                  onClick={() => setAddRoomStep(4)}
+                >
+                  Next: Review Summary →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ───────── STEP 4: REVIEW & SAVE SUMMARY ───────── */}
+          {addRoomStep === 4 && (
+            <div className="bm-ref-form-card animate-fade-in">
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <CheckCircle2 size={18} color="#10b981" /> Step 4: Review & Create Room
+              </div>
+
+              {/* Summary Card */}
+              <div style={{ background: '#f8fafc', borderRadius: 16, border: '1px solid #e2e8f0', padding: 16, marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{formRoomNumberInput}</div>
+                    <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+                      {activeHostel.floors.find(f => f.id === formFloorId)?.floorName || 'Floor 1'} • {formRoomTypeInput}
+                    </div>
+                  </div>
+                  <span className="bm-ref-badge mint">{formBedCount} Beds</span>
+                </div>
+
+                <div className="bm-ref-details-spec-list" style={{ background: 'transparent', padding: 0 }}>
+                  <div className="bm-ref-spec-row">
+                    <span className="bm-ref-spec-lbl">Monthly Rent</span>
+                    <span className="bm-ref-spec-val">₹{formRentAmount.toLocaleString('en-IN')} / month</span>
+                  </div>
+                  <div className="bm-ref-spec-row">
+                    <span className="bm-ref-spec-lbl">Beds Setup</span>
+                    <span className="bm-ref-spec-val">
+                      {Array.from({ length: formBedCount }).map((_, i) => `${formRoomNumberInput.replace(/\s+/g, '')}-${String.fromCharCode(65 + i)}`).join(', ')}
+                    </span>
+                  </div>
+                  <div className="bm-ref-spec-row col">
+                    <span className="bm-ref-spec-lbl">Amenities ({formSelectedAmenities.length})</span>
+                    <div className="bm-ref-amenities-pills">
+                      {formSelectedAmenities.map((a, i) => (
+                        <span key={i} className="bm-ref-amenity-pill">{a}</span>
+                      ))}
+                    </div>
+                  </div>
+                  {formRoomDesc && (
+                    <div className="bm-ref-spec-row col">
+                      <span className="bm-ref-spec-lbl">Description</span>
+                      <span className="bm-ref-spec-desc">{formRoomDesc}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  type="button"
+                  className="bm-ref-outline-btn purple"
+                  style={{ flex: 1 }}
+                  onClick={() => setAddRoomStep(3)}
+                >
+                  ← Back
+                </button>
+                <button
+                  type="button"
+                  className="bm-ref-btn-primary"
+                  style={{ flex: 2, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                  onClick={handleSaveRoom}
+                >
+                  Confirm & Save Room ✓
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -2520,7 +2803,9 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'filters' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">Filters</h1>
             <button
               className="bm-ref-reset-btn"
@@ -2575,7 +2860,9 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'reports' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">Reports</h1>
           </div>
 
@@ -2635,7 +2922,9 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'notifications' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">Notifications</h1>
             <span className="bm-ref-mark-read" onClick={() => alert('Marked all as read')}>Mark all as read</span>
           </div>
@@ -2717,7 +3006,9 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'settings' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">Settings</h1>
           </div>
 
@@ -2764,7 +3055,9 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'allocate-bed' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            
+            <button className="bm-ref-back-btn" onClick={() => setCurrentView('room-details')}>
+              <ArrowLeft size={18} />
+            </button>
             <h1 className="bm-ref-sub-title">Allocate Bed</h1>
           </div>
 

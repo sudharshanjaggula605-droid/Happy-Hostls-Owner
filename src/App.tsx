@@ -156,8 +156,12 @@ function App() {
   const [expenseDate] = useState(new Date().toISOString().substring(0, 10));
 
   // Global Navigation History
+<<<<<<< HEAD
+  const [historyStack, setHistoryStack] = useState<{ screen: string, tab: string }[]>([{ screen: 'home', tab: 'home' }]);
+=======
   const [historyStack, setHistoryStack] = useState<{screen: string, tab: string}[]>([{screen: 'home', tab: 'home'}]);
   void historyStack;
+>>>>>>> 745556187ca09497fb88d220d9fddc8e636ecae0
   const isBackNav = useRef(false);
 
   useEffect(() => {
@@ -187,7 +191,7 @@ function App() {
         isBackNav.current = true;
         setCurrentScreen('home');
         setActiveTab('home');
-        return [{screen: 'home', tab: 'home'}];
+        return [{ screen: 'home', tab: 'home' }];
       }
     });
   };

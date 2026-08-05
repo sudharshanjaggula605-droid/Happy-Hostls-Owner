@@ -156,8 +156,12 @@ function App() {
   const [expenseDate] = useState(new Date().toISOString().substring(0, 10));
 
   // Global Navigation History
+<<<<<<< HEAD
+  const [historyStack, setHistoryStack] = useState<{ screen: string, tab: string }[]>([{ screen: 'home', tab: 'home' }]);
+=======
   const [historyStack, setHistoryStack] = useState<{screen: string, tab: string}[]>([{screen: 'home', tab: 'home'}]);
   void historyStack;
+>>>>>>> 745556187ca09497fb88d220d9fddc8e636ecae0
   const isBackNav = useRef(false);
 
   useEffect(() => {
@@ -187,7 +191,7 @@ function App() {
         isBackNav.current = true;
         setCurrentScreen('home');
         setActiveTab('home');
-        return [{screen: 'home', tab: 'home'}];
+        return [{ screen: 'home', tab: 'home' }];
       }
     });
   };
@@ -510,7 +514,7 @@ function App() {
       case 'laundry':
         return 'Laundry Management';
       case 'broadcast':
-        return 'Broadcast';
+        return null;
       case 'requests':
         return null;
       case 'fees':
@@ -1042,22 +1046,25 @@ function App() {
               {/* Kitchen Navigation Tabs */}
               <div className="kitchen-tabs-nav">
                 <button
+                  type="button"
                   className={`kitchen-tab-btn ${kitchenTab === 'menu' ? 'active' : ''}`}
                   onClick={() => setKitchenTab('menu')}
                 >
                   Weekly Menu
                 </button>
                 <button
+                  type="button"
                   className={`kitchen-tab-btn ${kitchenTab === 'pantry' ? 'active' : ''}`}
                   onClick={() => setKitchenTab('pantry')}
                 >
                   Pantry Inventory
                 </button>
                 <button
+                  type="button"
                   className={`kitchen-tab-btn ${kitchenTab === 'suppliers' ? 'active' : ''}`}
                   onClick={() => setKitchenTab('suppliers')}
                 >
-                  Suppliers Directory
+                  Suppliers
                 </button>
               </div>
 

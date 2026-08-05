@@ -189,7 +189,7 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
               </div>
               <div className="kpi-card-content-wrap">
                 <div className="kpi-card-value-text">5</div>
-                <div className="kpi-card-label-text">Open Complaints</div>
+                <div className="kpi-card-label-text">Complaints</div>
               </div>
             </div>
 

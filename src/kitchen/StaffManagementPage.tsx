@@ -90,7 +90,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
   const [attendanceDB, setAttendanceDB] = useState<Record<string, { absentDates: number[]; holidayDates: number[] }>>(() => {
     const saved = localStorage.getItem('staffAttendanceDB');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try { return JSON.parse(saved); } catch (e) { }
     }
     return {
       'st-1': { absentDates: [8], holidayDates: [] },
@@ -104,6 +104,22 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
   React.useEffect(() => {
     localStorage.setItem('staffAttendanceDB', JSON.stringify(attendanceDB));
   }, [attendanceDB]);
+
+  // Prevent background scrolling when any modal is open
+  React.useEffect(() => {
+    const appContent = document.querySelector('.app-content') as HTMLElement;
+    if (!appContent) return;
+
+    if (activeCalendarStaff || isGlobalAttendanceModalOpen || selectedStaff || showRemoveAlert) {
+      appContent.style.overflow = 'hidden';
+    } else {
+      appContent.style.overflow = 'auto';
+    }
+
+    return () => {
+      appContent.style.overflow = 'auto';
+    };
+  }, [activeCalendarStaff, isGlobalAttendanceModalOpen, selectedStaff, showRemoveAlert]);
 
   // Helper to get real present/absent counts
   const getAttendanceStats = (staffId: string) => {
@@ -154,10 +170,10 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
 
   return (
     <div className="staff-management-page-container">
-      
+
       {/* TOP HEADER BAR (EXACT MATCH TO REFERENCE PHOTO) */}
       <div className="sm-header-bar">
-        
+
         <h1 className="sm-header-title">Staff</h1>
         <button className="sm-history-circle-btn" onClick={onOpenHistory} title="Payment History">
           <History size={18} />
@@ -165,8 +181,8 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
       </div>
 
       <div style={{ padding: '0 16px', marginBottom: '16px' }}>
-        <button 
-          className="quick-action-pill" 
+        <button
+          className="quick-action-pill"
           style={{ width: '100%', padding: '12px', background: 'var(--primary-gradient)', color: 'white', border: 'none', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: '600', fontSize: '15px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}
           onClick={() => setIsGlobalAttendanceModalOpen(true)}
         >
@@ -179,67 +195,67 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
         {staffMembers.map(staff => {
           const stats = getAttendanceStats(staff.id);
           return (
-          <div key={staff.id} className="sm-staff-card" onClick={() => setSelectedStaff(staff)} style={{ cursor: 'pointer' }}>
-            
-            {/* TOP LINE: AVATAR INITIALS + STAFF NAME + SALARY */}
-            <div className="sm-card-top-row">
-              <div className="sm-avatar-group">
-                <div className="sm-avatar-circle">
-                  {staff.initials}
+            <div key={staff.id} className="sm-staff-card" onClick={() => setSelectedStaff(staff)} style={{ cursor: 'pointer' }}>
+
+              {/* TOP LINE: AVATAR INITIALS + STAFF NAME + SALARY */}
+              <div className="sm-card-top-row">
+                <div className="sm-avatar-group">
+                  <div className="sm-avatar-circle">
+                    {staff.initials}
+                  </div>
+                  <h3 className="sm-staff-name">{staff.name}</h3>
                 </div>
-                <h3 className="sm-staff-name">{staff.name}</h3>
-              </div>
-              <div className="sm-salary-blue">
-                ₹{staff.salaryMonthly.toLocaleString('en-IN')}/mo
-              </div>
-            </div>
-
-            {/* DETAILS ROWS */}
-            <div className="sm-details-rows">
-
-              {/* ATTENDANCE SUMMARY */}
-              <div className="sm-detail-line">
-                <Calendar size={15} className="sm-icon-blue" />
-                <span className="sm-detail-label">Attendance (July):</span>
-                <span className="sm-detail-val-blue font-bold">
-                  {stats.presentDays} Present / {stats.absentDays} Absent
-                </span>
+                <div className="sm-salary-blue">
+                  ₹{staff.salaryMonthly.toLocaleString('en-IN')}/mo
+                </div>
               </div>
 
-            </div>
+              {/* DETAILS ROWS */}
+              <div className="sm-details-rows">
 
-            {/* BOTTOM ACTION BUTTONS */}
-            <div className="sm-card-actions-row">
-              <button
-                className="sm-btn-calendar"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onNavigateToAttendance) {
-                    onNavigateToAttendance({
-                      name: staff.name,
-                      presentDays: stats.presentDays,
-                      absentDays: stats.absentDays
-                    });
-                  } else {
-                    setActiveCalendarStaff({ ...staff, presentDays: stats.presentDays, absentDays: stats.absentDays });
-                  }
-                }}
-              >
-                <Calendar size={16} /> Calendar
-              </button>
-              
-              <button
-                className="sm-btn-pay"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePay(staff);
-                }}
-              >
-                <Banknote size={16} /> Pay
-              </button>
-            </div>
+                {/* ATTENDANCE SUMMARY */}
+                <div className="sm-detail-line">
+                  <Calendar size={15} className="sm-icon-blue" />
+                  <span className="sm-detail-label">Attendance (July):</span>
+                  <span className="sm-detail-val-blue font-bold">
+                    {stats.presentDays} Present / {stats.absentDays} Absent
+                  </span>
+                </div>
 
-          </div>
+              </div>
+
+              {/* BOTTOM ACTION BUTTONS */}
+              <div className="sm-card-actions-row">
+                <button
+                  className="sm-btn-calendar"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onNavigateToAttendance) {
+                      onNavigateToAttendance({
+                        name: staff.name,
+                        presentDays: stats.presentDays,
+                        absentDays: stats.absentDays
+                      });
+                    } else {
+                      setActiveCalendarStaff({ ...staff, presentDays: stats.presentDays, absentDays: stats.absentDays });
+                    }
+                  }}
+                >
+                  <Calendar size={16} /> Calendar
+                </button>
+
+                <button
+                  className="sm-btn-pay"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePay(staff);
+                  }}
+                >
+                  <Banknote size={16} /> Pay
+                </button>
+              </div>
+
+            </div>
           );
         })}
       </div>
@@ -287,7 +303,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
       {/* STAFF DETAIL MODAL */}
       {selectedStaff && !showRemoveAlert && (
         <div className="ref-modal-overlay" onClick={() => { setSelectedStaff(null); setIsEditingStaff(false); }}>
-          <div className="ref-modal-card" onClick={e => e.stopPropagation()}>
+          <div className="ref-modal-card" style={{ maxHeight: '100%' }} onClick={e => e.stopPropagation()}>
             <div className="ref-modal-header">
               <div>
                 <h3 className="ref-modal-title">{isEditingStaff ? 'Edit Staff Details' : 'Staff Details'}</h3>
@@ -298,7 +314,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
               </button>
             </div>
 
-            <div className="ref-modal-body">
+            <div className="ref-modal-body" style={{ overflowY: 'auto', flex: 1, paddingRight: '4px', paddingBottom: '16px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
@@ -306,10 +322,10 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                     <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500' }}>Name</label>
                   </div>
                   {isEditingStaff ? (
-                    <input 
-                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }} 
-                      value={editedStaffData?.name || ''} 
-                      onChange={e => setEditedStaffData(prev => prev ? {...prev, name: e.target.value} : prev)} 
+                    <input
+                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }}
+                      value={editedStaffData?.name || ''}
+                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, name: e.target.value } : prev)}
                     />
                   ) : (
                     <p style={{ fontWeight: '600', fontSize: '16px', color: '#1d4ed8' }}>{selectedStaff.name}</p>
@@ -322,10 +338,10 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                     <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500' }}>Contact</label>
                   </div>
                   {isEditingStaff ? (
-                    <input 
-                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }} 
-                      value={editedStaffData?.contact || ''} 
-                      onChange={e => setEditedStaffData(prev => prev ? {...prev, contact: e.target.value} : prev)} 
+                    <input
+                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }}
+                      value={editedStaffData?.contact || ''}
+                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, contact: e.target.value } : prev)}
                     />
                   ) : (
                     <p style={{ fontSize: '16px', color: '#1d4ed8', fontWeight: '600' }}>{selectedStaff.contact}</p>
@@ -338,11 +354,11 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                     <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500' }}>Salary (Monthly)</label>
                   </div>
                   {isEditingStaff ? (
-                    <input 
+                    <input
                       type="number"
-                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }} 
-                      value={editedStaffData?.salaryMonthly || ''} 
-                      onChange={e => setEditedStaffData(prev => prev ? {...prev, salaryMonthly: Number(e.target.value)} : prev)} 
+                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }}
+                      value={editedStaffData?.salaryMonthly || ''}
+                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, salaryMonthly: Number(e.target.value) } : prev)}
                     />
                   ) : (
                     <p style={{ fontSize: '16px', color: '#1d4ed8', fontWeight: '600' }}>₹{selectedStaff.salaryMonthly.toLocaleString('en-IN')}</p>
@@ -355,11 +371,11 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                     <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500' }}>Joined Date</label>
                   </div>
                   {isEditingStaff ? (
-                    <input 
+                    <input
                       type="date"
-                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }} 
-                      value={editedStaffData?.joinedDate || ''} 
-                      onChange={e => setEditedStaffData(prev => prev ? {...prev, joinedDate: e.target.value} : prev)} 
+                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }}
+                      value={editedStaffData?.joinedDate || ''}
+                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, joinedDate: e.target.value } : prev)}
                     />
                   ) : (
                     <p style={{ fontSize: '16px', color: '#1d4ed8', fontWeight: '600' }}>{selectedStaff.joinedDate}</p>
@@ -375,7 +391,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                     <select
                       style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px', background: 'white' }}
                       value={editedStaffData?.aadhaarStatus || 'Not Uploaded'}
-                      onChange={e => setEditedStaffData(prev => prev ? {...prev, aadhaarStatus: e.target.value as any} : prev)}
+                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, aadhaarStatus: e.target.value as any } : prev)}
                     >
                       <option value="Not Uploaded">Not Uploaded</option>
                       <option value="Pending Verification">Pending Verification</option>
@@ -386,7 +402,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                   )}
                 </div>
 
-                <div 
+                <div
                   style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #bfdbfe', cursor: 'pointer', transition: 'all 0.2s' }}
                   onClick={() => {
                     const stats = getAttendanceStats(selectedStaff.id);
@@ -478,10 +494,10 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                         <p style={{ fontSize: '13px', color: '#64748b' }}>{staff.contact}</p>
                       </div>
                       <div style={{ display: 'flex', gap: '12px' }}>
-                        <button 
-                          style={{ 
+                        <button
+                          style={{
                             width: '42px', height: '42px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            background: status === 'present' ? '#22c55e' : '#f8fafc', 
+                            background: status === 'present' ? '#22c55e' : '#f8fafc',
                             color: status === 'present' ? 'white' : '#94a3b8',
                             border: '2px solid', borderColor: status === 'present' ? '#22c55e' : '#e2e8f0',
                             cursor: 'pointer', transition: 'all 0.2s',
@@ -491,10 +507,10 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                         >
                           <Check size={22} />
                         </button>
-                        <button 
-                          style={{ 
+                        <button
+                          style={{
                             width: '42px', height: '42px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            background: status === 'absent' ? '#ef4444' : '#f8fafc', 
+                            background: status === 'absent' ? '#ef4444' : '#f8fafc',
                             color: status === 'absent' ? 'white' : '#94a3b8',
                             border: '2px solid', borderColor: status === 'absent' ? '#ef4444' : '#e2e8f0',
                             cursor: 'pointer', transition: 'all 0.2s',
@@ -511,27 +527,27 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                       <div style={{ padding: '16px', background: '#fef2f2', borderTop: '1px solid #fee2e2' }}>
                         <p style={{ fontSize: '13px', color: '#991b1b', marginBottom: '12px', fontWeight: '500' }}>Notify {staff.name.split(' ')[0]} about absence:</p>
                         <div style={{ display: 'flex', gap: '12px' }}>
-                          <button 
+                          <button
                             onClick={() => setNotificationPrefs(prev => ({ ...prev, [staff.id]: { ...prev[staff.id], whatsapp: !(prev[staff.id]?.whatsapp ?? false) } }))}
-                            style={{ 
-                              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', 
-                              background: notificationPrefs[staff.id]?.whatsapp ? '#25d366' : 'transparent', 
-                              color: notificationPrefs[staff.id]?.whatsapp ? 'white' : '#16a34a', 
-                              border: notificationPrefs[staff.id]?.whatsapp ? '1px solid #25d366' : '1px solid #16a34a', 
-                              borderRadius: '10px', cursor: 'pointer', fontWeight: '600', 
+                            style={{
+                              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px',
+                              background: notificationPrefs[staff.id]?.whatsapp ? '#25d366' : 'transparent',
+                              color: notificationPrefs[staff.id]?.whatsapp ? 'white' : '#16a34a',
+                              border: notificationPrefs[staff.id]?.whatsapp ? '1px solid #25d366' : '1px solid #16a34a',
+                              borderRadius: '10px', cursor: 'pointer', fontWeight: '600',
                               boxShadow: notificationPrefs[staff.id]?.whatsapp ? '0 4px 10px rgba(37, 211, 102, 0.3)' : 'none',
                               transition: 'all 0.2s'
                             }}>
                             <MessageCircle size={18} /> WhatsApp
                           </button>
-                          <button 
+                          <button
                             onClick={() => setNotificationPrefs(prev => ({ ...prev, [staff.id]: { ...prev[staff.id], sms: !(prev[staff.id]?.sms ?? false) } }))}
-                            style={{ 
-                              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', 
-                              background: notificationPrefs[staff.id]?.sms ? '#3b82f6' : 'transparent', 
-                              color: notificationPrefs[staff.id]?.sms ? 'white' : '#2563eb', 
-                              border: notificationPrefs[staff.id]?.sms ? '1px solid #3b82f6' : '1px solid #2563eb', 
-                              borderRadius: '10px', cursor: 'pointer', fontWeight: '600', 
+                            style={{
+                              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px',
+                              background: notificationPrefs[staff.id]?.sms ? '#3b82f6' : 'transparent',
+                              color: notificationPrefs[staff.id]?.sms ? 'white' : '#2563eb',
+                              border: notificationPrefs[staff.id]?.sms ? '1px solid #3b82f6' : '1px solid #2563eb',
+                              borderRadius: '10px', cursor: 'pointer', fontWeight: '600',
                               boxShadow: notificationPrefs[staff.id]?.sms ? '0 4px 10px rgba(59, 130, 246, 0.3)' : 'none',
                               transition: 'all 0.2s'
                             }}>
@@ -549,19 +565,19 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
               <button className="ref-btn-cancel" style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '600' }} onClick={() => setIsGlobalAttendanceModalOpen(false)}>
                 Cancel
               </button>
-              <button 
-                className="ref-btn-approve" 
-                style={{ 
-                  flex: 1, 
-                  padding: '12px', 
-                  borderRadius: '12px', 
+              <button
+                className="ref-btn-approve"
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '12px',
                   fontWeight: '600',
-                  background: Object.keys(globalAttendanceState).length > 0 ? 'var(--primary)' : '#e2e8f0', 
+                  background: Object.keys(globalAttendanceState).length > 0 ? 'var(--primary)' : '#e2e8f0',
                   color: Object.keys(globalAttendanceState).length > 0 ? 'white' : '#64748b',
                   borderColor: Object.keys(globalAttendanceState).length > 0 ? 'var(--primary)' : '#e2e8f0',
                   boxShadow: Object.keys(globalAttendanceState).length > 0 ? '0 4px 12px rgba(37, 99, 235, 0.3)' : 'none'
-                }} 
-                disabled={Object.keys(globalAttendanceState).length === 0} 
+                }}
+                disabled={Object.keys(globalAttendanceState).length === 0}
                 onClick={() => {
                   const todayDate = 15;
                   const db = JSON.parse(JSON.stringify(attendanceDB));
@@ -569,10 +585,10 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                   Object.keys(globalAttendanceState).forEach(staffId => {
                     const status = globalAttendanceState[staffId];
                     if (!db[staffId]) db[staffId] = { absentDates: [], holidayDates: [] };
-                    
+
                     const absentSet = new Set(db[staffId].absentDates);
                     const holidaySet = new Set(db[staffId].holidayDates || []);
-                    
+
                     if (status === 'absent') {
                       absentSet.add(todayDate);
                       holidaySet.delete(todayDate);
@@ -580,7 +596,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                       absentSet.delete(todayDate);
                       holidaySet.delete(todayDate);
                     }
-                    
+
                     db[staffId].absentDates = Array.from(absentSet);
                     db[staffId].holidayDates = Array.from(holidaySet);
                   });

@@ -118,6 +118,7 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  transform: translateZ(0);
 }
 
 /* Responsive adjustment for real mobile viewports */
@@ -1303,36 +1304,40 @@ table, .users-table {
 
 /* Kitchen Tabs Navigation */
 .kitchen-tabs-nav {
-  display: flex;
-  gap: 8px;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 8px;
-  margin-bottom: 16px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.kitchen-tabs-nav::-webkit-scrollbar {
-  display: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  border: 1px solid #e2e8f0;
 }
 
 .kitchen-tab-btn {
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 10px 4px;
+  border-radius: 10px;
   border: none;
   background: transparent;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .kitchen-tab-btn.active {
-  background: #eff6ff;
-  color: #2563eb;
-  font-weight: 700;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 800;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
 }
 
 /* Day Mess Menu Cards */
@@ -10815,6 +10820,20 @@ table, .users-table {
 .emp-grid-cell:hover .emp-grid-icon-box {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.emp-grid-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  text-align: center;
+  line-height: 1.25;
+  max-width: 76px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* Amount in red below icon (matches reference) */

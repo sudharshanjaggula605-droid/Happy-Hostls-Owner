@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  ChevronLeft, Users, Percent, Search, Bed, Wrench, X, Check, 
+  Users, Search, Bed, Wrench, X, Check, 
   Phone, Calendar, BookOpen, AlertTriangle, UserPlus, Info, 
   CheckCircle2, RefreshCw, ShieldAlert, Plus, Clock, Tag
 } from 'lucide-react';
@@ -635,15 +635,7 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
         </div>
       )}
 
-      {/* HEADER BAR */}
-      <div className="orp-header-bar">
-        <button className="orp-back-btn" onClick={onBack}>
-          <ChevronLeft size={22} color="#2563eb" />
-          <span className="orp-back-text">Back</span>
-        </button>
 
-        <h1 className="orp-header-title">Occupancy Rate Details</h1>
-      </div>
 
       {/* OVERALL HERO STAT CARD */}
       <div className="orp-hero-card">
@@ -651,9 +643,6 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
           <div>
             <div className="orp-hero-label">Overall Occupancy Rate</div>
             <div className="orp-hero-percentage">{occupancyPercent}%</div>
-          </div>
-          <div className="orp-hero-icon-wrap">
-            <Percent size={28} color="#2563eb" />
           </div>
         </div>
 

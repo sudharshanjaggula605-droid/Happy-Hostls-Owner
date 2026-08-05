@@ -85,6 +85,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
   const [isEditingStaff, setIsEditingStaff] = useState(false);
   const [editedStaffData, setEditedStaffData] = useState<StaffMember | null>(null);
   const [showRemoveAlert, setShowRemoveAlert] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Real data state for attendance
   const [attendanceDB, setAttendanceDB] = useState<Record<string, { absentDates: number[]; holidayDates: number[] }>>(() => {
@@ -470,7 +471,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
       {/* GLOBAL ATTENDANCE MODAL */}
       {isGlobalAttendanceModalOpen && (
         <div className="ref-modal-overlay" onClick={() => setIsGlobalAttendanceModalOpen(false)}>
-          <div className="ref-modal-card" style={{ maxHeight: '85vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+          <div className="ref-modal-card" style={{ maxHeight: '90%', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
             <div className="ref-modal-header" style={{ flexShrink: 0 }}>
               <div>
                 <h3 className="ref-modal-title">Mark Staff Attendance</h3>
@@ -487,7 +488,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
               {staffMembers.map(staff => {
                 const status = globalAttendanceState[staff.id];
                 return (
-                  <div key={staff.id} style={{ marginBottom: '16px', background: 'var(--surface-color)', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
+                  <div key={staff.id} style={{ flexShrink: 0, marginBottom: '16px', background: 'var(--surface-color)', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
                       <div>
                         <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>{staff.name}</h4>
@@ -582,6 +583,8 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                   const todayDate = 15;
                   const db = JSON.parse(JSON.stringify(attendanceDB));
 
+                  let notificationsSent = 0;
+
                   Object.keys(globalAttendanceState).forEach(staffId => {
                     const status = globalAttendanceState[staffId];
                     if (!db[staffId]) db[staffId] = { absentDates: [], holidayDates: [] };
@@ -592,6 +595,9 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                     if (status === 'absent') {
                       absentSet.add(todayDate);
                       holidaySet.delete(todayDate);
+                      if (notificationPrefs[staffId]?.whatsapp || notificationPrefs[staffId]?.sms) {
+                        notificationsSent++;
+                      }
                     } else if (status === 'present') {
                       absentSet.delete(todayDate);
                       holidaySet.delete(todayDate);
@@ -606,12 +612,27 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                   setIsGlobalAttendanceModalOpen(false);
                   setGlobalAttendanceState({});
                   setNotificationPrefs({});
+
+                  if (notificationsSent > 0) {
+                    setToastMessage(`Attendance saved. Sent notification to ${notificationsSent} absent staff.`);
+                  } else {
+                    setToastMessage('Attendance saved successfully.');
+                  }
+                  setTimeout(() => setToastMessage(null), 3000);
                 }}
               >
                 Save Attendance
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="orp-toast" style={{ zIndex: 100000, whiteSpace: 'nowrap' }}>
+          <Check size={16} color="#4ade80" style={{ flexShrink: 0 }} />
+          <span>{toastMessage}</span>
         </div>
       )}
 

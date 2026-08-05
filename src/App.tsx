@@ -500,7 +500,7 @@ function App() {
     if (currentScreen === 'log-expense') return 'Log Kitchen Expense';
     if (currentScreen === 'create-laundry-order') return 'Create Laundry Order';
     if (currentScreen === 'add-user') return 'Add User';
-    if (currentScreen === 'subscription-plans') return 'Subscription Plans';
+    if (currentScreen === 'due-payments' || currentScreen === 'overdue-dues' || currentScreen === 'payment-history') return null;
 
     switch (activeTab) {
       case 'home':
@@ -745,6 +745,7 @@ function App() {
           {currentScreen === 'overdue-dues' && (
             <OverdueDuesPage
               onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }}
+              onOpenHistory={() => setCurrentScreen('payment-history')}
               onNavigateToCollectFee={(res) => {
                 setSelectedCollectResident(res);
                 setCurrentScreen('collect-fee');

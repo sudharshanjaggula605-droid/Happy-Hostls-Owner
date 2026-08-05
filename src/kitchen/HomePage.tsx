@@ -4,7 +4,7 @@ import {
   AlertTriangle, 
   AlertCircle, 
   TrendingUp, 
-  Users, 
+  Receipt, 
   CheckCircle2, 
   ChevronRight,
   ChevronDown,
@@ -213,24 +213,24 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
               </div>
             </div>
 
-            {/* Card 4: Success Rate */}
+            {/* Card 4: Expenses */}
             <div 
               className="kpi-card-2col" 
               onClick={() => {
-                if (onNavigateScreen) onNavigateScreen('success-rate');
+                if (onNavigateScreen) onNavigateScreen('expenses-management');
                 else if (onNavigateTab) onNavigateTab('fees');
               }} 
               style={{ cursor: 'pointer' }}
             >
               <div className="kpi-card-top-row">
                 <div className="kpi-icon-badge bg-indigo">
-                  <CheckCircle2 size={15} color="#6366f1" />
+                  <Receipt size={15} color="#6366f1" />
                 </div>
                 <ChevronRight size={14} color="#94a3b8" />
               </div>
               <div className="kpi-card-content-wrap">
-                <div className="kpi-card-value-text">94%</div>
-                <div className="kpi-card-label-text">Success Rate</div>
+                <div className="kpi-card-value-text">₹45,000</div>
+                <div className="kpi-card-label-text">Expenses</div>
               </div>
             </div>
           </div>
@@ -241,22 +241,7 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
           <h2 className="dashboard-section-title">Manage</h2>
 
           <div className="manage-shortcuts-row">
-            {/* Shortcut 1: Guests */}
-            <button 
-              type="button" 
-              className="shortcut-card"
-              onClick={() => {
-                if (onNavigateScreen) onNavigateScreen('guests-directory');
-                else if (onNavigateTab) onNavigateTab('requests');
-              }}
-            >
-              <div className="shortcut-icon-box bg-blue-light">
-                <Users size={18} color="#2563eb" />
-              </div>
-              <span className="shortcut-label">Guests</span>
-            </button>
-
-            {/* Shortcut 2: Staff */}
+            {/* Shortcut 1: Staff */}
             <button 
               type="button" 
               className="shortcut-card"
@@ -271,7 +256,7 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
               <span className="shortcut-label">Staff</span>
             </button>
 
-            {/* Shortcut 3: Requests */}
+            {/* Shortcut 2: Requests */}
             <button 
               type="button" 
               className="shortcut-card"
@@ -286,7 +271,7 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
               <span className="shortcut-label">Requests</span>
             </button>
 
-            {/* Shortcut 4: Broadcast */}
+            {/* Shortcut 3: Broadcast */}
             <button 
               type="button" 
               className="shortcut-card"
@@ -298,6 +283,21 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
                 <Megaphone size={18} color="#d97706" />
               </div>
               <span className="shortcut-label">Broadcast</span>
+            </button>
+
+            {/* Shortcut 4: Success Rate */}
+            <button 
+              type="button" 
+              className="shortcut-card"
+              onClick={() => {
+                if (onNavigateScreen) onNavigateScreen('success-rate');
+                else if (onNavigateTab) onNavigateTab('fees');
+              }}
+            >
+              <div className="shortcut-icon-box bg-indigo-light">
+                <CheckCircle2 size={18} color="#4f46e5" />
+              </div>
+              <span className="shortcut-label">Success Rate</span>
             </button>
 
             {/* Shortcut 5: Analytics */}

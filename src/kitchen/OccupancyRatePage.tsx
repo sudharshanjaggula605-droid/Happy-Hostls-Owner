@@ -637,14 +637,10 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
 
       {/* HEADER BAR */}
       <div className="orp-header-bar">
-<<<<<<< HEAD
         <button className="orp-back-btn" onClick={onBack}>
           <ChevronLeft size={22} color="#2563eb" />
           <span className="orp-back-text">Back</span>
         </button>
-=======
-        
->>>>>>> 61082d43414c058669d42a4819e67da5a9c20c6c
         <h1 className="orp-header-title">Occupancy Rate Details</h1>
       </div>
 

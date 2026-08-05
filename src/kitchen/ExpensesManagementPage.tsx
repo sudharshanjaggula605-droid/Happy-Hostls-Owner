@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Search, X, History, ChevronRight } from 'lucide-react';
+import { Search, X, History, ChevronRight } from 'lucide-react';
+import type { KitchenExpense } from '../types';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  DATA TYPES                                                                */
@@ -19,13 +20,14 @@ interface ExpenseItem {
 }
 
 interface ExpensesManagementPageProps {
-  onBack: () => void;
+  onBack?: () => void;
+  expenses?: KitchenExpense[];
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
-/*  EXPENSE DATA (KITCHEN BILLS + RECHARGE & BILLS)                          */
+/*  DEFAULT EXPENSE DATA                                                       */
 /* ─────────────────────────────────────────────────────────────────────────── */
-const ALL_EXPENSES: ExpenseItem[] = [
+const DEFAULT_ALL_EXPENSES: ExpenseItem[] = [
   // KITCHEN BILLS
   { id: 'k1',  emoji: '🛢️',  title: 'LPG / Gas Cylinder', amount: 2400,  category: 'kitchen', vendor: 'HP Gas Agency',       paymentMethod: 'UPI',          date: '2026-07-28', dateLabel: '28 Jul', remarks: 'Monthly gas refill × 2 cylinders', status: 'Paid' },
   { id: 'k2',  emoji: '🥚',  title: 'Eggs',                amount: 1200,  category: 'kitchen', vendor: 'Poultry Farm Direct', paymentMethod: 'Cash',         date: '2026-07-25', dateLabel: '25 Jul', remarks: '100 eggs farm fresh',             status: 'Paid' },
@@ -46,19 +48,49 @@ const ALL_EXPENSES: ExpenseItem[] = [
   { id: 'b6',  emoji: '🗒️',  title: 'Maintenance',         amount: 0,     category: 'bills',   vendor: 'Pending',             paymentMethod: '-',            date: '-',          dateLabel: '-',      remarks: 'Pending repair estimate',          status: 'Pending' },
 ];
 
-const KITCHEN_EXPENSES = ALL_EXPENSES.filter(e => e.category === 'kitchen');
-const BILLS_EXPENSES   = ALL_EXPENSES.filter(e => e.category === 'bills');
-
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  COMPONENT                                                                 */
 /* ─────────────────────────────────────────────────────────────────────────── */
-export const ExpensesManagementPage: React.FC<ExpensesManagementPageProps> = ({ onBack }) => {
-  const [searchQuery, setSearchQuery]       = useState('');
-  const [selectedItem, setSelectedItem]     = useState<ExpenseItem | null>(null);
-  const [showHistory, setShowHistory]       = useState(false);
+export const ExpensesManagementPage: React.FC<ExpensesManagementPageProps> = ({ expenses = [] }) => {
+  const [searchQuery, setSearchQuery]   = useState('');
+  const [selectedItem, setSelectedItem] = useState<ExpenseItem | null>(null);
+  const [showHistory, setShowHistory]   = useState(false);
+
+  // Map dynamic expenses logged from Pantry item additions & stock updates into Kitchen Bills items
+  const dynamicPantryExpenses: ExpenseItem[] = expenses.map((exp, idx) => {
+    const descLower = exp.description.toLowerCase();
+    const catLower = (exp.category || '').toLowerCase();
+    let emoji = '📦';
+    if (descLower.includes('milk') || catLower.includes('dairy')) emoji = '🥛';
+    else if (descLower.includes('egg')) emoji = '🥚';
+    else if (descLower.includes('chicken') || descLower.includes('meat')) emoji = '🍗';
+    else if (descLower.includes('rice') || descLower.includes('flour') || descLower.includes('grain')) emoji = '🌾';
+    else if (descLower.includes('veg') || descLower.includes('fruit')) emoji = '🥬';
+    else if (descLower.includes('oil') || descLower.includes('spice')) emoji = '🫒';
+
+    return {
+      id: exp.id || `dyn_pantry_${idx}`,
+      emoji,
+      title: exp.description,
+      amount: exp.amount,
+      category: 'kitchen' as const,
+      vendor: exp.vendor || 'Pantry Vendor',
+      paymentMethod: 'Auto Sync',
+      date: exp.date || 'Today',
+      dateLabel: exp.date ? exp.date.split('-').slice(1).join('/') : 'Today',
+      remarks: `Automatically added from Pantry Module`,
+      status: exp.status || 'Paid'
+    };
+  });
+
+  const combinedKitchenExpenses = [...dynamicPantryExpenses, ...DEFAULT_ALL_EXPENSES.filter(e => e.category === 'kitchen')];
+  const billsExpenses = DEFAULT_ALL_EXPENSES.filter(e => e.category === 'bills');
+  const allExpensesList = [...dynamicPantryExpenses, ...DEFAULT_ALL_EXPENSES];
+
+
 
   /* ── filtered list (for history view) ── */
-  const filtered = ALL_EXPENSES.filter(e => {
+  const filtered = allExpensesList.filter(e => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return e.title.toLowerCase().includes(q) || e.vendor.toLowerCase().includes(q);
@@ -69,7 +101,6 @@ export const ExpensesManagementPage: React.FC<ExpensesManagementPageProps> = ({ 
     return (
       <div className="emp-page">
         <div className="emp-header">
-          
           <h1 className="emp-title">Expense Details</h1>
         </div>
 
@@ -105,7 +136,6 @@ export const ExpensesManagementPage: React.FC<ExpensesManagementPageProps> = ({ 
     return (
       <div className="emp-page">
         <div className="emp-header">
-          
           <h1 className="emp-title">Expense History</h1>
         </div>
 
@@ -151,9 +181,8 @@ export const ExpensesManagementPage: React.FC<ExpensesManagementPageProps> = ({ 
   return (
     <div className="emp-page">
 
-      {/* HEADER (EXACT MATCH TO REFERENCE PHOTO) */}
+      {/* HEADER */}
       <div className="emp-header">
-        
         <h1 className="emp-title">Expenses</h1>
         <button className="emp-history-icon-btn" onClick={() => setShowHistory(true)}>
           <History size={20} color="#334155" />
@@ -163,9 +192,10 @@ export const ExpensesManagementPage: React.FC<ExpensesManagementPageProps> = ({ 
       {/* KITCHEN BILLS SECTION */}
       <div className="emp-section-title">KITCHEN BILLS</div>
       <div className="emp-grid">
-        {KITCHEN_EXPENSES.map(exp => (
+        {combinedKitchenExpenses.map(exp => (
           <div key={exp.id} className="emp-grid-cell" onClick={() => setSelectedItem(exp)}>
             <div className="emp-grid-icon-box">{exp.emoji}</div>
+            <div className="emp-grid-title">{exp.title}</div>
             <div className="emp-grid-amount">₹{exp.amount.toLocaleString('en-IN')}</div>
           </div>
         ))}
@@ -174,9 +204,10 @@ export const ExpensesManagementPage: React.FC<ExpensesManagementPageProps> = ({ 
       {/* RECHARGE & BILLS SECTION */}
       <div className="emp-section-title" style={{ marginTop: 24 }}>RECHARGE & BILLS</div>
       <div className="emp-grid">
-        {BILLS_EXPENSES.map(exp => (
+        {billsExpenses.map(exp => (
           <div key={exp.id} className="emp-grid-cell" onClick={() => setSelectedItem(exp)}>
             <div className="emp-grid-icon-box">{exp.emoji}</div>
+            <div className="emp-grid-title">{exp.title}</div>
             <div className="emp-grid-amount">
               {exp.amount > 0 ? `₹${exp.amount.toLocaleString('en-IN')}` : '₹0'}
             </div>

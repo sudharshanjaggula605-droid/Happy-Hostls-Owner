@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  ArrowLeft, 
+  ArrowLeft,
   Crown, 
   Award, 
   Zap, 
@@ -269,9 +269,6 @@ export const SubscriptionPlansPage: React.FC<SubscriptionPlansPageProps> = ({
     <div className="plans-page-container">
       {/* Top Mobile App Header */}
       <div className="plans-header">
-        <button className="plans-back-btn" onClick={onBack} aria-label="Go Back">
-          <ArrowLeft size={18} />
-        </button>
         <div className="plans-header-title-container">
           <h1 className="plans-header-title">Subscription Plans</h1>
           <p className="plans-header-sub">Upgrade your hostel management system</p>

@@ -510,11 +510,11 @@ function App() {
       case 'laundry':
         return 'Laundry Management';
       case 'broadcast':
-        return 'Broadcast';
+        return null;
       case 'requests':
         return 'Users';
       case 'fees':
-        return 'Analytics';
+        return null;
       case 'rooms':
         return 'Room Management';
       case 'settings':
@@ -1038,22 +1038,25 @@ function App() {
               {/* Kitchen Navigation Tabs */}
               <div className="kitchen-tabs-nav">
                 <button
+                  type="button"
                   className={`kitchen-tab-btn ${kitchenTab === 'menu' ? 'active' : ''}`}
                   onClick={() => setKitchenTab('menu')}
                 >
                   Weekly Menu
                 </button>
                 <button
+                  type="button"
                   className={`kitchen-tab-btn ${kitchenTab === 'pantry' ? 'active' : ''}`}
                   onClick={() => setKitchenTab('pantry')}
                 >
                   Pantry Inventory
                 </button>
                 <button
+                  type="button"
                   className={`kitchen-tab-btn ${kitchenTab === 'suppliers' ? 'active' : ''}`}
                   onClick={() => setKitchenTab('suppliers')}
                 >
-                  Suppliers Directory
+                  Suppliers
                 </button>
               </div>
 

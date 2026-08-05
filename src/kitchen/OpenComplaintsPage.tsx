@@ -43,8 +43,7 @@ export const OpenComplaintsPage: React.FC<OpenComplaintsPageProps> = ({ onBack, 
     <div className="ocp-page-container">
       {/* HEADER */}
       <div className="ocp-header-bar">
-        
-        <h1 className="ocp-header-title">Open Complaints</h1>
+        <h1 className="ocp-header-title">Complaints</h1>
       </div>
 
       {/* STATS SUMMARY ROW */}

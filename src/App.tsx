@@ -18,7 +18,6 @@ import {
   X,
   Building,
   CheckCircle,
-  FileText,
   Edit3,
   Trash2,
   Users
@@ -63,7 +62,11 @@ import { OverdueDuesPage } from './kitchen/OverdueDuesPage';
 import { OpenComplaintsPage } from './kitchen/OpenComplaintsPage';
 import { RevenueAnalyticsPage } from './kitchen/RevenueAnalyticsPage';
 import { GuestsDirectoryPage } from './kitchen/GuestsDirectoryPage';
+import { AddPantryItemPage } from './kitchen/AddPantryItemPage';
+import { UpdateStockPage } from './kitchen/UpdateStockPage';
 import { SuccessRatePage } from './kitchen/SuccessRatePage';
+import { SubscriptionPlansPage } from './kitchen/SubscriptionPlansPage';
+import type { PlanType } from './kitchen/SubscriptionPlansPage';
 import { NotificationsPage } from './NotificationsPage';
 import { LaundryPage, CreateLaundryOrderPage, initialLaundryOrders } from './laundry';
 import { SettingsPage } from './settings/SettingsPage';
@@ -74,9 +77,10 @@ import type { LaundryOrder } from './laundry';
 function App() {
   // Navigation & View States
   const [currentHostelName, setCurrentHostelName] = useState('Happy Hostels');
+  const [currentPlan, setCurrentPlan] = useState<PlanType>('Gold');
   const [activeTab, setActiveTab] = useState<'home' | 'requests' | 'fees' | 'rooms' | 'laundry' | 'broadcast' | 'settings' | 'kitchen'>('home');
   const [kitchenTab, setKitchenTab] = useState<'menu' | 'pantry' | 'expenses' | 'suppliers'>('menu');
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'edit-menu' | 'add-pantry' | 'update-stock' | 'log-expense' | 'create-laundry-order' | 'add-user' | 'payment-verification' | 'payment-history' | 'due-payments' | 'collect-fee' | 'staff-management' | 'pay-staff-salary' | 'staff-attendance' | 'staff-payment-history' | 'expenses-management' | 'notifications' | 'occupancy-rate' | 'booking-requests' | 'overdue-dues' | 'open-complaints' | 'revenue-analytics' | 'guests-directory' | 'success-rate'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'edit-menu' | 'add-pantry' | 'update-stock' | 'log-expense' | 'create-laundry-order' | 'add-user' | 'payment-verification' | 'payment-history' | 'due-payments' | 'collect-fee' | 'staff-management' | 'pay-staff-salary' | 'staff-attendance' | 'staff-payment-history' | 'expenses-management' | 'notifications' | 'occupancy-rate' | 'booking-requests' | 'overdue-dues' | 'open-complaints' | 'revenue-analytics' | 'guests-directory' | 'success-rate' | 'subscription-plans'>('home');
   const [selectedVerificationFee, setSelectedVerificationFee] = useState<FeeTransaction | null>(null);
   const [selectedCollectResident, setSelectedCollectResident] = useState<{ id: string; name: string; roomNumber: string; amount?: number } | null>(null);
   const [selectedPayStaff, setSelectedPayStaff] = useState<{ name: string; role?: string; salaryMonthly: number; absentDays?: number } | null>(null);
@@ -95,6 +99,7 @@ function App() {
   const [requestSearchQuery] = useState('');
   const [requestFilter] = useState<'All' | RequestStatus>('All');
   const [roomFloorFilter, setRoomFloorFilter] = useState<string>('All');
+  void setRoomFloorFilter;
   const [feeSearchQuery, setFeeSearchQuery] = useState('');
   const [feeMonthFilter, setFeeMonthFilter] = useState<string>('All');
   const [feeStatusFilter, setFeeStatusFilter] = useState<'All' | PaymentStatus>('All');
@@ -107,6 +112,7 @@ function App() {
 
   // Hostel Data States
   const [hostelStats] = useState(initialHostelStats);
+  void hostelStats;
   const [hostelRooms] = useState<HostelRoom[]>(initialHostelRooms);
   const [residentRequests, setResidentRequests] = useState<ResidentRequest[]>(initialResidentRequests);
   const [feeTransactions, setFeeTransactions] = useState<FeeTransaction[]>(initialFeeTransactions);
@@ -138,20 +144,24 @@ function App() {
   const [menuLunch, setMenuLunch] = useState('');
   const [menuSnacks, setMenuSnacks] = useState('');
   const [menuDinner, setMenuDinner] = useState('');
-  const [pantryName, setPantryName] = useState('');
+  const [_pantryName, _setPantryName] = useState('');
   const [_pantryUnit, _setPantryUnit] = useState('kg');
-  const [pantryPrice, setPantryPrice] = useState('');
-  const [pantryStock, setPantryStock] = useState('');
-  const [pantryThreshold, setPantryThreshold] = useState('');
+  const [_pantryPrice, _setPantryPrice] = useState('');
+  const [_pantryStock, _setPantryStock] = useState('');
   const [_pantrySupplier, _setPantrySupplier] = useState('');
-  const [addStockAmount, setAddStockAmount] = useState('');
+  const [_addStockAmount, _setAddStockAmount] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
   const [expenseCategory] = useState('Grocery / Grains');
   const [expenseDescription, setExpenseDescription] = useState('');
   const [expenseDate] = useState(new Date().toISOString().substring(0, 10));
 
   // Global Navigation History
+<<<<<<< HEAD
   const [historyStack, setHistoryStack] = useState<{ screen: string, tab: string }[]>([{ screen: 'home', tab: 'home' }]);
+=======
+  const [historyStack, setHistoryStack] = useState<{screen: string, tab: string}[]>([{screen: 'home', tab: 'home'}]);
+  void historyStack;
+>>>>>>> 745556187ca09497fb88d220d9fddc8e636ecae0
   const isBackNav = useRef(false);
 
   useEffect(() => {
@@ -370,9 +380,26 @@ function App() {
     setMenuBreakfast(m.breakfast); setMenuLunch(m.lunch);
     setMenuSnacks(m.snacks); setMenuDinner(m.dinner);
     setCurrentScreen('edit-menu');
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      const appScreen = document.querySelector('.app-screen');
+      if (appScreen) appScreen.scrollTop = 0;
+      const appContent = document.querySelector('.app-content');
+      if (appContent) appContent.scrollTop = 0;
+    }, 40);
   };
-  const navigateToAddPantry = () => { setPantryName(''); setPantryPrice(''); setPantryStock(''); setPantryThreshold(''); setCurrentScreen('add-pantry'); };
-  const navigateToUpdateStock = (id: string) => { setUpdatingItemId(id); setAddStockAmount(''); setCurrentScreen('update-stock'); };
+  const navigateToAddPantry = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setCurrentScreen('add-pantry');
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      const appScreen = document.querySelector('.app-screen');
+      if (appScreen) appScreen.scrollTop = 0;
+      const appContent = document.querySelector('.app-content');
+      if (appContent) appContent.scrollTop = 0;
+    }, 40);
+  };
+  const navigateToUpdateStock = (id?: string) => { setUpdatingItemId(id || null); setCurrentScreen('update-stock'); setTimeout(() => { window.scrollTo(0, 0); const appScreen = document.querySelector('.app-screen'); if (appScreen) appScreen.scrollTop = 0; }, 40); };
   const navigateToLogExpense = () => { setExpenseAmount(''); setExpenseDescription(''); setCurrentScreen('log-expense'); };
   const handleSaveMenu = (e: React.FormEvent) => {
     e.preventDefault();
@@ -390,42 +417,6 @@ function App() {
     setCurrentScreen('home');
   };
 
-  const handleAddPantryItem = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!pantryName || !pantryPrice || !pantryStock || !pantryThreshold) {
-      showToast('Please fill in all pantry fields');
-      return;
-    }
-    const newItem: PantryItem = {
-      id: 'p_' + Date.now(),
-      name: pantryName,
-      unit: 'kg',
-      price: parseFloat(pantryPrice),
-      stock: parseFloat(pantryStock),
-      threshold: parseFloat(pantryThreshold),
-      supplier: ''
-    };
-    setPantryItems(prev => [...prev, newItem]);
-    showToast(`Added ${pantryName} to pantry`);
-    setKitchenTab('pantry');
-    setCurrentScreen('home');
-  };
-
-  const handleUpdateStock = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!updatingItemId || !addStockAmount) return;
-    const quantityToAdd = parseFloat(addStockAmount);
-    setPantryItems(prev => prev.map(item => {
-      if (item.id === updatingItemId) {
-        return { ...item, stock: item.stock + quantityToAdd };
-      }
-      return item;
-    }));
-    const updatedItem = pantryItems.find(i => i.id === updatingItemId);
-    showToast(`Updated stock for ${updatedItem?.name || 'item'}`);
-    setKitchenTab('pantry');
-    setCurrentScreen('home');
-  };
 
   const handleDeletePantryItem = (id: string) => {
     const itemToDelete = pantryItems.find(i => i.id === id);
@@ -475,6 +466,7 @@ function App() {
     if (roomFloorFilter === 'All') return true;
     return room.floor === roomFloorFilter;
   });
+  void filteredRooms;
 
   void feeSearchQuery;
   void setFeeSearchQuery;
@@ -487,10 +479,7 @@ function App() {
   void handleRecordFeePayment;
   void handleSendReminder;
 
-  const selectedPantryItemForUpdate = pantryItems.find(item => item.id === updatingItemId);
-  const updatedTotalStockCalculated = selectedPantryItemForUpdate
-    ? (selectedPantryItemForUpdate.stock + (parseFloat(addStockAmount) || 0))
-    : 0;
+
 
   const lowStockCount = pantryItems.filter(item => item.stock <= item.threshold).length;
 
@@ -515,6 +504,7 @@ function App() {
     if (currentScreen === 'log-expense') return 'Log Kitchen Expense';
     if (currentScreen === 'create-laundry-order') return 'Create Laundry Order';
     if (currentScreen === 'add-user') return 'Add User';
+    if (currentScreen === 'due-payments' || currentScreen === 'overdue-dues' || currentScreen === 'payment-history') return null;
 
     switch (activeTab) {
       case 'home':
@@ -623,7 +613,7 @@ function App() {
                         setCurrentScreen('home');
                       }}
                     >
-                      <span className="profile-dropdown-item-icon">⚙️</span>
+                      <span className="profile-dropdown-item-icon"><SettingsIcon size={16} /></span>
                       <span>Profile Settings</span>
                     </button>
                     {/* Logout */}
@@ -634,7 +624,7 @@ function App() {
                         if (showToast) showToast('You have been logged out.');
                       }}
                     >
-                      <span className="profile-dropdown-item-icon">🚪</span>
+                      <span className="profile-dropdown-item-icon"><DoorOpen size={16} /></span>
                       <span>Logout</span>
                     </button>
                   </div>
@@ -681,6 +671,7 @@ function App() {
               <KitchenHomePage
                 userName="Vijaya"
                 currentHostel={currentHostelName}
+                currentPlan={currentPlan}
                 onSelectHostel={(name) => setCurrentHostelName(name)}
                 onNavigateTab={(tab) => setActiveTab(tab as any)}
                 onNavigateScreen={(screen) => setCurrentScreen(screen as any)}
@@ -689,7 +680,64 @@ function App() {
             </div>
           )}
 
+          {/* SUBSCRIPTION PLANS SCREEN */}
+          {currentScreen === 'subscription-plans' && (
+            <SubscriptionPlansPage 
+              currentPlan={currentPlan}
+              onUpdatePlan={(newPlan) => setCurrentPlan(newPlan)}
+              onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }}
+              showToast={showToast}
+            />
+          )}
+
           {/* DEDICATED CARD PAGES */}
+          {currentScreen === 'add-pantry' && (
+            <AddPantryItemPage
+              suppliers={suppliers}
+              onBack={() => {
+                setCurrentScreen('home');
+                setActiveTab('kitchen');
+                setKitchenTab('pantry');
+              }}
+              onAddItem={(newItemData) => {
+                const newItem: PantryItem = {
+                  id: 'p_' + Date.now(),
+                  ...newItemData
+                };
+                setPantryItems(prev => [...prev, newItem]);
+                showToast(`Added ${newItem.name} to pantry`);
+                setKitchenTab('pantry');
+                setActiveTab('kitchen');
+                setCurrentScreen('home');
+              }}
+            />
+          )}
+
+          {currentScreen === 'update-stock' && (
+            <UpdateStockPage
+              pantryItems={pantryItems}
+              initialItemId={updatingItemId}
+              onBack={() => {
+                setCurrentScreen('home');
+                setActiveTab('kitchen');
+                setKitchenTab('pantry');
+              }}
+              onSaveStock={(itemId, quantityToAdd, totalCost) => {
+                setPantryItems(prev => prev.map(item => {
+                  if (item.id === itemId) {
+                    return { ...item, stock: item.stock + quantityToAdd };
+                  }
+                  return item;
+                }));
+                const targetItem = pantryItems.find(i => i.id === itemId);
+                showToast(`Added +${quantityToAdd} ${targetItem?.unit || 'stock'} to ${targetItem?.name || 'item'} (${totalCost > 0 ? '₹' + totalCost : ''})`);
+                setKitchenTab('pantry');
+                setActiveTab('kitchen');
+                setCurrentScreen('home');
+              }}
+            />
+          )}
+
           {currentScreen === 'occupancy-rate' && (
             <OccupancyRatePage onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }} />
           )}
@@ -701,6 +749,7 @@ function App() {
           {currentScreen === 'overdue-dues' && (
             <OverdueDuesPage
               onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }}
+              onOpenHistory={() => setCurrentScreen('payment-history')}
               onNavigateToCollectFee={(res) => {
                 setSelectedCollectResident(res);
                 setCurrentScreen('collect-fee');
@@ -973,11 +1022,11 @@ function App() {
 
               {/* 2 Action Buttons Row */}
               <div className="kitchen-action-btns-row">
-                <button className="btn-kitchen-soft" onClick={navigateToAddPantry}>
+                <button type="button" className="btn-kitchen-soft" onClick={navigateToAddPantry}>
                   <Plus size={16} /> Add Pantry Item
                 </button>
-                <button className="btn-kitchen-solid" onClick={navigateToLogExpense}>
-                  <FileText size={16} /> Log Expense
+                <button type="button" className="btn-kitchen-solid" onClick={() => navigateToUpdateStock('')}>
+                  <Plus size={16} /> Add Stock
                 </button>
               </div>
 
@@ -1005,12 +1054,6 @@ function App() {
                   Pantry Inventory
                 </button>
                 <button
-                  className={`kitchen-tab-btn ${kitchenTab === 'expenses' ? 'active' : ''}`}
-                  onClick={() => setKitchenTab('expenses')}
-                >
-                  Kitchen Expenses
-                </button>
-                <button
                   className={`kitchen-tab-btn ${kitchenTab === 'suppliers' ? 'active' : ''}`}
                   onClick={() => setKitchenTab('suppliers')}
                 >
@@ -1030,12 +1073,21 @@ function App() {
                     {(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as DayOfWeek[]).map((day) => {
                       const meals = weeklyMenu[day];
                       return (
-                        <div key={day} className="day-menu-card-compact">
+                        <div
+                          key={day}
+                          className="day-menu-card-compact"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => navigateToEditMenu(day)}
+                        >
                           <div className="day-card-compact-header">
                             <span className="day-card-compact-name">{day}</span>
                             <button
+                              type="button"
                               className="edit-btn-compact"
-                              onClick={() => navigateToEditMenu(day)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigateToEditMenu(day);
+                              }}
                               aria-label={`Edit ${day} menu`}
                             >
                               <Edit3 size={13} />
@@ -1074,6 +1126,7 @@ function App() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                     <h2 className="weekly-menu-title" style={{ marginBottom: 0 }}>Pantry Inventory ({pantryItems.length})</h2>
                     <button
+                      type="button"
                       className="quick-action-pill"
                       style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none' }}
                       onClick={navigateToAddPantry}
@@ -1403,118 +1456,9 @@ function App() {
             </form>
           )}
 
-          {/* SCREEN: ADD PANTRY ITEM */}
-          {currentScreen === 'add-pantry' && (
-            <form onSubmit={handleAddPantryItem} className="p-16">
-              <div className="modern-form-card">
-                <div className="modern-form-header">
-                  <div className="modern-form-icon-wrap">
-                    <Utensils size={18} />
-                  </div>
-                  <div className="modern-form-title">Add New Pantry Item</div>
-                </div>
 
-                <div className="modern-field-group">
-                  <label className="modern-field-label">Item Name</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Amul Milk, Fresh Eggs, Rice"
-                    className="modern-form-input"
-                    value={pantryName}
-                    onChange={(e) => setPantryName(e.target.value)}
-                  />
-                </div>
 
-                <div className="modern-two-cols">
-                  <div className="modern-field-group">
-                    <label className="modern-field-label">Unit Price (₹)</label>
-                    <input
-                      type="number"
-                      required
-                      placeholder="60"
-                      className="modern-form-input"
-                      value={pantryPrice}
-                      onChange={(e) => setPantryPrice(e.target.value)}
-                    />
-                  </div>
-                  <div className="modern-field-group">
-                    <label className="modern-field-label">Initial Stock</label>
-                    <input
-                      type="number"
-                      required
-                      placeholder="10"
-                      className="modern-form-input"
-                      value={pantryStock}
-                      onChange={(e) => setPantryStock(e.target.value)}
-                    />
-                  </div>
-                </div>
 
-                <div className="modern-field-group">
-                  <label className="modern-field-label">Low Stock Alert Threshold</label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="20"
-                    className="modern-form-input"
-                    value={pantryThreshold}
-                    onChange={(e) => setPantryThreshold(e.target.value)}
-                  />
-                </div>
-
-                <div className="modern-form-actions-row">
-                  <button type="button" className="btn-form-cancel" onClick={() => setCurrentScreen('home')}>Cancel</button>
-                  <button type="submit" className="btn-form-save">Add Item</button>
-                </div>
-              </div>
-            </form>
-          )}
-
-          {/* SCREEN: UPDATE STOCK */}
-          {currentScreen === 'update-stock' && selectedPantryItemForUpdate && (
-            <form onSubmit={handleUpdateStock} className="p-16">
-              <div className="modern-form-card">
-                <div className="modern-form-header">
-                  <div className="modern-form-icon-wrap" style={{ background: '#ecfdf5', color: '#059669' }}>
-                    <Plus size={18} />
-                  </div>
-                  <div>
-                    <div className="modern-form-title">Update Stock</div>
-                    <div style={{ fontSize: '12px', fontWeight: '600', color: '#64748b' }}>{selectedPantryItemForUpdate.name}</div>
-                  </div>
-                </div>
-
-                <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase' }}>Current Stock</span>
-                  <span style={{ fontSize: '14px', fontWeight: '800', color: '#0f172a' }}>{selectedPantryItemForUpdate.stock} {selectedPantryItemForUpdate.unit}</span>
-                </div>
-
-                <div className="modern-field-group">
-                  <label className="modern-field-label">Add Stock Amount ({selectedPantryItemForUpdate.unit})</label>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    placeholder="e.g. 5"
-                    className="modern-form-input"
-                    value={addStockAmount}
-                    onChange={(e) => setAddStockAmount(e.target.value)}
-                  />
-                </div>
-
-                <div style={{ background: '#eff6ff', padding: '10px 14px', borderRadius: '12px', border: '1px solid #dbeafe', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', fontWeight: '800', color: '#2563eb', textTransform: 'uppercase' }}>Updated Total Stock</span>
-                  <span style={{ fontSize: '15px', fontWeight: '800', color: '#1d4ed8' }}>{updatedTotalStockCalculated} {selectedPantryItemForUpdate.unit}</span>
-                </div>
-
-                <div className="modern-form-actions-row">
-                  <button type="button" className="btn-form-cancel" onClick={() => setCurrentScreen('home')}>Cancel</button>
-                  <button type="submit" className="btn-form-save">Save Stock</button>
-                </div>
-              </div>
-            </form>
-          )}
 
           {/* SCREEN: LOG EXPENSE */}
           {currentScreen === 'log-expense' && (

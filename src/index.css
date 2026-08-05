@@ -118,6 +118,7 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  transform: translateZ(0);
 }
 
 /* Responsive adjustment for real mobile viewports */

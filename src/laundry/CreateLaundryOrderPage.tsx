@@ -114,14 +114,7 @@ export const CreateLaundryOrderPage: React.FC<CreateLaundryOrderPageProps> = ({
     <div className="create-laundry-page-wrapper">
       {/* Top Page Header */}
       <div className="create-laundry-top-header">
-        <button 
-          type="button" 
-          className="create-laundry-back-btn" 
-          onClick={onCancel}
-          aria-label="Go back to Laundry Management"
-        >
-          <ArrowLeft size={18} />
-        </button>
+        
         <h2 className="create-laundry-title">Create Laundry Order</h2>
       </div>
 

@@ -105,70 +105,12 @@ export const StaffPaymentHistoryPage: React.FC<StaffPaymentHistoryPageProps> = (
     return r.name.toLowerCase().includes(q) || r.employeeId.toLowerCase().includes(q) || r.designation.toLowerCase().includes(q);
   });
 
-  if (selectedRecord) {
-    return (
-      <div className="sph-page-container">
-        <div className="sph-header-bar">
-          <button className="sph-back-btn" onClick={() => setSelectedRecord(null)}>
-            <ChevronLeft size={20} className="text-blue-600" />
-            <span className="sph-back-text">Back</span>
-          </button>
-          <h1 className="sph-header-title">Payment Details</h1>
-        </div>
-
-        <div className="sph-detail-card">
-          {/* Avatar & Name */}
-          <div className="sph-detail-top">
-            <div className="sph-avatar-lg">{selectedRecord.initials}</div>
-            <div>
-              <h2 className="sph-detail-name">{selectedRecord.name}</h2>
-              <p className="sph-detail-subtext">{selectedRecord.designation} • {selectedRecord.employeeId}</p>
-            </div>
-          </div>
-
-          <div className="sph-detail-divider" />
-
-          {/* Details Rows */}
-          <div className="sph-detail-rows">
-            <div className="sph-detail-row">
-              <span className="sph-detail-label">Salary Month</span>
-              <span className="sph-detail-value">{selectedRecord.month}</span>
-            </div>
-            <div className="sph-detail-row">
-              <span className="sph-detail-label">Payment Date</span>
-              <span className="sph-detail-value">{selectedRecord.paymentDate}</span>
-            </div>
-            <div className="sph-detail-row">
-              <span className="sph-detail-label">Payment Amount</span>
-              <span className="sph-detail-value-amber">₹{selectedRecord.amount.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="sph-detail-row">
-              <span className="sph-detail-label">Payment Method</span>
-              <span className="sph-detail-value">{selectedRecord.paymentMethod}</span>
-            </div>
-            <div className="sph-detail-row">
-              <span className="sph-detail-label">Transaction ID</span>
-              <span className="sph-detail-value">{selectedRecord.transactionId}</span>
-            </div>
-            <div className="sph-detail-row">
-              <span className="sph-detail-label">Status</span>
-              <span className={`sph-status-badge ${selectedRecord.status.toLowerCase()}`}>{selectedRecord.status}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="sph-page-container">
 
       {/* HEADER BAR (EXACT MATCH TO REFERENCE PHOTO) */}
       <div className="sph-header-bar">
-        <button className="sph-back-btn" onClick={onBack}>
-          <ChevronLeft size={20} className="text-blue-600" />
-          <span className="sph-back-text">Back</span>
-        </button>
+        
         <h1 className="sph-header-title">Staff Payment History</h1>
       </div>
 
@@ -219,6 +161,65 @@ export const StaffPaymentHistoryPage: React.FC<StaffPaymentHistoryPageProps> = (
           </div>
         ))}
       </div>
+
+      {/* PAYMENT DETAILS MODAL */}
+      {selectedRecord && (
+        <div className="ref-modal-overlay" onClick={() => setSelectedRecord(null)}>
+          <div className="ref-modal-card" onClick={e => e.stopPropagation()} style={{ padding: 0, overflow: 'hidden', background: '#f8fafc' }}>
+            <div className="ref-modal-header" style={{ background: 'white' }}>
+              <div>
+                <h3 className="ref-modal-title">Payment Details</h3>
+              </div>
+              <button className="ref-close-btn" onClick={() => setSelectedRecord(null)}>
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="sph-detail-card" style={{ boxShadow: 'none', margin: 0, borderRadius: 0, border: 'none', background: 'transparent' }}>
+              {/* Avatar & Name */}
+              <div className="sph-detail-top">
+                <div className="sph-avatar-lg">{selectedRecord.initials}</div>
+                <div>
+                  <h2 className="sph-detail-name">{selectedRecord.name}</h2>
+                  <p className="sph-detail-subtext">{selectedRecord.designation} • {selectedRecord.employeeId}</p>
+                </div>
+              </div>
+
+              <div className="sph-detail-divider" />
+
+              {/* Details Rows */}
+              <div className="sph-detail-rows">
+                <div className="sph-detail-row">
+                  <span className="sph-detail-label">Salary Month</span>
+                  <span className="sph-detail-value">{selectedRecord.month}</span>
+                </div>
+                <div className="sph-detail-row">
+                  <span className="sph-detail-label">Payment Date</span>
+                  <span className="sph-detail-value">{selectedRecord.paymentDate}</span>
+                </div>
+                <div className="sph-detail-row">
+                  <span className="sph-detail-label">Payment Amount</span>
+                  <span className="sph-detail-value-amber">₹{selectedRecord.amount.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="sph-detail-row">
+                  <span className="sph-detail-label">Payment Method</span>
+                  <span className="sph-detail-value">{selectedRecord.paymentMethod}</span>
+                </div>
+                {selectedRecord.paymentMethod !== 'Cash' && selectedRecord.paymentMethod !== 'Cheque' && selectedRecord.paymentMethod !== 'Cash Payment' && (
+                  <div className="sph-detail-row">
+                    <span className="sph-detail-label">Transaction ID</span>
+                    <span className="sph-detail-value">{selectedRecord.transactionId}</span>
+                  </div>
+                )}
+                <div className="sph-detail-row">
+                  <span className="sph-detail-label">Status</span>
+                  <span className={`sph-status-badge ${selectedRecord.status.toLowerCase()}`}>{selectedRecord.status}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

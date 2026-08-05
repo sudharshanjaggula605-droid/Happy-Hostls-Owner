@@ -1642,6 +1642,18 @@ table, .users-table {
   padding: 0 4px;
 }
 
+.sa-day-cell.rest {
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.sa-day-cell.holiday {
+  background: #ffedd5;
+  color: #c2410c;
+  font-weight: 600;
+}
+
 /* SEGMENTED TABS */
 .settings-segmented-tabs {
   background: #f1f5f9;
@@ -14062,6 +14074,7 @@ table, .users-table {
   cursor: pointer;
 }
 
+<<<<<<< HEAD
 /* ==========================================================================
    SUBSCRIPTION PLANS & PREMIUM BUY PROCESS STYLES (APP THEME SYSTEM HARMONIZED)
    ========================================================================== */
@@ -15297,5 +15310,20 @@ table, .users-table {
 
 
 
+=======
+/* Global alignment for headers after removing back buttons */
+[class$="-header-bar"] {
+  position: relative !important;
+  justify-content: center !important;
+}
+>>>>>>> 61082d43414c058669d42a4819e67da5a9c20c6c
 
+[class$="-header-title"] {
+  margin: 0 auto !important;
+  text-align: center !important;
+}
 
+[class$="-header-bar"] > *:not([class$="-header-title"]) {
+  position: absolute !important;
+  right: 0 !important;
+}

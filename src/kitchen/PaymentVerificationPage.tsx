@@ -45,9 +45,7 @@ export const PaymentVerificationPage: React.FC<PaymentVerificationPageProps> = (
       
       {/* HEADER BAR */}
       <div className="pv-header-bar">
-        <button className="pv-back-btn" onClick={onBack} title="Back to Fees">
-          <ArrowLeft size={20} />
-        </button>
+        
         <h1 className="pv-header-title">Payment Verification</h1>
         <button className="pv-icon-btn" title="Options">
           <MoreVertical size={18} />

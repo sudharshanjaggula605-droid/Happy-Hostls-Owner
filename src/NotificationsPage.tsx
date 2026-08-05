@@ -108,10 +108,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ onBack }) 
 
       {/* HEADER */}
       <div className="notif-header">
-        <button className="notif-back-btn" onClick={onBack}>
-          <ChevronLeft size={20} color="#2563eb" />
-          <span className="notif-back-text">Back</span>
-        </button>
+        
         <div className="notif-header-center">
           <h1 className="notif-title">Notifications</h1>
           {unreadCount > 0 && (

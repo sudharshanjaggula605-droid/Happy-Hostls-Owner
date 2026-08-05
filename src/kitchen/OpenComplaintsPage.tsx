@@ -43,10 +43,7 @@ export const OpenComplaintsPage: React.FC<OpenComplaintsPageProps> = ({ onBack, 
     <div className="ocp-page-container">
       {/* HEADER */}
       <div className="ocp-header-bar">
-        <button className="ocp-back-btn" onClick={onBack}>
-          <ChevronLeft size={20} color="#2563eb" />
-          <span className="ocp-back-text">Back</span>
-        </button>
+        
         <h1 className="ocp-header-title">Open Complaints</h1>
       </div>
 

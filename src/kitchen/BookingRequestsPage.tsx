@@ -40,10 +40,7 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
     <div className="brp-page-container">
       {/* HEADER */}
       <div className="brp-header-bar">
-        <button className="brp-back-btn" onClick={onBack}>
-          <ChevronLeft size={20} color="#2563eb" />
-          <span className="brp-back-text">Back</span>
-        </button>
+        
         <h1 className="brp-header-title">Booking Requests</h1>
       </div>
 

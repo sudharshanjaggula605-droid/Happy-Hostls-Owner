@@ -69,10 +69,7 @@ export const ExpensesManagementPage: React.FC<ExpensesManagementPageProps> = ({ 
     return (
       <div className="emp-page">
         <div className="emp-header">
-          <button className="emp-back-btn" onClick={() => setSelectedItem(null)}>
-            <ChevronLeft size={20} color="#2563eb" />
-            <span className="emp-back-text">Back</span>
-          </button>
+          
           <h1 className="emp-title">Expense Details</h1>
         </div>
 
@@ -108,10 +105,7 @@ export const ExpensesManagementPage: React.FC<ExpensesManagementPageProps> = ({ 
     return (
       <div className="emp-page">
         <div className="emp-header">
-          <button className="emp-back-btn" onClick={() => setShowHistory(false)}>
-            <ChevronLeft size={20} color="#2563eb" />
-            <span className="emp-back-text">Back</span>
-          </button>
+          
           <h1 className="emp-title">Expense History</h1>
         </div>
 
@@ -159,10 +153,7 @@ export const ExpensesManagementPage: React.FC<ExpensesManagementPageProps> = ({ 
 
       {/* HEADER (EXACT MATCH TO REFERENCE PHOTO) */}
       <div className="emp-header">
-        <button className="emp-back-btn" onClick={onBack}>
-          <ChevronLeft size={20} color="#2563eb" />
-          <span className="emp-back-text">Back</span>
-        </button>
+        
         <h1 className="emp-title">Expenses</h1>
         <button className="emp-history-icon-btn" onClick={() => setShowHistory(true)}>
           <History size={20} color="#334155" />

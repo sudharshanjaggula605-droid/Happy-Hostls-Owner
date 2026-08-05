@@ -28,10 +28,7 @@ export const RevenueAnalyticsPage: React.FC<RevenueAnalyticsPageProps> = ({ onBa
     <div className="rap-page-container">
       {/* HEADER */}
       <div className="rap-header-bar">
-        <button className="rap-back-btn" onClick={onBack}>
-          <ChevronLeft size={20} color="#2563eb" />
-          <span className="rap-back-text">Back</span>
-        </button>
+        
         <h1 className="rap-header-title">Revenue & Analytics</h1>
       </div>
 

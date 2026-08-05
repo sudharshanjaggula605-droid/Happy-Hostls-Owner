@@ -114,10 +114,7 @@ export const DuePaymentsPage: React.FC<DuePaymentsPageProps> = ({
       
       {/* TOP HEADER BAR (EXACT MATCH TO REFERENCE PHOTO) */}
       <div className="dp-header-bar">
-        <button className="dp-back-btn" onClick={onBack}>
-          <ChevronLeft size={20} className="text-blue-600" />
-          <span className="dp-back-text">Back</span>
-        </button>
+        
         <h1 className="dp-header-title">Due Payments</h1>
         <button className="dp-history-circle-btn" onClick={onOpenHistory} title="Payment History">
           <History size={18} />

@@ -1849,9 +1849,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'floors-list' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">Floors</h1>
           </div>
 
@@ -1908,9 +1906,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'floor-details' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('floors-list')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">{currentFloorObj.floorName}</h1>
             <MoreVertical size={20} color="#64748b" style={{ marginLeft: 'auto' }} />
           </div>
@@ -2015,9 +2011,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'rooms-list' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">Rooms</h1>
             <MoreVertical size={20} color="#64748b" style={{ marginLeft: 'auto' }} />
           </div>
@@ -2073,9 +2067,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'room-details' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('rooms-list')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">{currentRoomObj?.roomNumber || 'Room Details'}</h1>
             <MoreVertical size={20} color="#64748b" style={{ marginLeft: 'auto' }} />
           </div>
@@ -2190,9 +2182,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'beds-in-room' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">
               {selectedStatusFilter !== 'All Status'
                 ? `${selectedStatusFilter.charAt(0).toUpperCase() + selectedStatusFilter.slice(1)} Beds`
@@ -2276,9 +2266,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'bed-details' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('room-details')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">Bed Details</h1>
           </div>
 
@@ -2374,9 +2362,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'add-bed' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">Add Bed</h1>
           </div>
 
@@ -2488,9 +2474,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'add-room' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('rooms-list')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">Add Room</h1>
           </div>
 
@@ -2536,9 +2520,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'filters' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <X size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">Filters</h1>
             <button
               className="bm-ref-reset-btn"
@@ -2593,9 +2575,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'reports' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">Reports</h1>
           </div>
 
@@ -2655,9 +2635,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'notifications' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">Notifications</h1>
             <span className="bm-ref-mark-read" onClick={() => alert('Marked all as read')}>Mark all as read</span>
           </div>
@@ -2699,9 +2677,7 @@ export const RoomManagementPage: React.FC = () => {
               <div className="bm-ref-profile-name">J. Sudharshan</div>
               <div className="bm-ref-profile-role">Admin</div>
             </div>
-            <button className="bm-ref-back-btn" style={{ marginLeft: 'auto' }} onClick={() => setCurrentView('dashboard')}>
-              <X size={18} />
-            </button>
+            
           </div>
 
           <div className="bm-ref-drawer-menu">
@@ -2741,9 +2717,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'settings' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">Settings</h1>
           </div>
 
@@ -2790,9 +2764,7 @@ export const RoomManagementPage: React.FC = () => {
       {currentView === 'allocate-bed' && (
         <div className="bm-ref-screen animate-fade-in">
           <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={20} />
-            </button>
+            
             <h1 className="bm-ref-sub-title">Allocate Bed</h1>
           </div>
 

@@ -15345,8 +15345,11 @@ table, .users-table {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
   margin-bottom: 16px;
   position: relative;
+  width: 100%;
 }
 
 .odp-back-btn,
@@ -15385,8 +15388,8 @@ table, .users-table {
 .odp-history-circle-btn,
 .dp-history-circle-btn,
 .ph-history-circle-btn {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -15395,8 +15398,9 @@ table, .users-table {
   justify-content: center;
   color: #2563eb;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .odp-history-circle-btn:hover,
@@ -15414,7 +15418,9 @@ table, .users-table {
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  flex: 1;
+  width: 100%;
+  margin-bottom: 0;
 }
 
 .odp-search-icon,
@@ -15430,15 +15436,17 @@ table, .users-table {
 .dp-search-input,
 .ph-search-input {
   width: 100%;
-  padding: 12px 40px 12px 42px;
+  height: 44px;
+  padding: 0 40px 0 42px;
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  font-size: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 22px;
+  font-size: 14.5px;
   color: #1e293b;
   outline: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .odp-search-input:focus,
@@ -15579,13 +15587,14 @@ table, .users-table {
 .odp-user-name,
 .dp-student-title,
 .ph-student-name {
-  font-size: 16px;
-  font-weight: 800;
-  color: #0f172a;
+  font-size: 18px;
+  font-weight: 900;
+  color: #000000;
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  letter-spacing: -0.2px;
 }
 
 .odp-room-badge,

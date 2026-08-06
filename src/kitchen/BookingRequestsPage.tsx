@@ -218,6 +218,9 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
   const [viewCheckoutReq, setViewCheckoutReq] = useState<CheckoutRequestItem | null>(null);
   const [viewTransferReq, setViewTransferReq] = useState<TransferRequestItem | null>(null);
 
+  // Success Popup State
+  const [transferSuccessPopup, setTransferSuccessPopup] = useState<boolean>(false);
+
   // Room Inventory State
   const [inventoryRooms, setInventoryRooms] = useState<InventoryRoom[]>(initialInventoryRooms);
 
@@ -372,7 +375,11 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
   // Approve Transfer Request
   const handleApproveTransfer = (id: string, name: string) => {
     setTransferRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Approved' } : r));
-    if (showToast) showToast(`Approved transfer request for ${name}.`);
+    setTransferSuccessPopup(true);
+    if (showToast) showToast('Transfer Approved Successfully');
+    setTimeout(() => {
+      setTransferSuccessPopup(false);
+    }, 2500);
   };
 
   // Counts for Booking Requests
@@ -903,6 +910,20 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TRANSFER APPROVED AUTO-DISAPPEARING SUCCESS POPUP                         */}
+      {/* ========================================================================= */}
+      {transferSuccessPopup && (
+        <div className="transfer-success-backdrop" onClick={() => setTransferSuccessPopup(false)}>
+          <div className="transfer-success-card" onClick={(e) => e.stopPropagation()}>
+            <div className="transfer-success-icon-wrap">
+              <CheckCircle size={38} color="#16a34a" />
+            </div>
+            <h3 className="transfer-success-title">Transfer Approved Successfully</h3>
           </div>
         </div>
       )}

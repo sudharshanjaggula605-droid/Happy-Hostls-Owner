@@ -452,7 +452,6 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
 
       {/* 4. FILTER PILLS ROW (EXACT PAYMENTS PAGE FILTER BAR) */}
       <div className="brp-ref-filter-line">
-        <span className="brp-filter-prefix">Filter:</span>
         <div className="brp-ref-filter-pills">
           {(['All', 'Pending', 'Approved', 'Rejected'] as const).map(tab => {
             const pendingNum = requestCategory === 'Booking' ? bookingPendingCount : requestCategory === 'Checkout' ? checkoutPendingCount : transferPendingCount;
@@ -690,7 +689,7 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                 }}
               >
                 <CheckCircle size={16} />
-                <span>Approve &amp; Allocate Bed</span>
+                <span>Approve</span>
               </button>
             </div>
 
@@ -800,7 +799,7 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                 }}
               >
                 <LogOut size={16} />
-                <span>Process Checkout</span>
+                <span>Checkout</span>
               </button>
             </div>
 

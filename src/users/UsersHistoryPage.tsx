@@ -18,7 +18,11 @@ import {
   Check, 
   ArrowLeft,
   CheckCircle2,
-  Users
+  Users,
+  User,
+  ShieldCheck,
+  Briefcase,
+  PhoneCall
 } from 'lucide-react';
 
 export interface TenantUser {
@@ -26,6 +30,9 @@ export interface TenantUser {
   name: string;
   email: string;
   mobile: string;
+  altMobile?: string;
+  aadharNo?: string;
+  purpose?: string;
   roomNumber: string;
   bedNumber: string;
   block: string;
@@ -44,6 +51,9 @@ export const initialTenantUsers: TenantUser[] = [
     name: 'Aarav Sharma',
     email: 'aarav.sharma@example.com',
     mobile: '9876543210',
+    altMobile: '9876543211',
+    aadharNo: '4532 8901 2345',
+    purpose: 'Software Engineer at Tech Corp',
     roomNumber: '101',
     bedNumber: 'Bed A',
     block: 'Block A',
@@ -59,6 +69,9 @@ export const initialTenantUsers: TenantUser[] = [
     name: 'Kabir Verma',
     email: 'kabir.verma@example.com',
     mobile: '9123456780',
+    altMobile: '9123456781',
+    aadharNo: '8912 3456 7890',
+    purpose: 'Student - B.Tech CS',
     roomNumber: '204',
     bedNumber: 'Bed B',
     block: 'Block A',
@@ -74,6 +87,9 @@ export const initialTenantUsers: TenantUser[] = [
     name: 'Ishaan Gupta',
     email: 'ishaan.gupta@example.com',
     mobile: '9988776655',
+    altMobile: '9988776644',
+    aadharNo: '6789 0123 4567',
+    purpose: 'Government Exam Preparation',
     roomNumber: '112',
     bedNumber: 'Bed A',
     block: 'Block B',
@@ -89,6 +105,9 @@ export const initialTenantUsers: TenantUser[] = [
     name: 'Rohit Rajpoot',
     email: 'rohitrajpoot21119@gmail.com',
     mobile: '6265775558',
+    altMobile: '9826012345',
+    aadharNo: '3456 7890 1234',
+    purpose: 'Working Professional - Data Analyst',
     roomNumber: '105',
     bedNumber: 'Bed A',
     block: 'Block C',
@@ -104,6 +123,9 @@ export const initialTenantUsers: TenantUser[] = [
     name: 'Ankit Kumar',
     email: 'ankit.kumar@example.com',
     mobile: '9032109876',
+    altMobile: '9032109877',
+    aadharNo: '1234 5678 9012',
+    purpose: 'Internship at IT Firm',
     roomNumber: '202',
     bedNumber: 'Bed B',
     block: 'Block B',
@@ -390,6 +412,9 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
       name: wizName.trim(),
       email: wizEmail.trim() || `${wizName.toLowerCase().replace(/\s+/g, '.')}@gmail.com`,
       mobile: wizMobile.trim(),
+      altMobile: wizAltMobile.trim() || 'N/A',
+      aadharNo: wizAadhaar.trim() || 'N/A',
+      purpose: 'Working Professional',
       roomNumber: wizRoom.roomNumber,
       bedNumber: wizBed.bedNumber,
       block: wizRoom.floor,
@@ -420,28 +445,10 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
   };
 
   return (
-    <div className="users-page-clean-container">
-      {/* 1. USERS HEADING */}
-      <div className="users-heading-header">
+    <div className="users-page-container">
+      {/* 1. TOP HEADER ROW (USERS TITLE + ADD USER BUTTON) */}
+      <div className="users-top-header-row">
         <h1 className="users-page-title">Users</h1>
-      </div>
-
-      {/* 2. HOSTEL SELECTOR & "+ ADD USER" BUTTON (BELOW USERS, ABOVE SEARCH) */}
-      <div className="users-actions-row">
-        <div className="hostel-filter-select-box">
-          <Building2 size={15} className="hostel-icon-muted" />
-          <select 
-            className="hostel-filter-dropdown"
-            value={selectedHostel}
-            onChange={(e) => setSelectedHostel(e.target.value)}
-          >
-            <option value="Akshara Ladies Hostel">Akshara Ladies Hostel</option>
-            <option value="Sunrise Residency">Sunrise Residency</option>
-            <option value="Happy Hostels">Happy Hostels</option>
-            <option value="ALL HOSTELS">All Hostels</option>
-          </select>
-        </div>
-
         <button 
           type="button" 
           className="single-add-user-btn"
@@ -452,7 +459,22 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
         </button>
       </div>
 
-      {/* 3. SEARCH BAR DIRECTLY BELOW HOSTEL & ADD USER ROW */}
+      {/* 2. HOSTEL FILTER SELECTOR BAR */}
+      <div className="hostel-filter-select-box">
+        <Building2 size={15} className="hostel-icon-muted" />
+        <select 
+          className="hostel-filter-dropdown"
+          value={selectedHostel}
+          onChange={(e) => setSelectedHostel(e.target.value)}
+        >
+          <option value="Akshara Ladies Hostel">Akshara Ladies Hostel</option>
+          <option value="Sunrise Residency">Sunrise Residency</option>
+          <option value="Happy Hostels">Happy Hostels</option>
+          <option value="ALL HOSTELS">All Hostels</option>
+        </select>
+      </div>
+
+      {/* 3. SEARCH BAR */}
       <div className="users-search-container">
         <Search size={18} className="search-icon-muted" />
         <input 
@@ -469,7 +491,7 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
         )}
       </div>
 
-      {/* 3. BIG STAT CARDS (BLUE & YELLOW TINTS) */}
+      {/* 4. BIG STAT CARDS (TOTAL TENANTS & AVAILABLE BEDS) */}
       <div className="users-big-stats-grid">
         {/* TOTAL TENANTS CARD (BLUE TINT) */}
         <div className="ref-stat-card blue-tint-card">
@@ -496,13 +518,13 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
         </div>
       </div>
 
-      {/* 4. ROSTER LIST HEADER WITH RECORDS COUNT */}
+      {/* 5. ROSTER LIST HEADER WITH RECORDS COUNT */}
       <div className="roster-list-header">
         <span className="roster-list-title">REGISTERED TENANTS</span>
         <span className="roster-count-badge">{filteredUsers.length} Records</span>
       </div>
 
-      {/* 5. TENANT CARDS (MATCHING REFERENCE DESIGN) */}
+      {/* 6. TENANT CARDS (BRIEF: NAME, ROOM & BED, VIEW >) */}
       <div className="users-roster-list">
         {filteredUsers.length === 0 ? (
           <div className="no-tenants-empty-card">
@@ -514,7 +536,7 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
           filteredUsers.map((user) => (
             <div 
               key={user.id} 
-              className="ref-tenant-card"
+              className="ref-tenant-card brief-user-card"
               onClick={() => setViewingUser(user)}
             >
               <div className="ref-card-content">
@@ -523,24 +545,16 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
                     <h3 className="ref-tenant-name">{user.name}</h3>
                     <span className="ref-room-pill">Room {user.roomNumber} ({user.bedNumber})</span>
                   </div>
-                  <ChevronRight size={18} className="ref-chevron-icon" />
-                </div>
-
-                <div className="ref-card-bottom-row">
-                  <div className="ref-tenant-subtext">
-                    Joined: {user.joinDate} • {user.hostelName}
-                  </div>
-                  <button 
-                    type="button" 
-                    className="ref-checkout-quick-btn"
+                  <button
+                    type="button"
+                    className="user-block-view-btn"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCheckoutUser(user);
+                      setViewingUser(user);
                     }}
-                    title="Checkout Tenant"
                   >
-                    <LogOut size={13} />
-                    <span>Checkout</span>
+                    <span>View</span>
+                    <ChevronRight size={16} />
                   </button>
                 </div>
               </div>
@@ -981,74 +995,137 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
       {viewingUser && (
         <div className="user-detail-modal-overlay" onClick={() => setViewingUser(null)}>
           <div className="user-detail-modal-card" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="user-detail-close-btn"
-              onClick={() => setViewingUser(null)}
-            >
-              <X size={18} />
-            </button>
-
-            <div className="user-detail-hero">
-              <div className="user-detail-avatar">
-                {viewingUser.name.split(' ').map(n => n[0]).join('').slice(0,2)}
-              </div>
-              <div className="user-detail-hero-name">{viewingUser.name}</div>
-              <div className="user-detail-hero-hostel">{viewingUser.hostelName}</div>
-              <span className="user-detail-status-badge active">
-                ● {viewingUser.status}
-              </span>
+            
+            {/* FIXED HEADER WITH TITLE & CLOSE BUTTON */}
+            <div className="user-modal-header">
+              <span className="user-modal-header-title">Tenant Details</span>
+              <button
+                type="button"
+                className="user-detail-close-btn"
+                onClick={() => setViewingUser(null)}
+                title="Close"
+              >
+                <X size={18} />
+              </button>
             </div>
 
-            <div className="user-detail-info-list">
-              <div className="user-detail-info-row">
-                <div className="user-detail-info-icon-wrap blue-icon">
-                  <Phone size={16} />
+            {/* SCROLLABLE MODAL BODY */}
+            <div className="user-detail-modal-body">
+              <div className="user-detail-hero">
+                <div className="user-detail-avatar">
+                  {viewingUser.name.split(' ').map(n => n[0]).join('').slice(0,2)}
                 </div>
-                <div className="user-detail-info-content">
-                  <div className="user-detail-info-label">Mobile Number</div>
-                  <div className="user-detail-info-value">{viewingUser.mobile}</div>
-                </div>
+                <div className="user-detail-hero-name">{viewingUser.name}</div>
+                <div className="user-detail-hero-hostel">{viewingUser.hostelName} • Room {viewingUser.roomNumber} ({viewingUser.bedNumber})</div>
+                <span className="user-detail-status-badge active">
+                  ● {viewingUser.status}
+                </span>
               </div>
 
-              <div className="user-detail-info-row">
-                <div className="user-detail-info-icon-wrap purple-icon">
-                  <Mail size={16} />
+              <div className="user-detail-info-list">
+                {/* 1. Name */}
+                <div className="user-detail-info-row">
+                  <div className="user-detail-info-icon-wrap blue-icon">
+                    <User size={16} />
+                  </div>
+                  <div className="user-detail-info-content">
+                    <div className="user-detail-info-label">Name</div>
+                    <div className="user-detail-info-value">{viewingUser.name}</div>
+                  </div>
                 </div>
-                <div className="user-detail-info-content">
-                  <div className="user-detail-info-label">Email Address</div>
-                  <div className="user-detail-info-value">{viewingUser.email}</div>
-                </div>
-              </div>
 
-              <div className="user-detail-info-row">
-                <div className="user-detail-info-icon-wrap green-icon">
-                  <Home size={16} />
+                {/* 2. Contact Number */}
+                <div className="user-detail-info-row">
+                  <div className="user-detail-info-icon-wrap blue-icon">
+                    <Phone size={16} />
+                  </div>
+                  <div className="user-detail-info-content">
+                    <div className="user-detail-info-label">Contact Number</div>
+                    <div className="user-detail-info-value">{viewingUser.mobile}</div>
+                  </div>
                 </div>
-                <div className="user-detail-info-content">
-                  <div className="user-detail-info-label">Room &amp; Bed</div>
-                  <div className="user-detail-info-value">Room {viewingUser.roomNumber} ({viewingUser.bedNumber}) • {viewingUser.sharingType}</div>
-                </div>
-              </div>
 
-              <div className="user-detail-info-row">
-                <div className="user-detail-info-icon-wrap amber-icon">
-                  <Calendar size={16} />
+                {/* 3. Alternate Number */}
+                <div className="user-detail-info-row">
+                  <div className="user-detail-info-icon-wrap teal-icon">
+                    <PhoneCall size={16} />
+                  </div>
+                  <div className="user-detail-info-content">
+                    <div className="user-detail-info-label">Alternate Number</div>
+                    <div className="user-detail-info-value">{viewingUser.altMobile || 'N/A'}</div>
+                  </div>
                 </div>
-                <div className="user-detail-info-content">
-                  <div className="user-detail-info-label">Joining Date</div>
-                  <div className="user-detail-info-value">{viewingUser.joinDate}</div>
+
+                {/* 4. Email */}
+                <div className="user-detail-info-row">
+                  <div className="user-detail-info-icon-wrap purple-icon">
+                    <Mail size={16} />
+                  </div>
+                  <div className="user-detail-info-content">
+                    <div className="user-detail-info-label">Email</div>
+                    <div className="user-detail-info-value">{viewingUser.email}</div>
+                  </div>
+                </div>
+
+                {/* 5. Aadhar No */}
+                <div className="user-detail-info-row">
+                  <div className="user-detail-info-icon-wrap indigo-icon">
+                    <ShieldCheck size={16} />
+                  </div>
+                  <div className="user-detail-info-content">
+                    <div className="user-detail-info-label">Aadhar No</div>
+                    <div className="user-detail-info-value">{viewingUser.aadharNo || 'N/A'}</div>
+                  </div>
+                </div>
+
+                {/* 6. Purpose (Joining Purpose) */}
+                <div className="user-detail-info-row">
+                  <div className="user-detail-info-icon-wrap orange-icon">
+                    <Briefcase size={16} />
+                  </div>
+                  <div className="user-detail-info-content">
+                    <div className="user-detail-info-label">Purpose (Joining Purpose)</div>
+                    <div className="user-detail-info-value">{viewingUser.purpose || 'Working Professional'}</div>
+                  </div>
+                </div>
+
+                {/* 7. Date of Joined */}
+                <div className="user-detail-info-row">
+                  <div className="user-detail-info-icon-wrap amber-icon">
+                    <Calendar size={16} />
+                  </div>
+                  <div className="user-detail-info-content">
+                    <div className="user-detail-info-label">Date of Joined</div>
+                    <div className="user-detail-info-value">{viewingUser.joinDate}</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <button
-              type="button"
-              className="user-detail-close-full-btn"
-              onClick={() => setViewingUser(null)}
-            >
-              Close Details
-            </button>
+            {/* TWO BUTTONS AT BOTTOM: LEFT CHECKOUT, RIGHT GREEN CONTACT BUTTON */}
+            <div className="user-detail-bottom-actions">
+              <button
+                type="button"
+                className="user-modal-checkout-btn"
+                onClick={() => {
+                  const targetUser = viewingUser;
+                  setViewingUser(null);
+                  setCheckoutUser(targetUser);
+                }}
+              >
+                <LogOut size={16} />
+                <span>Checkout</span>
+              </button>
+
+              <a
+                href={`tel:${viewingUser.mobile}`}
+                className="user-modal-contact-btn"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Phone size={16} />
+                <span>Contact</span>
+              </a>
+            </div>
           </div>
         </div>
       )}

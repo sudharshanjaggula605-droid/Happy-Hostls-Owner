@@ -781,7 +781,7 @@ function App() {
 
           {/* SCREEN 2: USERS HISTORY PAGE (REQUESTS NAVIGATION) */}
           {currentScreen === 'home' && activeTab === 'requests' && (
-            <div className="p-16">
+            <div className="w-full">
               <UsersHistoryPage
                 showToast={showToast}
                 onNavigateToAddUser={() => setCurrentScreen('add-user')}

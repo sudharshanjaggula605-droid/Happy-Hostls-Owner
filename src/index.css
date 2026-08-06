@@ -8011,6 +8011,336 @@ table, .users-table {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+.ref-fees-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.ref-fees-title {
+  font-size: 18px !important;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.ref-modal-title {
+  font-size: 15px !important;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.ref-modal-subtitle {
+  font-size: 11px !important;
+  color: #64748b;
+  margin: 1px 0 0 0;
+}
+
+.ref-date-below-heading {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 3px;
+  background: #f1f5f9;
+  padding: 3px 10px;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.ref-collect-header-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transition: all 0.15s ease;
+}
+
+.ref-collect-header-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+.ref-section-history-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  border-radius: 12px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  transition: all 0.15s ease;
+}
+
+.ref-section-history-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.ref-mini-status-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.tag-paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.tag-partial {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.tag-pending, .tag-overdue {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.ref-user-suggestions-box {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  margin-top: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.ref-user-suggestion-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.ref-user-suggestion-item:hover {
+  background: #f8fafc;
+}
+
+.ref-no-user-text {
+  padding: 12px;
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+}
+
+.ref-remaining-calc-callout {
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-top: 8px;
+}
+
+.ref-month-records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.ref-month-record-card {
+  border-radius: 16px;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ref-month-record-card.is-current-month {
+  background: #f0f7ff;
+  border-color: #bfdbfe;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
+}
+
+.ref-month-record-card.is-other-month {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.ref-month-title {
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ref-month-title.current-active-text {
+  color: #1d4ed8;
+}
+
+.ref-month-title.other-gray-text {
+  color: #64748b;
+}
+
+.ref-current-badge {
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 8px;
+  text-transform: uppercase;
+}
+
+.ref-month-daterange {
+  font-size: 11.5px;
+  color: #475569;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+.ref-status-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.compact-year-list {
+  max-height: 340px;
+  overflow-y: auto;
+  gap: 8px;
+  padding: 4px 2px;
+  scroll-behavior: smooth;
+}
+
+.compact-year-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.compact-year-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.ref-compact-month-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ref-compact-month-row:hover {
+  transform: translateX(3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.ref-compact-month-row.is-current-month {
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+  border-color: #93c5fd;
+  border-left: 5px solid #2563eb;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.14);
+}
+
+.ref-compact-month-row.is-other-month {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  border-left: 4px solid #10b981;
+}
+
+.ref-compact-month-row.is-upcoming-month {
+  background: #f8fafc;
+  border-color: #f1f5f9;
+  border-left: 4px solid #94a3b8;
+  opacity: 0.85;
+}
+
+.ref-compact-month-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ref-compact-daterange {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+
+.status-upcoming-gray {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.status-paid-green {
+  background: #d1fae5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.status-partial-yellow {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.status-pending-red {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.ref-month-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed #cbd5e1;
+  font-size: 11px;
+  color: #475569;
+}
+
+.ref-click-action-hint {
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.ref-past-receipt-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-top: 10px;
+}
+
 .ref-fees-header {
   display: flex;
   justify-content: space-between;

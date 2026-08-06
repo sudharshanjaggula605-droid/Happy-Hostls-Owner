@@ -523,10 +523,49 @@ export const initialFeeTransactions: FeeTransaction[] = [
     status: 'Partial',
     date: '2026-07-26',
     uploadedDate: '26 Jul, 08:30 am',
+    lastPaymentDate: '26 Jul 2026',
     paymentMethod: 'UPI / GPay',
     phone: '+91 98765 43210',
     history: [
       { id: 'h-1', date: '2026-07-26', amountPaid: 8000, paymentMethod: 'UPI / GPay', receiptNo: 'REC-2026-0781' }
+    ],
+    monthlyRecords: [
+      {
+        id: 'mr-101-jul',
+        monthName: 'July 2026',
+        isCurrentMonth: true,
+        dateRange: '01-07-2026 to 31-07-2026',
+        amount: 12500,
+        amountPaid: 8000,
+        dues: 4500,
+        status: 'Partial',
+        lastPaymentDate: '26 Jul 2026',
+        history: [{ id: 'h-1', date: '2026-07-26', amountPaid: 8000, paymentMethod: 'UPI / GPay', receiptNo: 'REC-2026-0781' }]
+      },
+      {
+        id: 'mr-101-jun',
+        monthName: 'June 2026',
+        isCurrentMonth: false,
+        dateRange: '01-06-2026 to 30-06-2026',
+        amount: 12500,
+        amountPaid: 12500,
+        dues: 0,
+        status: 'Paid',
+        lastPaymentDate: '28 Jun 2026',
+        history: [{ id: 'h-101-jun', date: '2026-06-28', amountPaid: 12500, paymentMethod: 'UPI', receiptNo: 'REC-2026-0611' }]
+      },
+      {
+        id: 'mr-101-may',
+        monthName: 'May 2026',
+        isCurrentMonth: false,
+        dateRange: '01-05-2026 to 31-05-2026',
+        amount: 12500,
+        amountPaid: 12500,
+        dues: 0,
+        status: 'Paid',
+        lastPaymentDate: '25 May 2026',
+        history: [{ id: 'h-101-may', date: '2026-05-25', amountPaid: 12500, paymentMethod: 'Cash', receiptNo: 'REC-2026-0504' }]
+      }
     ]
   },
   {
@@ -540,8 +579,35 @@ export const initialFeeTransactions: FeeTransaction[] = [
     status: 'Pending',
     date: '2026-07-25',
     uploadedDate: '25 Jul, 08:15 pm',
+    lastPaymentDate: '25 Jun 2026',
     phone: '+91 98765 43212',
-    history: []
+    history: [],
+    monthlyRecords: [
+      {
+        id: 'mr-102-jul',
+        monthName: 'July 2026',
+        isCurrentMonth: true,
+        dateRange: '01-07-2026 to 31-07-2026',
+        amount: 10000,
+        amountPaid: 0,
+        dues: 10000,
+        status: 'Pending',
+        lastPaymentDate: 'None',
+        history: []
+      },
+      {
+        id: 'mr-102-jun',
+        monthName: 'June 2026',
+        isCurrentMonth: false,
+        dateRange: '01-06-2026 to 30-06-2026',
+        amount: 10000,
+        amountPaid: 10000,
+        dues: 0,
+        status: 'Paid',
+        lastPaymentDate: '25 Jun 2026',
+        history: [{ id: 'h-102-jun', date: '2026-06-25', amountPaid: 10000, paymentMethod: 'UPI', receiptNo: 'REC-2026-0650' }]
+      }
+    ]
   },
   {
     id: 'ft-103',
@@ -554,8 +620,35 @@ export const initialFeeTransactions: FeeTransaction[] = [
     status: 'Pending',
     date: '2026-07-27',
     uploadedDate: '27 Jul, 09:15 am',
+    lastPaymentDate: '27 May 2026',
     phone: '+91 98765 43213',
-    history: []
+    history: [],
+    monthlyRecords: [
+      {
+        id: 'mr-103-jul',
+        monthName: 'July 2026',
+        isCurrentMonth: true,
+        dateRange: '01-07-2026 to 31-07-2026',
+        amount: 11000,
+        amountPaid: 0,
+        dues: 11000,
+        status: 'Pending',
+        lastPaymentDate: 'None',
+        history: []
+      },
+      {
+        id: 'mr-103-jun',
+        monthName: 'June 2026',
+        isCurrentMonth: false,
+        dateRange: '01-06-2026 to 30-06-2026',
+        amount: 11000,
+        amountPaid: 5000,
+        dues: 6000,
+        status: 'Partial',
+        lastPaymentDate: '15 Jun 2026',
+        history: [{ id: 'h-103-jun', date: '2026-06-15', amountPaid: 5000, paymentMethod: 'Cash', receiptNo: 'REC-2026-0630' }]
+      }
+    ]
   },
   {
     id: 'ft-104',
@@ -568,10 +661,37 @@ export const initialFeeTransactions: FeeTransaction[] = [
     status: 'Overdue',
     date: '2026-07-10',
     uploadedDate: '10 Jul, 02:20 pm',
+    lastPaymentDate: '10 Jul 2026',
     paymentMethod: 'Cash',
     phone: '+91 98765 43222',
     history: [
       { id: 'h-2', date: '2026-07-10', amountPaid: 4500, paymentMethod: 'Cash', receiptNo: 'REC-2026-0512' }
+    ],
+    monthlyRecords: [
+      {
+        id: 'mr-104-jul',
+        monthName: 'July 2026',
+        isCurrentMonth: true,
+        dateRange: '01-07-2026 to 31-07-2026',
+        amount: 9500,
+        amountPaid: 4500,
+        dues: 5000,
+        status: 'Partial',
+        lastPaymentDate: '10 Jul 2026',
+        history: [{ id: 'h-2', date: '2026-07-10', amountPaid: 4500, paymentMethod: 'Cash', receiptNo: 'REC-2026-0512' }]
+      },
+      {
+        id: 'mr-104-jun',
+        monthName: 'June 2026',
+        isCurrentMonth: false,
+        dateRange: '01-06-2026 to 30-06-2026',
+        amount: 9500,
+        amountPaid: 9500,
+        dues: 0,
+        status: 'Paid',
+        lastPaymentDate: '02 Jun 2026',
+        history: [{ id: 'h-104-jun', date: '2026-06-02', amountPaid: 9500, paymentMethod: 'UPI', receiptNo: 'REC-2026-0602' }]
+      }
     ]
   },
   {
@@ -585,10 +705,37 @@ export const initialFeeTransactions: FeeTransaction[] = [
     status: 'Paid',
     date: '2026-07-05',
     uploadedDate: '05 Jul, 11:45 am',
+    lastPaymentDate: '05 Jul 2026',
     paymentMethod: 'Credit Card',
     phone: '+91 98765 43217',
     history: [
       { id: 'h-3', date: '2026-07-05', amountPaid: 8500, paymentMethod: 'Credit Card', receiptNo: 'REC-2026-0422' }
+    ],
+    monthlyRecords: [
+      {
+        id: 'mr-105-jul',
+        monthName: 'July 2026',
+        isCurrentMonth: true,
+        dateRange: '01-07-2026 to 31-07-2026',
+        amount: 8500,
+        amountPaid: 8500,
+        dues: 0,
+        status: 'Paid',
+        lastPaymentDate: '05 Jul 2026',
+        history: [{ id: 'h-3', date: '2026-07-05', amountPaid: 8500, paymentMethod: 'Credit Card', receiptNo: 'REC-2026-0422' }]
+      },
+      {
+        id: 'mr-105-jun',
+        monthName: 'June 2026',
+        isCurrentMonth: false,
+        dateRange: '01-06-2026 to 30-06-2026',
+        amount: 8500,
+        amountPaid: 8500,
+        dues: 0,
+        status: 'Paid',
+        lastPaymentDate: '04 Jun 2026',
+        history: [{ id: 'h-105-jun', date: '2026-06-04', amountPaid: 8500, paymentMethod: 'UPI', receiptNo: 'REC-2026-0604' }]
+      }
     ]
   },
   {
@@ -602,10 +749,25 @@ export const initialFeeTransactions: FeeTransaction[] = [
     status: 'Paid',
     date: '2026-07-03',
     uploadedDate: '03 Jul, 10:10 am',
+    lastPaymentDate: '03 Jul 2026',
     paymentMethod: 'UPI',
     phone: '+91 98765 43225',
     history: [
       { id: 'h-4', date: '2026-07-03', amountPaid: 7500, paymentMethod: 'UPI', receiptNo: 'REC-2026-0399' }
+    ],
+    monthlyRecords: [
+      {
+        id: 'mr-106-jul',
+        monthName: 'July 2026',
+        isCurrentMonth: true,
+        dateRange: '01-07-2026 to 31-07-2026',
+        amount: 7500,
+        amountPaid: 7500,
+        dues: 0,
+        status: 'Paid',
+        lastPaymentDate: '03 Jul 2026',
+        history: [{ id: 'h-4', date: '2026-07-03', amountPaid: 7500, paymentMethod: 'UPI', receiptNo: 'REC-2026-0399' }]
+      }
     ]
   },
   {
@@ -619,8 +781,35 @@ export const initialFeeTransactions: FeeTransaction[] = [
     status: 'Pending',
     date: '2026-07-28',
     uploadedDate: '28 Jul, 04:30 pm',
+    lastPaymentDate: '20 May 2026',
     phone: '+91 98765 43299',
-    history: []
+    history: [],
+    monthlyRecords: [
+      {
+        id: 'mr-107-jul',
+        monthName: 'July 2026',
+        isCurrentMonth: true,
+        dateRange: '01-07-2026 to 31-07-2026',
+        amount: 9000,
+        amountPaid: 0,
+        dues: 9000,
+        status: 'Pending',
+        lastPaymentDate: 'None',
+        history: []
+      },
+      {
+        id: 'mr-107-jun',
+        monthName: 'June 2026',
+        isCurrentMonth: false,
+        dateRange: '01-06-2026 to 30-06-2026',
+        amount: 9000,
+        amountPaid: 9000,
+        dues: 0,
+        status: 'Paid',
+        lastPaymentDate: '01 Jun 2026',
+        history: [{ id: 'h-107-jun', date: '2026-06-01', amountPaid: 9000, paymentMethod: 'UPI', receiptNo: 'REC-2026-0601' }]
+      }
+    ]
   }
 ];
 

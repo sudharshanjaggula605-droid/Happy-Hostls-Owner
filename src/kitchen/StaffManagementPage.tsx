@@ -7,10 +7,11 @@ interface StaffMember {
   initials: string;
   salaryMonthly: number;
   contact: string;
+  altContact: string;
   joinedDate: string;
   presentDays: number;
   absentDays: number;
-  aadhaarStatus: 'Not Uploaded' | 'Verified' | 'Pending Verification';
+  aadhaarNumber: string;
 }
 
 interface StaffManagementPageProps {
@@ -28,10 +29,11 @@ const initialStaffMembers: StaffMember[] = [
     initials: 'RK',
     salaryMonthly: 18000,
     contact: '9876543210',
+    altContact: '9876543211',
     joinedDate: '2025-03-10',
     presentDays: 25,
     absentDays: 1,
-    aadhaarStatus: 'Not Uploaded'
+    aadhaarNumber: '1234 5678 9012'
   },
   {
     id: 'st-2',
@@ -39,10 +41,11 @@ const initialStaffMembers: StaffMember[] = [
     initials: 'SD',
     salaryMonthly: 14000,
     contact: '9765432109',
+    altContact: '9765432110',
     joinedDate: '2025-05-15',
     presentDays: 24,
     absentDays: 2,
-    aadhaarStatus: 'Not Uploaded'
+    aadhaarNumber: '2345 6789 0123'
   },
   {
     id: 'st-3',
@@ -50,10 +53,11 @@ const initialStaffMembers: StaffMember[] = [
     initials: 'BS',
     salaryMonthly: 12000,
     contact: '9654321098',
+    altContact: '9654321099',
     joinedDate: '2024-11-01',
     presentDays: 26,
     absentDays: 0,
-    aadhaarStatus: 'Verified'
+    aadhaarNumber: '3456 7890 1234'
   },
   {
     id: 'st-4',
@@ -61,10 +65,11 @@ const initialStaffMembers: StaffMember[] = [
     initials: 'SC',
     salaryMonthly: 15000,
     contact: '9543210987',
+    altContact: '9543210988',
     joinedDate: '2025-01-20',
     presentDays: 25,
     absentDays: 1,
-    aadhaarStatus: 'Verified'
+    aadhaarNumber: '4567 8901 2345'
   }
 ];
 
@@ -215,12 +220,12 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
               {/* DETAILS ROWS */}
               <div className="sm-details-rows">
 
-                {/* ATTENDANCE SUMMARY */}
+                {/* CONTACT INFO */}
                 <div className="sm-detail-line">
-                  <Calendar size={15} className="sm-icon-blue" />
-                  <span className="sm-detail-label">Attendance (July):</span>
-                  <span className="sm-detail-val-blue font-bold">
-                    {stats.presentDays} Present / {stats.absentDays} Absent
+                  <Phone size={15} className="sm-icon-blue" />
+                  <span className="sm-detail-label">Contact:</span>
+                  <span className="sm-detail-val-blue font-bold" style={{ color: '#0f172a' }}>
+                    {staff.contact}
                   </span>
                 </div>
 
@@ -243,7 +248,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                     }
                   }}
                 >
-                  <Calendar size={16} /> Calendar
+                  <Calendar size={16} /> Attendance
                 </button>
 
                 <button
@@ -304,172 +309,162 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
 
       {/* STAFF DETAIL MODAL */}
       {selectedStaff && !showRemoveAlert && (
-        <div className="ref-modal-overlay" onClick={() => { setSelectedStaff(null); setIsEditingStaff(false); }}>
-          <div className="ref-modal-card" style={{ maxHeight: '100%' }} onClick={e => e.stopPropagation()}>
-            <div className="ref-modal-header">
-              <div>
-                <h3 className="ref-modal-title">{isEditingStaff ? 'Edit Staff Details' : 'Staff Details'}</h3>
-                <p className="ref-modal-subtitle">{selectedStaff.id}</p>
-              </div>
-              <button className="ref-close-btn" onClick={() => { setSelectedStaff(null); setIsEditingStaff(false); }}>
-                <X size={18} />
+        <div className="ref-modal-overlay" onClick={() => { setSelectedStaff(null); setIsEditingStaff(false); }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: 'white', borderRadius: '24px', width: '100%', maxWidth: '400px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+            
+            {/* Colorful Header */}
+            <div style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', padding: '32px 24px', position: 'relative', color: 'white', flexShrink: 0 }}>
+              <button
+                style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', cursor: 'pointer', backdropFilter: 'blur(4px)' }}
+                onClick={() => { setSelectedStaff(null); setIsEditingStaff(false); }}
+              >
+                ✕
               </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '64px', height: '64px', borderRadius: '18px', background: 'white', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
+                  {selectedStaff.initials}
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '700', letterSpacing: '-0.5px' }}>{isEditingStaff ? 'Edit Details' : selectedStaff.name}</h3>
+                  <p style={{ margin: 0, fontSize: '14px', color: 'rgba(255,255,255,0.8)', marginTop: '4px' }}>{selectedStaff.id}</p>
+                </div>
+              </div>
             </div>
 
-            <div className="ref-modal-body" style={{ overflowY: 'auto', flex: 1, paddingRight: '4px', paddingBottom: '16px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <User size={14} color="#3b82f6" />
-                    <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500' }}>Name</label>
-                  </div>
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}>
+              
+              {/* Name */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <User size={22} color="#3b82f6" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Name</div>
                   {isEditingStaff ? (
                     <input
-                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
                       value={editedStaffData?.name || ''}
                       onChange={e => setEditedStaffData(prev => prev ? { ...prev, name: e.target.value } : prev)}
                     />
                   ) : (
-                    <p style={{ fontWeight: '600', fontSize: '16px', color: '#1d4ed8' }}>{selectedStaff.name}</p>
+                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedStaff.name}</div>
                   )}
                 </div>
+              </div>
 
-                <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <Phone size={14} color="#3b82f6" />
-                    <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500' }}>Contact</label>
-                  </div>
-                  {isEditingStaff ? (
-                    <input
-                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }}
-                      value={editedStaffData?.contact || ''}
-                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, contact: e.target.value } : prev)}
-                    />
-                  ) : (
-                    <p style={{ fontSize: '16px', color: '#1d4ed8', fontWeight: '600' }}>{selectedStaff.contact}</p>
-                  )}
+              {/* Joined Date */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CalendarDays size={22} color="#8b5cf6" />
                 </div>
-
-                <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <Banknote size={14} color="#3b82f6" />
-                    <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500' }}>Salary (Monthly)</label>
-                  </div>
-                  {isEditingStaff ? (
-                    <input
-                      type="number"
-                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }}
-                      value={editedStaffData?.salaryMonthly || ''}
-                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, salaryMonthly: Number(e.target.value) } : prev)}
-                    />
-                  ) : (
-                    <p style={{ fontSize: '16px', color: '#1d4ed8', fontWeight: '600' }}>₹{selectedStaff.salaryMonthly.toLocaleString('en-IN')}</p>
-                  )}
-                </div>
-
-                <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <CalendarDays size={14} color="#3b82f6" />
-                    <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500' }}>Joined Date</label>
-                  </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Date of Joined</div>
                   {isEditingStaff ? (
                     <input
                       type="date"
-                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px' }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
                       value={editedStaffData?.joinedDate || ''}
                       onChange={e => setEditedStaffData(prev => prev ? { ...prev, joinedDate: e.target.value } : prev)}
                     />
                   ) : (
-                    <p style={{ fontSize: '16px', color: '#1d4ed8', fontWeight: '600' }}>{selectedStaff.joinedDate}</p>
+                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedStaff.joinedDate}</div>
                   )}
-                </div>
-
-                <div 
-                  style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #bfdbfe', cursor: 'pointer', transition: 'all 0.2s' }}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Contact2 size={14} color="#3b82f6" />
-                      <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500', cursor: 'pointer' }}>Aadhaar Status</label>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#2563eb', fontWeight: '600' }}>
-                      <Upload size={14} /> Upload
-                    </div>
-                  </div>
-                  {isEditingStaff ? (
-                    <select
-                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px', background: 'white' }}
-                      value={editedStaffData?.aadhaarStatus || 'Not Uploaded'}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, aadhaarStatus: e.target.value as any } : prev)}
-                    >
-                      <option value="Not Uploaded">Not Uploaded</option>
-                      <option value="Pending Verification">Pending Verification</option>
-                      <option value="Verified">Verified</option>
-                    </select>
-                  ) : (
-                    <p style={{ fontSize: '16px', color: '#1d4ed8', fontWeight: '600' }}>{selectedStaff.aadhaarStatus}</p>
-                  )}
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    style={{ display: 'none' }} 
-                    accept="image/*,.pdf"
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files.length > 0) {
-                        if (isEditingStaff) {
-                          setEditedStaffData(prev => prev ? { ...prev, aadhaarStatus: 'Pending Verification' } : prev);
-                        } else {
-                          setStaffMembers(prev => prev.map(s => s.id === selectedStaff.id ? { ...s, aadhaarStatus: 'Pending Verification' } : s));
-                          setSelectedStaff(prev => prev ? { ...prev, aadhaarStatus: 'Pending Verification' } : prev);
-                        }
-                        setToastMessage('Aadhaar document uploaded successfully.');
-                        setTimeout(() => setToastMessage(null), 3000);
-                      }
-                    }}
-                  />
-                </div>
-
-                <div
-                  style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #bfdbfe', cursor: 'pointer', transition: 'all 0.2s' }}
-                  onClick={() => {
-                    const stats = getAttendanceStats(selectedStaff.id);
-                    if (onNavigateToAttendance) {
-                      onNavigateToAttendance({
-                        name: selectedStaff.name,
-                        presentDays: stats.presentDays,
-                        absentDays: stats.absentDays
-                      });
-                    } else {
-                      setActiveCalendarStaff({ ...selectedStaff, presentDays: stats.presentDays, absentDays: stats.absentDays });
-                    }
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <Calendar size={14} color="#3b82f6" />
-                    <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500', cursor: 'pointer' }}>Attendance (July)</label>
-                  </div>
-                  <p style={{ fontSize: '16px', color: '#1d4ed8', fontWeight: '600' }}>
-                    {getAttendanceStats(selectedStaff.id).presentDays} Present / {getAttendanceStats(selectedStaff.id).absentDays} Absent
-                  </p>
                 </div>
               </div>
+
+              {/* Salary */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fdf4ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Banknote size={22} color="#d946ef" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Salary</div>
+                  {isEditingStaff ? (
+                    <input
+                      type="number"
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
+                      value={editedStaffData?.salaryMonthly || ''}
+                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, salaryMonthly: Number(e.target.value) } : prev)}
+                    />
+                  ) : (
+                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>₹{selectedStaff.salaryMonthly.toLocaleString('en-IN')}</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Contact */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Phone size={22} color="#10b981" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Contact No.</div>
+                  {isEditingStaff ? (
+                    <input
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
+                      value={editedStaffData?.contact || ''}
+                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, contact: e.target.value } : prev)}
+                    />
+                  ) : (
+                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedStaff.contact}</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Alternate Contact */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Phone size={22} color="#f59e0b" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Alternate Contact Number</div>
+                  {isEditingStaff ? (
+                    <input
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
+                      value={editedStaffData?.altContact || ''}
+                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, altContact: e.target.value } : prev)}
+                    />
+                  ) : (
+                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedStaff.altContact}</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Aadhaar Number */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Contact2 size={22} color="#ef4444" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Adhaar Number</div>
+                  {isEditingStaff ? (
+                    <input
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
+                      value={editedStaffData?.aadhaarNumber || ''}
+                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, aadhaarNumber: e.target.value } : prev)}
+                    />
+                  ) : (
+                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedStaff.aadhaarNumber}</div>
+                  )}
+                </div>
+              </div>
+
             </div>
 
-            <div className="ref-modal-actions" style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ padding: '20px 24px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', gap: '12px' }}>
               {isEditingStaff ? (
                 <>
-                  <button className="ref-btn-cancel" style={{ flex: 1, padding: '12px', borderRadius: '12px' }} onClick={() => setIsEditingStaff(false)}>Cancel</button>
-                  <button className="ref-btn-approve" style={{ flex: 1, padding: '12px', borderRadius: '12px' }} onClick={handleSaveStaff}>Save</button>
+                  <button style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '600', color: '#64748b', background: 'white', border: '1px solid #cbd5e1', cursor: 'pointer' }} onClick={() => setIsEditingStaff(false)}>Cancel</button>
+                  <button style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '600', color: 'white', background: '#6366f1', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' }} onClick={handleSaveStaff}>Save</button>
                 </>
               ) : (
                 <>
-                  <button className="ref-btn-cancel" style={{ flex: 1, color: '#64748b', borderColor: '#cbd5e1', background: '#f8fafc', fontWeight: '600', padding: '12px', borderRadius: '12px' }} onClick={() => setShowRemoveAlert(true)}>Remove</button>
-                  <button className="ref-btn-approve" style={{ flex: 1, fontWeight: '600', padding: '12px', borderRadius: '12px' }} onClick={handleEditStaff}>Edit</button>
+                  <button style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '600', color: '#64748b', background: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }} onClick={() => setShowRemoveAlert(true)}>Remove</button>
+                  <button style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '600', color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', cursor: 'pointer' }} onClick={handleEditStaff}>Edit</button>
                 </>
               )}
             </div>
+
           </div>
         </div>
       )}

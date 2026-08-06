@@ -22,7 +22,8 @@ import {
   User,
   ShieldCheck,
   Briefcase,
-  PhoneCall
+  PhoneCall,
+  Edit3
 } from 'lucide-react';
 
 export interface TenantUser {
@@ -279,6 +280,51 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
   const [isAddWizardOpen, setIsAddWizardOpen] = useState<boolean>(false);
   const [viewingUser, setViewingUser] = useState<TenantUser | null>(null);
   const [checkoutUser, setCheckoutUser] = useState<TenantUser | null>(null);
+
+  // Edit Mode state
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editName, setEditName] = useState<string>('');
+  const [editMobile, setEditMobile] = useState<string>('');
+  const [editAltMobile, setEditAltMobile] = useState<string>('');
+  const [editEmail, setEditEmail] = useState<string>('');
+  const [editAadhaar, setEditAadhaar] = useState<string>('');
+  const [editPurpose, setEditPurpose] = useState<string>('');
+  const [editJoinDate, setEditJoinDate] = useState<string>('');
+
+  const handleStartEdit = (user: TenantUser) => {
+    setEditName(user.name);
+    setEditMobile(user.mobile);
+    setEditAltMobile(user.altMobile && user.altMobile !== 'N/A' ? user.altMobile : '');
+    setEditEmail(user.email);
+    setEditAadhaar(user.aadharNo && user.aadharNo !== 'N/A' ? user.aadharNo : '');
+    setEditPurpose(user.purpose || 'Working Professional');
+    setEditJoinDate(user.joinDate);
+    setIsEditing(true);
+  };
+
+  const handleSaveUserEdit = () => {
+    if (!viewingUser) return;
+    if (!editName.trim() || !editMobile.trim()) {
+      if (showToast) showToast('Name and Contact Number are required');
+      return;
+    }
+
+    const updatedUser: TenantUser = {
+      ...viewingUser,
+      name: editName.trim(),
+      mobile: editMobile.trim(),
+      altMobile: editAltMobile.trim() || 'N/A',
+      email: editEmail.trim(),
+      aadharNo: editAadhaar.trim() || 'N/A',
+      purpose: editPurpose.trim() || 'Working Professional',
+      joinDate: editJoinDate.trim()
+    };
+
+    setUsers(prev => prev.map(u => u.id === viewingUser.id ? updatedUser : u));
+    setViewingUser(updatedUser);
+    setIsEditing(false);
+    if (showToast) showToast(`Tenant details for ${updatedUser.name} updated successfully!`);
+  };
 
   // -------------------------------------------------------------
   // ADD USER WIZARD STATE (5 Steps)
@@ -992,17 +1038,31 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
       {/* ========================================================================= */}
       {/* VIEW USER DETAILS MODAL                                                   */}
       {/* ========================================================================= */}
+      {/* ========================================================================= */}
+      {/* VIEW / EDIT USER DETAILS MODAL                                            */}
+      {/* ========================================================================= */}
       {viewingUser && (
-        <div className="user-detail-modal-overlay" onClick={() => setViewingUser(null)}>
+        <div 
+          className="user-detail-modal-overlay" 
+          onClick={() => {
+            setViewingUser(null);
+            setIsEditing(false);
+          }}
+        >
           <div className="user-detail-modal-card" onClick={(e) => e.stopPropagation()}>
             
             {/* FIXED HEADER WITH TITLE & CLOSE BUTTON */}
             <div className="user-modal-header">
-              <span className="user-modal-header-title">Tenant Details</span>
+              <span className="user-modal-header-title">
+                {isEditing ? 'Edit Tenant Details' : 'Tenant Details'}
+              </span>
               <button
                 type="button"
                 className="user-detail-close-btn"
-                onClick={() => setViewingUser(null)}
+                onClick={() => {
+                  setViewingUser(null);
+                  setIsEditing(false);
+                }}
                 title="Close"
               >
                 <X size={18} />
@@ -1011,121 +1071,252 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
 
             {/* SCROLLABLE MODAL BODY */}
             <div className="user-detail-modal-body">
-              <div className="user-detail-hero">
-                <div className="user-detail-avatar">
-                  {viewingUser.name.split(' ').map(n => n[0]).join('').slice(0,2)}
-                </div>
-                <div className="user-detail-hero-name">{viewingUser.name}</div>
-                <div className="user-detail-hero-hostel">{viewingUser.hostelName} • Room {viewingUser.roomNumber} ({viewingUser.bedNumber})</div>
-                <span className="user-detail-status-badge active">
-                  ● {viewingUser.status}
-                </span>
-              </div>
+              {!isEditing ? (
+                /* VIEW MODE */
+                <>
+                  <div className="user-detail-hero">
+                    <div className="user-detail-avatar">
+                      {viewingUser.name.split(' ').map(n => n[0]).join('').slice(0,2)}
+                    </div>
+                    <div className="user-detail-hero-name">{viewingUser.name}</div>
+                    <div className="user-detail-hero-hostel">{viewingUser.hostelName} • Room {viewingUser.roomNumber} ({viewingUser.bedNumber})</div>
+                    <span className="user-detail-status-badge active">
+                      ● {viewingUser.status}
+                    </span>
+                  </div>
 
-              <div className="user-detail-info-list">
-                {/* 1. Name */}
-                <div className="user-detail-info-row">
-                  <div className="user-detail-info-icon-wrap blue-icon">
-                    <User size={16} />
-                  </div>
-                  <div className="user-detail-info-content">
-                    <div className="user-detail-info-label">Name</div>
-                    <div className="user-detail-info-value">{viewingUser.name}</div>
-                  </div>
-                </div>
+                  <div className="user-detail-info-list">
+                    {/* 1. Name */}
+                    <div className="user-detail-info-row">
+                      <div className="user-detail-info-icon-wrap blue-icon">
+                        <User size={16} />
+                      </div>
+                      <div className="user-detail-info-content">
+                        <div className="user-detail-info-label">Name</div>
+                        <div className="user-detail-info-value">{viewingUser.name}</div>
+                      </div>
+                    </div>
 
-                {/* 2. Contact Number */}
-                <div className="user-detail-info-row">
-                  <div className="user-detail-info-icon-wrap blue-icon">
-                    <Phone size={16} />
-                  </div>
-                  <div className="user-detail-info-content">
-                    <div className="user-detail-info-label">Contact Number</div>
-                    <div className="user-detail-info-value">{viewingUser.mobile}</div>
-                  </div>
-                </div>
+                    {/* 2. Contact Number */}
+                    <div className="user-detail-info-row">
+                      <div className="user-detail-info-icon-wrap blue-icon">
+                        <Phone size={16} />
+                      </div>
+                      <div className="user-detail-info-content">
+                        <div className="user-detail-info-label">Contact Number</div>
+                        <div className="user-detail-info-value">{viewingUser.mobile}</div>
+                      </div>
+                    </div>
 
-                {/* 3. Alternate Number */}
-                <div className="user-detail-info-row">
-                  <div className="user-detail-info-icon-wrap teal-icon">
-                    <PhoneCall size={16} />
-                  </div>
-                  <div className="user-detail-info-content">
-                    <div className="user-detail-info-label">Alternate Number</div>
-                    <div className="user-detail-info-value">{viewingUser.altMobile || 'N/A'}</div>
-                  </div>
-                </div>
+                    {/* 3. Alternate Number */}
+                    <div className="user-detail-info-row">
+                      <div className="user-detail-info-icon-wrap teal-icon">
+                        <PhoneCall size={16} />
+                      </div>
+                      <div className="user-detail-info-content">
+                        <div className="user-detail-info-label">Alternate Number</div>
+                        <div className="user-detail-info-value">{viewingUser.altMobile || 'N/A'}</div>
+                      </div>
+                    </div>
 
-                {/* 4. Email */}
-                <div className="user-detail-info-row">
-                  <div className="user-detail-info-icon-wrap purple-icon">
-                    <Mail size={16} />
-                  </div>
-                  <div className="user-detail-info-content">
-                    <div className="user-detail-info-label">Email</div>
-                    <div className="user-detail-info-value">{viewingUser.email}</div>
-                  </div>
-                </div>
+                    {/* 4. Email */}
+                    <div className="user-detail-info-row">
+                      <div className="user-detail-info-icon-wrap purple-icon">
+                        <Mail size={16} />
+                      </div>
+                      <div className="user-detail-info-content">
+                        <div className="user-detail-info-label">Email</div>
+                        <div className="user-detail-info-value">{viewingUser.email}</div>
+                      </div>
+                    </div>
 
-                {/* 5. Aadhar No */}
-                <div className="user-detail-info-row">
-                  <div className="user-detail-info-icon-wrap indigo-icon">
-                    <ShieldCheck size={16} />
-                  </div>
-                  <div className="user-detail-info-content">
-                    <div className="user-detail-info-label">Aadhar No</div>
-                    <div className="user-detail-info-value">{viewingUser.aadharNo || 'N/A'}</div>
-                  </div>
-                </div>
+                    {/* 5. Aadhar No */}
+                    <div className="user-detail-info-row">
+                      <div className="user-detail-info-icon-wrap indigo-icon">
+                        <ShieldCheck size={16} />
+                      </div>
+                      <div className="user-detail-info-content">
+                        <div className="user-detail-info-label">Aadhar No</div>
+                        <div className="user-detail-info-value">{viewingUser.aadharNo || 'N/A'}</div>
+                      </div>
+                    </div>
 
-                {/* 6. Purpose (Joining Purpose) */}
-                <div className="user-detail-info-row">
-                  <div className="user-detail-info-icon-wrap orange-icon">
-                    <Briefcase size={16} />
-                  </div>
-                  <div className="user-detail-info-content">
-                    <div className="user-detail-info-label">Purpose (Joining Purpose)</div>
-                    <div className="user-detail-info-value">{viewingUser.purpose || 'Working Professional'}</div>
-                  </div>
-                </div>
+                    {/* 6. Purpose (Joining Purpose) */}
+                    <div className="user-detail-info-row">
+                      <div className="user-detail-info-icon-wrap orange-icon">
+                        <Briefcase size={16} />
+                      </div>
+                      <div className="user-detail-info-content">
+                        <div className="user-detail-info-label">Purpose (Joining Purpose)</div>
+                        <div className="user-detail-info-value">{viewingUser.purpose || 'Working Professional'}</div>
+                      </div>
+                    </div>
 
-                {/* 7. Date of Joined */}
-                <div className="user-detail-info-row">
-                  <div className="user-detail-info-icon-wrap amber-icon">
-                    <Calendar size={16} />
+                    {/* 7. Date of Joined */}
+                    <div className="user-detail-info-row">
+                      <div className="user-detail-info-icon-wrap amber-icon">
+                        <Calendar size={16} />
+                      </div>
+                      <div className="user-detail-info-content">
+                        <div className="user-detail-info-label">Date of Joined</div>
+                        <div className="user-detail-info-value">{viewingUser.joinDate}</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="user-detail-info-content">
-                    <div className="user-detail-info-label">Date of Joined</div>
-                    <div className="user-detail-info-value">{viewingUser.joinDate}</div>
+                </>
+              ) : (
+                /* EDIT MODE FORM */
+                <div className="user-edit-form-grid">
+                  <div className="edit-form-field">
+                    <label className="edit-field-label">Full Name *</label>
+                    <div className="edit-input-wrapper">
+                      <User size={16} className="edit-input-icon" />
+                      <input 
+                        type="text"
+                        className="edit-text-input"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        placeholder="Full Name"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-field-label">Contact Number *</label>
+                    <div className="edit-input-wrapper">
+                      <Phone size={16} className="edit-input-icon" />
+                      <input 
+                        type="text"
+                        className="edit-text-input"
+                        value={editMobile}
+                        onChange={(e) => setEditMobile(e.target.value)}
+                        placeholder="Contact Mobile Number"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-field-label">Alternate Number</label>
+                    <div className="edit-input-wrapper">
+                      <PhoneCall size={16} className="edit-input-icon" />
+                      <input 
+                        type="text"
+                        className="edit-text-input"
+                        value={editAltMobile}
+                        onChange={(e) => setEditAltMobile(e.target.value)}
+                        placeholder="Alternate Mobile Number"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-field-label">Email Address</label>
+                    <div className="edit-input-wrapper">
+                      <Mail size={16} className="edit-input-icon" />
+                      <input 
+                        type="email"
+                        className="edit-text-input"
+                        value={editEmail}
+                        onChange={(e) => setEditEmail(e.target.value)}
+                        placeholder="Email Address"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-field-label">Aadhar No.</label>
+                    <div className="edit-input-wrapper">
+                      <ShieldCheck size={16} className="edit-input-icon" />
+                      <input 
+                        type="text"
+                        className="edit-text-input"
+                        value={editAadhaar}
+                        onChange={(e) => setEditAadhaar(e.target.value)}
+                        placeholder="Aadhar Number"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-field-label">Joining Purpose</label>
+                    <div className="edit-input-wrapper">
+                      <Briefcase size={16} className="edit-input-icon" />
+                      <input 
+                        type="text"
+                        className="edit-text-input"
+                        value={editPurpose}
+                        onChange={(e) => setEditPurpose(e.target.value)}
+                        placeholder="e.g. Software Engineer, Student"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-field-label">Date of Joined</label>
+                    <div className="edit-input-wrapper">
+                      <Calendar size={16} className="edit-input-icon" />
+                      <input 
+                        type="text"
+                        className="edit-text-input"
+                        value={editJoinDate}
+                        onChange={(e) => setEditJoinDate(e.target.value)}
+                        placeholder="e.g. 15 Jan 2026"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* TWO BUTTONS AT BOTTOM: LEFT CHECKOUT, RIGHT GREEN CONTACT BUTTON */}
+            {/* TWO BUTTONS AT BOTTOM: VIEW MODE (CHECKOUT & EDIT) OR EDIT MODE (CANCEL & SAVE) */}
             <div className="user-detail-bottom-actions">
-              <button
-                type="button"
-                className="user-modal-checkout-btn"
-                onClick={() => {
-                  const targetUser = viewingUser;
-                  setViewingUser(null);
-                  setCheckoutUser(targetUser);
-                }}
-              >
-                <LogOut size={16} />
-                <span>Checkout</span>
-              </button>
+              {!isEditing ? (
+                <>
+                  <button
+                    type="button"
+                    className="user-modal-checkout-btn"
+                    onClick={() => {
+                      const targetUser = viewingUser;
+                      setViewingUser(null);
+                      setIsEditing(false);
+                      setCheckoutUser(targetUser);
+                    }}
+                  >
+                    <LogOut size={16} />
+                    <span>Checkout</span>
+                  </button>
 
-              <a
-                href={`tel:${viewingUser.mobile}`}
-                className="user-modal-contact-btn"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Phone size={16} />
-                <span>Contact</span>
-              </a>
+                  <button
+                    type="button"
+                    className="user-modal-edit-btn"
+                    onClick={() => handleStartEdit(viewingUser)}
+                  >
+                    <Edit3 size={16} />
+                    <span>Edit</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="user-modal-cancel-edit-btn"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    <span>Cancel</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="user-modal-save-edit-btn"
+                    onClick={handleSaveUserEdit}
+                  >
+                    <Check size={16} />
+                    <span>Save Changes</span>
+                  </button>
+                </>
+              )}
             </div>
+
           </div>
         </div>
       )}

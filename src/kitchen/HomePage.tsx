@@ -213,24 +213,24 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
               </div>
             </div>
 
-            {/* Card 4: Expenses */}
+            {/* Card 4: Requests */}
             <div 
               className="kpi-card-2col" 
               onClick={() => {
-                if (onNavigateScreen) onNavigateScreen('expenses-management');
-                else if (onNavigateTab) onNavigateTab('fees');
+                if (onNavigateScreen) onNavigateScreen('booking-requests');
+                else if (onNavigateTab) onNavigateTab('requests');
               }} 
               style={{ cursor: 'pointer' }}
             >
               <div className="kpi-card-top-row">
                 <div className="kpi-icon-badge bg-indigo">
-                  <Receipt size={15} color="#6366f1" />
+                  <Calendar size={15} color="#6366f1" />
                 </div>
                 <ChevronRight size={14} color="#94a3b8" />
               </div>
               <div className="kpi-card-content-wrap">
-                <div className="kpi-card-value-text">₹45,000</div>
-                <div className="kpi-card-label-text">Expenses</div>
+                <div className="kpi-card-value-text">12</div>
+                <div className="kpi-card-label-text">Requests</div>
               </div>
             </div>
           </div>
@@ -256,19 +256,19 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
               <span className="shortcut-label">Staff</span>
             </button>
 
-            {/* Shortcut 2: Requests */}
+            {/* Shortcut 2: Expenses */}
             <button 
               type="button" 
               className="shortcut-card"
               onClick={() => {
-                if (onNavigateScreen) onNavigateScreen('booking-requests');
-                else if (onNavigateTab) onNavigateTab('requests');
+                if (onNavigateScreen) onNavigateScreen('expenses-management');
+                else if (onNavigateTab) onNavigateTab('fees');
               }}
             >
               <div className="shortcut-icon-box bg-pink-light">
-                <Calendar size={18} color="#db2777" />
+                <Receipt size={18} color="#db2777" />
               </div>
-              <span className="shortcut-label">Requests</span>
+              <span className="shortcut-label">Expenses</span>
             </button>
 
             {/* Shortcut 3: Broadcast */}

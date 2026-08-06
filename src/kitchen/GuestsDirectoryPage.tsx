@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Search, Phone, Calendar, Mail, MapPin, User, Smartphone, CreditCard, MessageSquare } from 'lucide-react';
+import { ChevronLeft, Search, Phone, Calendar, Mail, MapPin, User, Smartphone, CreditCard, MessageSquare, ClipboardList, Home, Users } from 'lucide-react';
 
 interface GuestsDirectoryPageProps {
   onBack: () => void;
@@ -11,12 +11,12 @@ export const GuestsDirectoryPage: React.FC<GuestsDirectoryPageProps> = ({ onBack
   const [selectedGuest, setSelectedGuest] = useState<any>(null);
 
   const guests = [
-    { id: 'g-1', name: 'Amit Verma', roomNumber: '101', bedNumber: 'Bed A', phone: '+91 98765 43210', altPhone: '+91 98765 43211', email: 'amit.verma@example.com', aadhar: '1234 5678 9012', location: 'Medchal, Hyderabad', course: 'B.Tech CSE 3rd Yr', checkIn: '2025-08-10', feeStatus: 'Paid', rent: 6500 },
-    { id: 'g-2', name: 'Siddharth Rao', roomNumber: '101', bedNumber: 'Bed B', phone: '+91 98765 43211', altPhone: '+91 98765 43212', email: 'siddharth.r@example.com', aadhar: '2345 6789 0123', location: 'Koramangala, Bangalore', course: 'B.Tech ECE 3rd Yr', checkIn: '2025-08-12', feeStatus: 'Overdue', rent: 6500 },
-    { id: 'g-3', name: 'Rahul Sharma', roomNumber: '102', bedNumber: 'Bed A', phone: '+91 98765 22334', altPhone: '+91 98765 22335', email: 'rahul.s@example.com', aadhar: '3456 7890 1234', location: 'Indiranagar, Bangalore', course: 'MBA 1st Yr', checkIn: '2026-01-15', feeStatus: 'Overdue', rent: 6500 },
-    { id: 'g-4', name: 'Priya Singh', roomNumber: '103', bedNumber: 'Bed A', phone: '+91 98765 33445', altPhone: '+91 98765 33446', email: 'priya.s@example.com', aadhar: '4567 8901 2345', location: 'Kukatpally, Hyderabad', course: 'B.Pharm 2nd Yr', checkIn: '2025-09-01', feeStatus: 'Paid', rent: 5500 },
-    { id: 'g-5', name: 'Neha Gupta', roomNumber: '103', bedNumber: 'Bed B', phone: '+91 98765 55443', altPhone: '+91 98765 55444', email: 'neha.g@example.com', aadhar: '5678 9012 3456', location: 'Gachibowli, Hyderabad', course: 'B.Arch 4th Yr', checkIn: '2025-09-05', feeStatus: 'Paid', rent: 5500 },
-    { id: 'g-6', name: 'Vikas Kumar', roomNumber: '201', bedNumber: 'Bed A', phone: '+91 98765 66778', altPhone: '+91 98765 66779', email: 'vikas.k@example.com', aadhar: '6789 0123 4567', location: 'HSR Layout, Bangalore', course: 'M.Tech IT', checkIn: '2025-07-20', feeStatus: 'Paid', rent: 6800 },
+    { id: 'g-1', name: 'Amit Verma', roomNumber: '101', bedNumber: 'Bed A', phone: '+91 98765 43210', altPhone: '+91 98765 43211', email: 'amit.verma@example.com', aadhar: '1234 5678 9012', location: 'Medchal, Hyderabad', hostel: 'Boys Hostel', sharing: '2 Sharing', course: 'B.Tech CSE 3rd Yr', checkIn: '2025-08-10', feeStatus: 'Paid', rent: 6500 },
+    { id: 'g-2', name: 'Siddharth Rao', roomNumber: '101', bedNumber: 'Bed B', phone: '+91 98765 43211', altPhone: '+91 98765 43212', email: 'siddharth.r@example.com', aadhar: '2345 6789 0123', location: 'Koramangala, Bangalore', hostel: 'Co-living', sharing: '2 Sharing', course: 'B.Tech ECE 3rd Yr', checkIn: '2025-08-12', feeStatus: 'Overdue', rent: 6500 },
+    { id: 'g-3', name: 'Rahul Sharma', roomNumber: '102', bedNumber: 'Bed A', phone: '+91 98765 22334', altPhone: '+91 98765 22335', email: 'rahul.s@example.com', aadhar: '3456 7890 1234', location: 'Indiranagar, Bangalore', hostel: 'Boys Hostel', sharing: '1 Sharing', course: 'MBA 1st Yr', checkIn: '2026-01-15', feeStatus: 'Overdue', rent: 6500 },
+    { id: 'g-4', name: 'Priya Singh', roomNumber: '103', bedNumber: 'Bed A', phone: '+91 98765 33445', altPhone: '+91 98765 33446', email: 'priya.s@example.com', aadhar: '4567 8901 2345', location: 'Kukatpally, Hyderabad', hostel: 'Girls Hostel', sharing: '3 Sharing', course: 'B.Pharm 2nd Yr', checkIn: '2025-09-01', feeStatus: 'Paid', rent: 5500 },
+    { id: 'g-5', name: 'Neha Gupta', roomNumber: '103', bedNumber: 'Bed B', phone: '+91 98765 55443', altPhone: '+91 98765 55444', email: 'neha.g@example.com', aadhar: '5678 9012 3456', location: 'Gachibowli, Hyderabad', hostel: 'Girls Hostel', sharing: '4 Sharing', course: 'B.Arch 4th Yr', checkIn: '2025-09-05', feeStatus: 'Paid', rent: 5500 },
+    { id: 'g-6', name: 'Vikas Kumar', roomNumber: '201', bedNumber: 'Bed A', phone: '+91 98765 66778', altPhone: '+91 98765 66779', email: 'vikas.k@example.com', aadhar: '6789 0123 4567', location: 'HSR Layout, Bangalore', hostel: 'Co-living', sharing: '1 Sharing', course: 'M.Tech IT', checkIn: '2025-07-20', feeStatus: 'Paid', rent: 6800 },
   ];
 
   const filtered = guests.filter(g => {
@@ -111,8 +111,28 @@ export const GuestsDirectoryPage: React.FC<GuestsDirectoryPageProps> = ({ onBack
                   <MapPin size={22} color="#3b82f6" />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Address</div>
+                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Location / Address</div>
                   <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedGuest.location}</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Home size={22} color="#10b981" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Hostel</div>
+                  <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedGuest.hostel}</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fdf4ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Users size={22} color="#d946ef" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Sharing Type</div>
+                  <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedGuest.sharing}</div>
                 </div>
               </div>
 
@@ -146,15 +166,7 @@ export const GuestsDirectoryPage: React.FC<GuestsDirectoryPageProps> = ({ onBack
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CreditCard size={22} color="#ef4444" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Aadhar Number</div>
-                  <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedGuest.aadhar}</div>
-                </div>
-              </div>
+
 
             </div>
           </div>

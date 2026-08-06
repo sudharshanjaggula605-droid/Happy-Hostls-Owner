@@ -1825,55 +1825,41 @@ function App() {
         {/* MODAL: ADD / EDIT SUPPLIER */}
         {isSupplierModalOpen && (
           <div className="modal-overlay-backdrop" onClick={() => setIsSupplierModalOpen(false)}>
-            <div className="bottom-sheet-content" onClick={(e) => e.stopPropagation()}>
+            <div className="bottom-sheet-content" style={{ padding: '24px' }} onClick={(e) => e.stopPropagation()}>
               <div className="bottom-sheet-handle" />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '800' }}>{editingSupplier ? 'Edit Supplier' : 'Register New Supplier'}</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '800' }}>{editingSupplier ? 'Edit Supplier' : 'Register New Supplier'}</h3>
                 <button style={{ background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setIsSupplierModalOpen(false)}>
-                  <X size={18} />
+                  <X size={20} />
                 </button>
               </div>
 
               <form onSubmit={handleSaveSupplier}>
-                <div style={{ marginBottom: '8px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: '600' }}>Supplier Company Name *</label>
-                  <input type="text" required className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '6px 8px', borderRadius: '8px', width: '100%', marginTop: '2px' }} value={supName} onChange={(e) => setSupName(e.target.value)} />
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>Supplier Company Name *</label>
+                  <input type="text" required className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '8px', width: '100%', fontSize: '15px' }} value={supName} onChange={(e) => setSupName(e.target.value)} />
                 </div>
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '11px', fontWeight: '600' }}>Contact Person *</label>
-                    <input type="text" required className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '6px 8px', borderRadius: '8px', width: '100%', marginTop: '2px' }} value={supContactPerson} onChange={(e) => setSupContactPerson(e.target.value)} />
+                    <label style={{ fontSize: '13px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>Contact Person *</label>
+                    <input type="text" required className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '8px', width: '100%', fontSize: '15px' }} value={supContactPerson} onChange={(e) => setSupContactPerson(e.target.value)} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '11px', fontWeight: '600' }}>Mobile Number *</label>
-                    <input type="text" required className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '6px 8px', borderRadius: '8px', width: '100%', marginTop: '2px' }} value={supPhone} onChange={(e) => setSupPhone(e.target.value)} />
+                    <label style={{ fontSize: '13px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>Mobile Number *</label>
+                    <input type="text" required className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '8px', width: '100%', fontSize: '15px' }} value={supPhone} onChange={(e) => setSupPhone(e.target.value)} />
                   </div>
                 </div>
-                <div style={{ marginBottom: '8px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: '600' }}>Items Supplied</label>
-                  <input type="text" placeholder="e.g. Milk, Curd, Butter, Paneer" className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '6px 8px', borderRadius: '8px', width: '100%', marginTop: '2px' }} value={supItems} onChange={(e) => setSupItems(e.target.value)} />
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>Items Supplied</label>
+                  <input type="text" placeholder="e.g. Milk, Curd, Butter, Paneer" className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '8px', width: '100%', fontSize: '15px' }} value={supItems} onChange={(e) => setSupItems(e.target.value)} />
                 </div>
-                <div style={{ marginBottom: '8px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: '600' }}>Address</label>
-                  <input type="text" placeholder="Shop/Store address..." className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '6px 8px', borderRadius: '8px', width: '100%', marginTop: '2px' }} value={supAddress} onChange={(e) => setSupAddress(e.target.value)} />
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>Address</label>
+                  <input type="text" placeholder="Shop/Store address..." className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '8px', width: '100%', fontSize: '15px' }} value={supAddress} onChange={(e) => setSupAddress(e.target.value)} />
                 </div>
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '11px', fontWeight: '600' }}>Last Delivery Date</label>
-                    <input type="date" className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '6px 8px', borderRadius: '8px', width: '100%', marginTop: '2px' }} value={supLastDelivery} onChange={(e) => setSupLastDelivery(e.target.value)} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '11px', fontWeight: '600' }}>Payment Status</label>
-                    <select className="search-box-input" style={{ border: '1px solid var(--border-color)', padding: '6px 8px', borderRadius: '8px', width: '100%', marginTop: '2px' }} value={supPaymentStatus} onChange={(e) => setSupPaymentStatus(e.target.value as any)}>
-                      <option value="Paid">Paid</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Overdue">Overdue</option>
-                    </select>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button type="button" className="btn-action-sm btn-action-reject" style={{ flex: 1, padding: '8px' }} onClick={() => setIsSupplierModalOpen(false)}>Cancel</button>
-                  <button type="submit" className="btn-action-sm btn-action-approve" style={{ flex: 1, padding: '8px' }}>Save Supplier</button>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button type="button" className="btn-action-sm btn-action-reject" style={{ flex: 1, padding: '12px', fontSize: '15px', fontWeight: '600', borderRadius: '8px' }} onClick={() => setIsSupplierModalOpen(false)}>Cancel</button>
+                  <button type="submit" className="btn-action-sm btn-action-approve" style={{ flex: 1, padding: '12px', fontSize: '15px', fontWeight: '600', borderRadius: '8px' }}>Save Supplier</button>
                 </div>
               </form>
             </div>

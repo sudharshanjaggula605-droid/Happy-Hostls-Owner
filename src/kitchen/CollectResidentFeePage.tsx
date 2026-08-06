@@ -116,28 +116,13 @@ export const CollectResidentFeePage: React.FC<CollectResidentFeePageProps> = ({
 
       <form onSubmit={handleSubmit} className="crf-form-container">
         
-        {/* FIELD 1: SELECT RESIDENT */}
-        <div className="crf-field-group">
-          <label className="crf-field-label">Select Resident</label>
-          <div className="crf-select-wrap">
-            <select
-              className="crf-select-input"
-              value={selectedResidentId}
-              onChange={e => handleResidentSelect(e.target.value)}
-            >
-              {residentsList.map(res => (
-                <option key={res.id} value={res.id}>
-                  {res.statusLabel}
-                </option>
-              ))}
-            </select>
-            <ChevronDown size={18} className="crf-select-arrow" />
-          </div>
-        </div>
-
         {/* RESIDENT DETAILS SUMMARY CARD (LIGHT GREY BOX WITH DASHED BORDER) */}
         <div className="crf-details-box">
           <div className="crf-details-row">
+            <span className="crf-details-label">Resident Name:</span>
+            <span className="crf-details-val-bold">{activeResident.name}</span>
+          </div>
+          <div className="crf-details-row" style={{ marginTop: '8px' }}>
             <span className="crf-details-label">Room Allocation:</span>
             <span className="crf-details-val-bold">{activeResident.roomType}</span>
           </div>

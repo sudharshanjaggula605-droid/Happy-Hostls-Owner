@@ -18997,6 +18997,229 @@ table, .users-table {
   cursor: pointer;
 }
 
+/* CLEAN BOOKING CARD STYLING & VIEW POPUP MODAL STYLING */
+.brp-clean-request-card {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 14px 16px !important;
+  cursor: pointer !important;
+}
+
+.brp-clean-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.brp-view-details-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1f5f9;
+  color: #2563eb;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.brp-view-details-btn:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+/* BOOKING VIEW MODAL */
+.booking-view-modal-card {
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  background: #ffffff;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUpWizard 0.25s ease-out;
+}
+
+@media (min-width: 500px) {
+  .booking-view-modal-card {
+    border-radius: 20px;
+  }
+}
+
+.view-modal-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.view-modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.view-modal-user-icon {
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 6px;
+  box-sizing: content-box;
+  border-radius: 10px;
+}
+
+.view-modal-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.view-modal-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.view-details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.view-detail-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #f1f5f9;
+}
+
+.view-detail-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.view-detail-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.view-detail-value.font-bold {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.view-detail-value.highlight-blue {
+  color: #2563eb;
+}
+
+.view-modal-footer {
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #f1f5f9;
+  background: #ffffff;
+}
+
+.view-btn-reject {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.view-btn-reject:hover {
+  background: #fca5a5;
+  color: #991b1b;
+}
+
+.view-btn-approve {
+  flex: 1.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+  transition: all 0.15s ease;
+}
+
+.view-btn-approve:hover {
+  background: #15803d;
+}
+
+/* CATEGORY SWITCHER FULL WIDTH UNDER HEADING */
+.brp-cat-switcher-full {
+  display: flex !important;
+  width: 100% !important;
+  margin-top: 10px !important;
+  background: #f1f5f9 !important;
+  padding: 4px !important;
+  border-radius: 14px !important;
+  gap: 4px !important;
+  box-sizing: border-box !important;
+}
+
+.brp-cat-switcher-full .brp-ref-cat-btn {
+  flex: 1 !important;
+  justify-content: center !important;
+  padding: 9px 8px !important;
+  font-size: 13px !important;
+}
+
+.view-modal-user-icon.red-icon {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.view-btn-approve.red-bg {
+  background: #dc2626;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+
+.view-btn-approve.red-bg:hover {
+  background: #b91c1c;
+}
+
+
+
+
 
 
 

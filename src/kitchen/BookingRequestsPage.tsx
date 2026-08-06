@@ -16,15 +16,20 @@ import {
   X,
   Building2,
   Search,
-  BookOpen
+  BookOpen,
+  ChevronRight,
+  ArrowRightLeft
 } from 'lucide-react';
 
 export interface BookingRequestItem {
   id: string;
   name: string;
   phone: string;
+  alternatePhone?: string;
   email?: string;
-  course: string;
+  course?: string;
+  purpose?: string;
+  aadhaar?: string;
   sharingPreferred: string; // e.g. '2-Sharing' or 'Double Attached'
   floorPreferred: string;   // e.g. '1st Floor'
   requestedDate: string;
@@ -37,6 +42,9 @@ export interface CheckoutRequestItem {
   tenantId: string;
   name: string;
   phone: string;
+  alternatePhone?: string;
+  email?: string;
+  aadhaar?: string;
   roomNumber: string;
   bedNumber: string;
   hostelName: string;
@@ -45,6 +53,23 @@ export interface CheckoutRequestItem {
   reason: string;
   pendingDues: number;
   earnings: number;
+  status: 'Pending' | 'Approved' | 'Rejected';
+}
+
+export interface TransferRequestItem {
+  id: string;
+  tenantId: string;
+  name: string;
+  phone: string;
+  alternatePhone?: string;
+  email?: string;
+  aadhaar?: string;
+  currentRoom: string;
+  currentSharing: string;
+  targetRoom: string;
+  targetSharing: string;
+  reason: string;
+  requestedDate: string;
   status: 'Pending' | 'Approved' | 'Rejected';
 }
 
@@ -152,25 +177,46 @@ interface BookingRequestsPageProps {
 }
 
 export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack, showToast }) => {
-  // Top Request Category: 'Booking' | 'Checkout'
-  const [requestCategory, setRequestCategory] = useState<'Booking' | 'Checkout'>('Booking');
+  // Top Request Category: 'Booking' | 'Checkout' | 'Transfer'
+  const [requestCategory, setRequestCategory] = useState<'Booking' | 'Checkout' | 'Transfer'>('Booking');
 
   // Booking Requests State
   const [bookingRequests, setBookingRequests] = useState<BookingRequestItem[]>([
-    { id: 'br-1', name: 'Rohan Sharma', phone: '+91 98765 12345', email: 'rohan.s@gmail.com', course: 'B.Tech CSE 2nd Year', sharingPreferred: '2-Sharing', requestedDate: '2026-08-05', floorPreferred: '1st Floor', status: 'Pending' },
-    { id: 'br-2', name: 'Kavya Nair', phone: '+91 98765 23456', email: 'kavya.n@gmail.com', course: 'MBA 1st Year', sharingPreferred: '1-Sharing', requestedDate: '2026-08-07', floorPreferred: '2nd Floor', status: 'Pending' },
-    { id: 'br-3', name: 'Manish Verma', phone: '+91 98765 34567', email: 'manish.v@gmail.com', course: 'B.Com Honors', sharingPreferred: '3-Sharing', requestedDate: '2026-08-10', floorPreferred: '1st Floor', status: 'Pending' },
-    { id: 'br-4', name: 'Sneha Patel', phone: '+91 98765 45678', email: 'sneha.p@gmail.com', course: 'MBBS 3rd Year', sharingPreferred: '2-Sharing', requestedDate: '2026-08-02', floorPreferred: '3rd Floor', status: 'Approved' },
-    { id: 'br-5', name: 'Aditya Roy', phone: '+91 98765 56789', email: 'aditya.r@gmail.com', course: 'BCA 1st Year', sharingPreferred: '3-Sharing', requestedDate: '2026-08-01', floorPreferred: '2nd Floor', status: 'Rejected' },
+    { id: 'br-1', name: 'Rohan Sharma', phone: '+91 98765 12345', alternatePhone: '+91 98765 11111', email: 'rohan.s@gmail.com', course: 'B.Tech CSE 2nd Year', purpose: 'Education (College)', aadhaar: '4532 8901 2345', sharingPreferred: '2-Sharing', requestedDate: '2026-08-05', floorPreferred: '1st Floor', status: 'Pending' },
+    { id: 'br-2', name: 'Kavya Nair', phone: '+91 98765 23456', alternatePhone: '+91 98765 22222', email: 'kavya.n@gmail.com', course: 'MBA 1st Year', purpose: 'Higher Studies', aadhaar: '6789 1234 5678', sharingPreferred: '1-Sharing', requestedDate: '2026-08-07', floorPreferred: '2nd Floor', status: 'Pending' },
+    { id: 'br-3', name: 'Manish Verma', phone: '+91 98765 34567', alternatePhone: '+91 98765 33333', email: 'manish.v@gmail.com', course: 'B.Com Honors', purpose: 'Education & Internship', aadhaar: '9012 3456 7890', sharingPreferred: '3-Sharing', requestedDate: '2026-08-10', floorPreferred: '1st Floor', status: 'Pending' },
+    { id: 'br-4', name: 'Sneha Patel', phone: '+91 98765 45678', alternatePhone: '+91 98765 44444', email: 'sneha.p@gmail.com', course: 'MBBS 3rd Year', purpose: 'Medical Internship', aadhaar: '2345 6789 0123', sharingPreferred: '2-Sharing', requestedDate: '2026-08-02', floorPreferred: '3rd Floor', status: 'Approved' },
+    { id: 'br-5', name: 'Aditya Roy', phone: '+91 98765 56789', alternatePhone: '+91 98765 55555', email: 'aditya.r@gmail.com', course: 'BCA 1st Year', purpose: 'Job Training', aadhaar: '5678 9012 3456', sharingPreferred: '3-Sharing', requestedDate: '2026-08-01', floorPreferred: '2nd Floor', status: 'Rejected' },
+    { id: 'br-6', name: 'Ananya Reddy', phone: '+91 97654 32109', alternatePhone: '+91 97654 30000', email: 'ananya.r@gmail.com', course: 'B.Tech ECE 3rd Year', purpose: 'College Hostel Admission', aadhaar: '1234 9012 5678', sharingPreferred: '2-Sharing', requestedDate: '2026-08-08', floorPreferred: '2nd Floor', status: 'Pending' },
+    { id: 'br-7', name: 'Rajesh Kulkarni', phone: '+91 96543 21098', alternatePhone: '+91 96543 20000', email: 'rajesh.k@gmail.com', course: 'Software Trainee', purpose: 'IT Park Job Placement', aadhaar: '5678 1234 9012', sharingPreferred: '1-Sharing', requestedDate: '2026-08-09', floorPreferred: '1st Floor', status: 'Pending' },
+    { id: 'br-8', name: 'Divya Krishnan', phone: '+91 95432 10987', alternatePhone: '+91 95432 10000', email: 'divya.k@gmail.com', course: 'M.Tech BioTech', purpose: 'University Entrance', aadhaar: '9012 5678 1234', sharingPreferred: '3-Sharing', requestedDate: '2026-08-11', floorPreferred: '3rd Floor', status: 'Pending' },
   ]);
 
   // Checkout Requests State
   const [checkoutRequests, setCheckoutRequests] = useState<CheckoutRequestItem[]>([
-    { id: 'cr-1', tenantId: 'u1', name: 'Aarav Sharma', phone: '+91 98765 43210', roomNumber: '101', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '2-Sharing', requestedDate: '2026-08-06', reason: 'Course Completed & Relocating', pendingDues: 0, earnings: 14500, status: 'Pending' },
-    { id: 'cr-2', tenantId: 'u2', name: 'Kabir Verma', phone: '+91 91234 56780', roomNumber: '204', bedNumber: 'Bed B', hostelName: 'Happy Hostels', sharingType: '3-Sharing', requestedDate: '2026-08-08', reason: 'Job Location Change', pendingDues: 2500, earnings: 12000, status: 'Pending' },
-    { id: 'cr-3', tenantId: 'u4', name: 'Rohit Rajpoot', phone: '+91 62657 75558', roomNumber: '105', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '2-Sharing', requestedDate: '2026-08-04', reason: 'Moving to rented flat', pendingDues: 1200, earnings: 8500, status: 'Pending' },
-    { id: 'cr-4', tenantId: 'u5', name: 'Ankit Kumar', phone: '+91 90321 09876', roomNumber: '202', bedNumber: 'Bed B', hostelName: 'Happy Hostels', sharingType: '4-Sharing', requestedDate: '2026-08-01', reason: 'Completed internship', pendingDues: 0, earnings: 15000, status: 'Approved' },
+    { id: 'cr-1', tenantId: 'u1', name: 'Aarav Sharma', phone: '+91 98765 43210', alternatePhone: '+91 98765 40000', email: 'aarav.s@gmail.com', aadhaar: '8901 2345 6789', roomNumber: '101', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '2-Sharing', requestedDate: '2026-08-06', reason: 'Course Completed & Relocating', pendingDues: 0, earnings: 14500, status: 'Pending' },
+    { id: 'cr-2', tenantId: 'u2', name: 'Kabir Verma', phone: '+91 91234 56780', alternatePhone: '+91 91234 50000', email: 'kabir.v@gmail.com', aadhaar: '1234 5678 9012', roomNumber: '204', bedNumber: 'Bed B', hostelName: 'Happy Hostels', sharingType: '3-Sharing', requestedDate: '2026-08-08', reason: 'Job Location Change', pendingDues: 2500, earnings: 12000, status: 'Pending' },
+    { id: 'cr-3', tenantId: 'u4', name: 'Rohit Rajpoot', phone: '+91 62657 75558', alternatePhone: '+91 62657 70000', email: 'rohit.r@gmail.com', aadhaar: '3456 7890 1234', roomNumber: '105', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '2-Sharing', requestedDate: '2026-08-04', reason: 'Moving to rented flat', pendingDues: 1200, earnings: 8500, status: 'Pending' },
+    { id: 'cr-4', tenantId: 'u5', name: 'Ankit Kumar', phone: '+91 90321 09876', alternatePhone: '+91 90321 00000', email: 'ankit.k@gmail.com', aadhaar: '5678 9012 3456', roomNumber: '202', bedNumber: 'Bed B', hostelName: 'Happy Hostels', sharingType: '4-Sharing', requestedDate: '2026-08-01', reason: 'Completed internship', pendingDues: 0, earnings: 15000, status: 'Approved' },
+    { id: 'cr-5', tenantId: 'u6', name: 'Meera Joshi', phone: '+91 91234 98765', alternatePhone: '+91 91234 90000', email: 'meera.j@gmail.com', aadhaar: '4321 8765 2109', roomNumber: '103', bedNumber: 'Bed B', hostelName: 'Happy Hostels', sharingType: '3-Sharing', requestedDate: '2026-08-09', reason: 'Semester Break & Returning Home', pendingDues: 0, earnings: 11000, status: 'Pending' },
+    { id: 'cr-6', tenantId: 'u7', name: 'Siddharth Rao', phone: '+91 92345 87654', alternatePhone: '+91 92345 80000', email: 'siddharth.r@gmail.com', aadhaar: '8765 4321 0987', roomNumber: '201', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '1-Sharing', requestedDate: '2026-08-11', reason: 'Flat Transfer with Colleagues', pendingDues: 3000, earnings: 24000, status: 'Pending' },
+    { id: 'cr-7', tenantId: 'u8', name: 'Pooja Hegde', phone: '+91 93456 76543', alternatePhone: '+91 93456 70000', email: 'pooja.h@gmail.com', aadhaar: '6543 2109 8765', roomNumber: '301', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '2-Sharing', requestedDate: '2026-08-03', reason: 'Project Completion', pendingDues: 0, earnings: 16000, status: 'Rejected' },
   ]);
+
+  // Transfer Requests State
+  const [transferRequests, setTransferRequests] = useState<TransferRequestItem[]>([
+    { id: 'tr-1', tenantId: 'u10', name: 'Vikram Malhotra', phone: '+91 98123 45678', alternatePhone: '+91 98123 40000', email: 'vikram.m@gmail.com', aadhaar: '7890 1234 5678', currentRoom: 'Room 101 (Bed B)', currentSharing: '2-Sharing (1st Floor)', targetRoom: 'Room 202 (Bed A)', targetSharing: '1-Sharing (2nd Floor)', reason: 'Need private room for competitive exams study', requestedDate: '2026-08-06', status: 'Pending' },
+    { id: 'tr-2', tenantId: 'u11', name: 'Priya Sundaram', phone: '+91 98234 56789', alternatePhone: '+91 98234 50000', email: 'priya.s@gmail.com', aadhaar: '9012 3456 7890', currentRoom: 'Room 204 (Bed C)', currentSharing: '3-Sharing (2nd Floor)', targetRoom: 'Room 102 (Bed B)', targetSharing: '2-Sharing (1st Floor)', reason: 'Medical preference for lower floor', requestedDate: '2026-08-05', status: 'Pending' },
+    { id: 'tr-3', tenantId: 'u12', name: 'Rahul Deshmukh', phone: '+91 98345 67890', alternatePhone: '+91 98345 60000', email: 'rahul.d@gmail.com', aadhaar: '2345 6789 0123', currentRoom: 'Room 301 (Bed A)', currentSharing: '2-Sharing (3rd Floor)', targetRoom: 'Room 103 (Bed C)', targetSharing: '3-Sharing (1st Floor)', reason: 'Budget optimization request', requestedDate: '2026-08-02', status: 'Approved' },
+    { id: 'tr-4', tenantId: 'u13', name: 'Harish Naidu', phone: '+91 94567 65432', alternatePhone: '+91 94567 60000', email: 'harish.n@gmail.com', aadhaar: '2109 8765 4321', currentRoom: 'Room 102 (Bed A)', currentSharing: '2-Sharing (1st Floor)', targetRoom: 'Room 201 (Bed A)', targetSharing: '1-Sharing (2nd Floor)', reason: 'Requested AC single room upgrade', requestedDate: '2026-08-07', status: 'Pending' },
+    { id: 'tr-5', tenantId: 'u14', name: 'Nivedita Sen', phone: '+91 95678 54321', alternatePhone: '+91 95678 50000', email: 'nivedita.s@gmail.com', aadhaar: '0987 6543 2109', currentRoom: 'Room 204 (Bed A)', currentSharing: '3-Sharing (2nd Floor)', targetRoom: 'Room 101 (Bed A)', targetSharing: '2-Sharing (1st Floor)', reason: 'Wants ground/1st floor due to leg injury', requestedDate: '2026-08-08', status: 'Pending' },
+    { id: 'tr-6', tenantId: 'u15', name: 'Amit Saxena', phone: '+91 96789 43210', alternatePhone: '+91 96789 40000', email: 'amit.s@gmail.com', aadhaar: '5432 1098 7654', currentRoom: 'Room 103 (Bed B)', currentSharing: '3-Sharing (1st Floor)', targetRoom: 'Room 105 (Bed B)', targetSharing: '2-Sharing (1st Floor)', reason: 'Moving to share with college classmate', requestedDate: '2026-08-01', status: 'Rejected' },
+  ]);
+
+  // View Modals State
+  const [viewBookingReq, setViewBookingReq] = useState<BookingRequestItem | null>(null);
+  const [viewCheckoutReq, setViewCheckoutReq] = useState<CheckoutRequestItem | null>(null);
+  const [viewTransferReq, setViewTransferReq] = useState<TransferRequestItem | null>(null);
 
   // Room Inventory State
   const [inventoryRooms, setInventoryRooms] = useState<InventoryRoom[]>(initialInventoryRooms);
@@ -293,7 +339,7 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
       if (activeFilter !== 'All' && r.status !== activeFilter) return false;
       if (!searchQuery.trim()) return true;
       const q = searchQuery.toLowerCase();
-      return r.name.toLowerCase().includes(q) || r.phone.includes(q) || r.course.toLowerCase().includes(q);
+      return r.name.toLowerCase().includes(q) || r.phone.includes(q) || (r.course && r.course.toLowerCase().includes(q));
     });
   }, [bookingRequests, activeFilter, searchQuery]);
 
@@ -307,6 +353,28 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
     });
   }, [checkoutRequests, activeFilter, searchQuery]);
 
+  // Filtered Transfer Requests
+  const filteredTransferRequests = useMemo(() => {
+    return transferRequests.filter(r => {
+      if (activeFilter !== 'All' && r.status !== activeFilter) return false;
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      return r.name.toLowerCase().includes(q) || r.phone.includes(q) || r.currentRoom.toLowerCase().includes(q);
+    });
+  }, [transferRequests, activeFilter, searchQuery]);
+
+  // Reject Transfer Request
+  const handleRejectTransfer = (id: string, name: string) => {
+    setTransferRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Rejected' } : r));
+    if (showToast) showToast(`Rejected transfer request for ${name}.`);
+  };
+
+  // Approve Transfer Request
+  const handleApproveTransfer = (id: string, name: string) => {
+    setTransferRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Approved' } : r));
+    if (showToast) showToast(`Approved transfer request for ${name}.`);
+  };
+
   // Counts for Booking Requests
   const bookingPendingCount = bookingRequests.filter(r => r.status === 'Pending').length;
   const bookingApprovedCount = bookingRequests.filter(r => r.status === 'Approved').length;
@@ -316,6 +384,9 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
   const checkoutPendingCount = checkoutRequests.filter(r => r.status === 'Pending').length;
   const checkoutApprovedCount = checkoutRequests.filter(r => r.status === 'Approved').length;
   const checkoutRejectedCount = checkoutRequests.filter(r => r.status === 'Rejected').length;
+
+  // Counts for Transfer Requests
+  const transferPendingCount = transferRequests.filter(r => r.status === 'Pending').length;
 
   // Available Rooms matching Step 1 Hostel & Step 2 Sharing & Floor
   const availableWizardRooms = useMemo(() => {
@@ -328,30 +399,37 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
 
   return (
     <div className="users-page-clean-container">
-      {/* 1. TOP TITLE HEADER & CATEGORY SWITCHER (PAYMENTS PAGE DESIGN) */}
+      {/* 1. TOP TITLE HEADER & CATEGORY SWITCHER UNDER HEADING */}
       <div className="users-heading-header">
-        <div className="users-top-header-row">
-          <h1 className="users-page-title">Requests</h1>
+        <h1 className="users-page-title">Requests</h1>
 
-          <div className="brp-ref-cat-switcher">
-            <button 
-              type="button" 
-              className={`brp-ref-cat-btn ${requestCategory === 'Booking' ? 'active' : ''}`}
-              onClick={() => setRequestCategory('Booking')}
-            >
-              <BookOpen size={14} />
-              <span>Booking ({bookingPendingCount})</span>
-            </button>
+        <div className="brp-ref-cat-switcher brp-cat-switcher-full">
+          <button 
+            type="button" 
+            className={`brp-ref-cat-btn ${requestCategory === 'Booking' ? 'active' : ''}`}
+            onClick={() => setRequestCategory('Booking')}
+          >
+            <BookOpen size={14} />
+            <span>Booking ({bookingPendingCount})</span>
+          </button>
 
-            <button 
-              type="button" 
-              className={`brp-ref-cat-btn ${requestCategory === 'Checkout' ? 'active' : ''}`}
-              onClick={() => setRequestCategory('Checkout')}
-            >
-              <LogOut size={14} />
-              <span>Checkout ({checkoutPendingCount})</span>
-            </button>
-          </div>
+          <button 
+            type="button" 
+            className={`brp-ref-cat-btn ${requestCategory === 'Checkout' ? 'active' : ''}`}
+            onClick={() => setRequestCategory('Checkout')}
+          >
+            <LogOut size={14} />
+            <span>Checkout ({checkoutPendingCount})</span>
+          </button>
+
+          <button 
+            type="button" 
+            className={`brp-ref-cat-btn ${requestCategory === 'Transfer' ? 'active' : ''}`}
+            onClick={() => setRequestCategory('Transfer')}
+          >
+            <ArrowRightLeft size={14} />
+            <span>Transfer ({transferPendingCount})</span>
+          </button>
         </div>
       </div>
 
@@ -361,7 +439,7 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
         <input 
           type="text"
           className="users-clean-search-input"
-          placeholder={requestCategory === 'Booking' ? "Search by applicant name or phone..." : "Search by tenant or room no..."}
+          placeholder={requestCategory === 'Booking' ? "Search by applicant name or phone..." : requestCategory === 'Checkout' ? "Search by tenant or room no..." : "Search by tenant name or room..."}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -372,41 +450,12 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
         )}
       </div>
 
-      {/* 3. 2 BIG STAT CARDS (BLUE & YELLOW TINTS - MATCHING REFERENCE IMAGE) */}
-      <div className="users-big-stats-grid">
-        {/* CARD 1: BLUE TINT CARD */}
-        <div className="ref-stat-card blue-tint-card">
-          <div className="ref-stat-label">
-            {requestCategory === 'Booking' ? 'TOTAL BOOKINGS' : 'TOTAL CHECKOUTS'}
-          </div>
-          <div className="ref-stat-val">
-            {requestCategory === 'Booking' ? bookingRequests.length : checkoutRequests.length}
-          </div>
-          <div className="ref-stat-sub blue-sub">
-            <CheckCircle size={13} color="#2563eb" />
-            <span>{requestCategory === 'Booking' ? bookingApprovedCount : checkoutApprovedCount} Approved</span>
-          </div>
-        </div>
-
-        {/* CARD 2: YELLOW TINT CARD */}
-        <div className="ref-stat-card yellow-tint-card">
-          <div className="ref-stat-label">PENDING REVIEW</div>
-          <div className="ref-stat-val">
-            {requestCategory === 'Booking' ? bookingPendingCount : checkoutPendingCount}
-          </div>
-          <div className="ref-stat-sub yellow-sub">
-            <AlertTriangle size={13} color="#d97706" />
-            <span>! {requestCategory === 'Booking' ? bookingPendingCount : checkoutPendingCount} pending</span>
-          </div>
-        </div>
-      </div>
-
       {/* 4. FILTER PILLS ROW (EXACT PAYMENTS PAGE FILTER BAR) */}
       <div className="brp-ref-filter-line">
         <span className="brp-filter-prefix">Filter:</span>
         <div className="brp-ref-filter-pills">
           {(['All', 'Pending', 'Approved', 'Rejected'] as const).map(tab => {
-            const pendingNum = requestCategory === 'Booking' ? bookingPendingCount : checkoutPendingCount;
+            const pendingNum = requestCategory === 'Booking' ? bookingPendingCount : requestCategory === 'Checkout' ? checkoutPendingCount : transferPendingCount;
             return (
               <button
                 key={tab}
@@ -432,10 +481,16 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
         <span className="roster-list-title">
           {requestCategory === 'Booking' 
             ? (activeFilter === 'Pending' ? 'PENDING BOOKING REQUESTS' : `${activeFilter.toUpperCase()} BOOKING REQUESTS`) 
-            : (activeFilter === 'Pending' ? 'PENDING CHECKOUT REQUESTS' : `${activeFilter.toUpperCase()} CHECKOUT REQUESTS`)}
+            : requestCategory === 'Checkout'
+            ? (activeFilter === 'Pending' ? 'PENDING CHECKOUT REQUESTS' : `${activeFilter.toUpperCase()} CHECKOUT REQUESTS`)
+            : (activeFilter === 'Pending' ? 'PENDING TRANSFER REQUESTS' : `${activeFilter.toUpperCase()} TRANSFER REQUESTS`)}
         </span>
         <span className="roster-count-badge">
-          {requestCategory === 'Booking' ? filteredBookingRequests.length : filteredCheckoutRequests.length} Records
+          {requestCategory === 'Booking' 
+            ? filteredBookingRequests.length 
+            : requestCategory === 'Checkout' 
+            ? filteredCheckoutRequests.length 
+            : filteredTransferRequests.length} Records
         </span>
       </div>
 
@@ -450,50 +505,31 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
             </div>
           ) : (
             filteredBookingRequests.map(req => (
-              <div key={req.id} className="ref-tenant-card brp-ref-card">
-                <div className="ref-card-top-row">
-                  <div className="ref-name-group">
-                    <h3 className="ref-tenant-name">{req.name}</h3>
-                    <span className="ref-room-pill">{req.sharingPreferred} ({req.floorPreferred})</span>
-                  </div>
-                  <span className={`brp-status-pill ${req.status.toLowerCase()}`}>{req.status}</span>
+              <div 
+                key={req.id} 
+                className="ref-tenant-card brp-ref-card brp-clean-request-card"
+                onClick={() => setViewBookingReq(req)}
+              >
+                <div className="brp-clean-card-left">
+                  <h3 className="ref-tenant-name">{req.name}</h3>
+                  <span className="ref-room-pill">{req.sharingPreferred} ({req.floorPreferred})</span>
                 </div>
 
-                <div className="brp-ref-card-details">
-                  <div className="brp-ref-detail-item">
-                    <Phone size={13} color="#64748b" />
-                    <span>{req.phone} • {req.course}</span>
-                  </div>
-                  <div className="brp-ref-detail-item">
-                    <Calendar size={13} color="#64748b" />
-                    <span>Move-in Date: <strong>{req.requestedDate}</strong></span>
-                  </div>
-                </div>
-
-                {req.status === 'Pending' && (
-                  <div className="brp-ref-card-actions">
-                    <button 
-                      type="button" 
-                      className="brp-ref-btn-approve"
-                      onClick={() => handleOpenBookingWizard(req)}
-                    >
-                      <CheckCircle size={15} />
-                      <span>Approve &amp; Allocate Bed</span>
-                    </button>
-                    <button 
-                      type="button" 
-                      className="brp-ref-btn-reject"
-                      onClick={() => handleRejectBooking(req.id, req.name)}
-                    >
-                      <XCircle size={15} />
-                      <span>Reject</span>
-                    </button>
-                  </div>
-                )}
+                <button 
+                  type="button" 
+                  className="brp-view-details-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setViewBookingReq(req);
+                  }}
+                >
+                  <span>View</span>
+                  <ChevronRight size={16} />
+                </button>
               </div>
             ))
           )
-        ) : (
+        ) : requestCategory === 'Checkout' ? (
           filteredCheckoutRequests.length === 0 ? (
             <div className="no-tenants-empty-card">
               <LogOut size={32} color="#94a3b8" />
@@ -502,64 +538,375 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
             </div>
           ) : (
             filteredCheckoutRequests.map(req => (
-              <div key={req.id} className="ref-tenant-card brp-ref-card brp-checkout-border">
-                <div className="ref-card-top-row">
-                  <div className="ref-name-group">
-                    <h3 className="ref-tenant-name">{req.name}</h3>
-                    <span className="ref-room-pill red-pill">Room {req.roomNumber} ({req.bedNumber})</span>
-                  </div>
-                  <span className={`brp-status-pill ${req.status.toLowerCase()}`}>{req.status}</span>
+              <div 
+                key={req.id} 
+                className="ref-tenant-card brp-ref-card brp-clean-request-card"
+                onClick={() => setViewCheckoutReq(req)}
+              >
+                <div className="brp-clean-card-left">
+                  <h3 className="ref-tenant-name">{req.name}</h3>
+                  <span className="ref-room-pill red-pill">Room {req.roomNumber} ({req.bedNumber})</span>
                 </div>
 
-                <div className="brp-ref-card-details">
-                  <div className="brp-ref-detail-item">
-                    <Phone size={13} color="#64748b" />
-                    <span>{req.phone} • {req.sharingType}</span>
-                  </div>
-                  <div className="brp-ref-detail-item">
-                    <Calendar size={13} color="#64748b" />
-                    <span>Checkout Date: <strong>{req.requestedDate}</strong></span>
-                  </div>
-                  <div className="brp-ref-detail-item">
-                    <AlertTriangle size={13} color={req.pendingDues > 0 ? "#dc2626" : "#16a34a"} />
-                    <span>Reason: {req.reason}</span>
-                  </div>
-                  {req.pendingDues > 0 ? (
-                    <div className="dues-warning-pill">
-                      ⚠️ Pending Dues: ₹{req.pendingDues}
-                    </div>
-                  ) : (
-                    <div className="dues-clear-pill">
-                      ✓ Clear Bill (No Dues)
-                    </div>
-                  )}
+                <button 
+                  type="button" 
+                  className="brp-view-details-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setViewCheckoutReq(req);
+                  }}
+                >
+                  <span>View</span>
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            ))
+          )
+        ) : (
+          filteredTransferRequests.length === 0 ? (
+            <div className="no-tenants-empty-card">
+              <ArrowRightLeft size={32} color="#94a3b8" />
+              <div className="empty-title">No Transfer Requests</div>
+              <div className="empty-desc">There are no transfer requests matching your filter.</div>
+            </div>
+          ) : (
+            filteredTransferRequests.map(req => (
+              <div 
+                key={req.id} 
+                className="ref-tenant-card brp-ref-card brp-clean-request-card"
+                onClick={() => setViewTransferReq(req)}
+              >
+                <div className="brp-clean-card-left">
+                  <h3 className="ref-tenant-name">{req.name}</h3>
+                  <span className="ref-room-pill blue-pill">{req.currentRoom} → {req.targetRoom}</span>
                 </div>
 
-                {req.status === 'Pending' && (
-                  <div className="brp-ref-card-actions">
-                    <button 
-                      type="button" 
-                      className="brp-ref-btn-checkout"
-                      onClick={() => setActiveCheckoutReq(req)}
-                    >
-                      <LogOut size={15} />
-                      <span>Process Checkout</span>
-                    </button>
-                    <button 
-                      type="button" 
-                      className="brp-ref-btn-reject"
-                      onClick={() => handleRejectCheckout(req.id, req.name)}
-                    >
-                      <XCircle size={15} />
-                      <span>Reject</span>
-                    </button>
-                  </div>
-                )}
+                <button 
+                  type="button" 
+                  className="brp-view-details-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setViewTransferReq(req);
+                  }}
+                >
+                  <span>View</span>
+                  <ChevronRight size={16} />
+                </button>
               </div>
             ))
           )
         )}
       </div>
+
+      {/* ========================================================================= */}
+      {/* VIEW BOOKING REQUEST DETAILS POPUP MODAL                                  */}
+      {/* ========================================================================= */}
+      {viewBookingReq && (
+        <div className="wizard-modal-backdrop" onClick={() => setViewBookingReq(null)}>
+          <div className="booking-view-modal-card" onClick={(e) => e.stopPropagation()}>
+            
+            {/* MODAL HEADER */}
+            <div className="view-modal-header">
+              <div className="view-modal-title-wrap">
+                <User size={20} className="view-modal-user-icon" />
+                <h3 className="view-modal-title">Booking Request Details</h3>
+              </div>
+              <button 
+                type="button" 
+                className="wizard-close-btn"
+                onClick={() => setViewBookingReq(null)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* MODAL BODY */}
+            <div className="view-modal-body">
+              <div className="view-details-grid">
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Name</span>
+                  <span className="view-detail-value font-bold">{viewBookingReq.name}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Number</span>
+                  <span className="view-detail-value">{viewBookingReq.phone}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Alternative Number</span>
+                  <span className="view-detail-value">{viewBookingReq.alternatePhone || '+91 98765 00000'}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Adhaar</span>
+                  <span className="view-detail-value">{viewBookingReq.aadhaar || '1234 5678 9012'}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Mail</span>
+                  <span className="view-detail-value">{viewBookingReq.email || `${viewBookingReq.name.toLowerCase().replace(/\s+/g, '.')}@gmail.com`}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Purpose</span>
+                  <span className="view-detail-value">{viewBookingReq.purpose || viewBookingReq.course || 'Education'}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Bed Type</span>
+                  <span className="view-detail-value highlight-blue">{viewBookingReq.sharingPreferred} ({viewBookingReq.floorPreferred})</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Date of Joining</span>
+                  <span className="view-detail-value">{viewBookingReq.requestedDate}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* MODAL ACTIONS FOOTER */}
+            <div className="view-modal-footer">
+              <button 
+                type="button" 
+                className="view-btn-reject"
+                onClick={() => {
+                  const req = viewBookingReq;
+                  setViewBookingReq(null);
+                  handleRejectBooking(req.id, req.name);
+                }}
+              >
+                <XCircle size={16} />
+                <span>Reject</span>
+              </button>
+
+              <button 
+                type="button" 
+                className="view-btn-approve"
+                onClick={() => {
+                  const req = viewBookingReq;
+                  setViewBookingReq(null);
+                  handleOpenBookingWizard(req);
+                }}
+              >
+                <CheckCircle size={16} />
+                <span>Approve &amp; Allocate Bed</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* VIEW CHECKOUT REQUEST DETAILS POPUP MODAL                                 */}
+      {/* ========================================================================= */}
+      {viewCheckoutReq && (
+        <div className="wizard-modal-backdrop" onClick={() => setViewCheckoutReq(null)}>
+          <div className="booking-view-modal-card" onClick={(e) => e.stopPropagation()}>
+            
+            {/* MODAL HEADER */}
+            <div className="view-modal-header">
+              <div className="view-modal-title-wrap">
+                <LogOut size={20} className="view-modal-user-icon red-icon" />
+                <h3 className="view-modal-title">Checkout Request Details</h3>
+              </div>
+              <button 
+                type="button" 
+                className="wizard-close-btn"
+                onClick={() => setViewCheckoutReq(null)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* MODAL BODY */}
+            <div className="view-modal-body">
+              <div className="view-details-grid">
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Name</span>
+                  <span className="view-detail-value font-bold">{viewCheckoutReq.name}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Number</span>
+                  <span className="view-detail-value">{viewCheckoutReq.phone}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Alternative Number</span>
+                  <span className="view-detail-value">{viewCheckoutReq.alternatePhone || '+91 98765 00000'}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Adhaar</span>
+                  <span className="view-detail-value">{viewCheckoutReq.aadhaar || '1234 5678 9012'}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Mail</span>
+                  <span className="view-detail-value">{viewCheckoutReq.email || `${viewCheckoutReq.name.toLowerCase().replace(/\s+/g, '.')}@gmail.com`}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Reason</span>
+                  <span className="view-detail-value">{viewCheckoutReq.reason}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Bed Type / Room</span>
+                  <span className="view-detail-value highlight-blue">Room {viewCheckoutReq.roomNumber} ({viewCheckoutReq.bedNumber}) • {viewCheckoutReq.sharingType}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Date of Joining / Move-out</span>
+                  <span className="view-detail-value">{viewCheckoutReq.requestedDate}</span>
+                </div>
+
+                {viewCheckoutReq.pendingDues > 0 ? (
+                  <div className="dues-warning-pill mt-4">
+                    ⚠️ Pending Dues: ₹{viewCheckoutReq.pendingDues}
+                  </div>
+                ) : (
+                  <div className="dues-clear-pill mt-4">
+                    ✓ Clear Bill (No Dues)
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* MODAL ACTIONS FOOTER */}
+            <div className="view-modal-footer">
+              <button 
+                type="button" 
+                className="view-btn-reject"
+                onClick={() => {
+                  const req = viewCheckoutReq;
+                  setViewCheckoutReq(null);
+                  handleRejectCheckout(req.id, req.name);
+                }}
+              >
+                <XCircle size={16} />
+                <span>Reject</span>
+              </button>
+
+              <button 
+                type="button" 
+                className="view-btn-approve red-bg"
+                onClick={() => {
+                  const req = viewCheckoutReq;
+                  setViewCheckoutReq(null);
+                  setActiveCheckoutReq(req);
+                }}
+              >
+                <LogOut size={16} />
+                <span>Process Checkout</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* VIEW TRANSFER REQUEST DETAILS POPUP MODAL                                 */}
+      {/* ========================================================================= */}
+      {viewTransferReq && (
+        <div className="wizard-modal-backdrop" onClick={() => setViewTransferReq(null)}>
+          <div className="booking-view-modal-card" onClick={(e) => e.stopPropagation()}>
+            
+            {/* MODAL HEADER */}
+            <div className="view-modal-header">
+              <div className="view-modal-title-wrap">
+                <ArrowRightLeft size={20} className="view-modal-user-icon" />
+                <h3 className="view-modal-title">Transfer Request Details</h3>
+              </div>
+              <button 
+                type="button" 
+                className="wizard-close-btn"
+                onClick={() => setViewTransferReq(null)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* MODAL BODY */}
+            <div className="view-modal-body">
+              <div className="view-details-grid">
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Name</span>
+                  <span className="view-detail-value font-bold">{viewTransferReq.name}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Number</span>
+                  <span className="view-detail-value">{viewTransferReq.phone}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Alternative Number</span>
+                  <span className="view-detail-value">{viewTransferReq.alternatePhone || '+91 98765 00000'}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Adhaar</span>
+                  <span className="view-detail-value">{viewTransferReq.aadhaar || '1234 5678 9012'}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Mail</span>
+                  <span className="view-detail-value">{viewTransferReq.email || `${viewTransferReq.name.toLowerCase().replace(/\s+/g, '.')}@gmail.com`}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Current Bed</span>
+                  <span className="view-detail-value">{viewTransferReq.currentRoom} • {viewTransferReq.currentSharing}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Transfer Bed</span>
+                  <span className="view-detail-value highlight-blue">{viewTransferReq.targetRoom} • {viewTransferReq.targetSharing}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">Date of Joining / Request</span>
+                  <span className="view-detail-value">{viewTransferReq.requestedDate}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* MODAL ACTIONS FOOTER */}
+            <div className="view-modal-footer">
+              <button 
+                type="button" 
+                className="view-btn-reject"
+                onClick={() => {
+                  const req = viewTransferReq;
+                  setViewTransferReq(null);
+                  handleRejectTransfer(req.id, req.name);
+                }}
+              >
+                <XCircle size={16} />
+                <span>Reject</span>
+              </button>
+
+              <button 
+                type="button" 
+                className="view-btn-approve"
+                onClick={() => {
+                  const req = viewTransferReq;
+                  setViewTransferReq(null);
+                  handleApproveTransfer(req.id, req.name);
+                }}
+              >
+                <CheckCircle size={16} />
+                <span>Approve Transfer</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* BOOKING APPROVAL & BED ALLOCATION WIZARD MODAL (5 STEPS)                  */}

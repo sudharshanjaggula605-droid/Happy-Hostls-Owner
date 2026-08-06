@@ -169,7 +169,7 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
               </div>
               <div className="kpi-card-content-wrap">
                 <div className="kpi-card-value-text">₹43,500</div>
-                <div className="kpi-card-label-text">Overdue Dues</div>
+                <div className="kpi-card-label-text">Overdue</div>
               </div>
             </div>
 
@@ -177,7 +177,7 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
             <div 
               className="kpi-card-2col"
               onClick={() => {
-                if (onNavigateScreen) onNavigateScreen('open-complaints');
+                if (onNavigateScreen) onNavigateScreen('guests-directory');
                 else if (onNavigateTab) onNavigateTab('requests');
               }}
             >
@@ -189,7 +189,7 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
               </div>
               <div className="kpi-card-content-wrap">
                 <div className="kpi-card-value-text">5</div>
-                <div className="kpi-card-label-text">Complaints</div>
+                <div className="kpi-card-label-text">Leads</div>
               </div>
             </div>
 
@@ -300,19 +300,19 @@ export const KitchenHomePage: React.FC<KitchenHomePageProps> = ({
               <span className="shortcut-label">Success Rate</span>
             </button>
 
-            {/* Shortcut 5: Analytics */}
+            {/* Shortcut 5: Complaints */}
             <button 
               type="button" 
               className="shortcut-card"
               onClick={() => {
-                if (onNavigateScreen) onNavigateScreen('revenue-analytics');
-                else if (onNavigateTab) onNavigateTab('fees');
+                if (onNavigateScreen) onNavigateScreen('open-complaints');
+                else if (onNavigateTab) onNavigateTab('requests');
               }}
             >
               <div className="shortcut-icon-box bg-emerald-light">
                 <BarChart2 size={18} color="#059669" />
               </div>
-              <span className="shortcut-label">Analytics</span>
+              <span className="shortcut-label">Complaints</span>
             </button>
           </div>
         </div>

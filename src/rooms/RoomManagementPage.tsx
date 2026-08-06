@@ -1474,7 +1474,7 @@ export const RoomManagementPage: React.FC = () => {
       {/* ────────────────── SCREEN 1: DASHBOARD (HOME) ────────────────── */}
       {currentView === 'dashboard' && (
         <div className="bm-ref-screen animate-fade-in" style={{ paddingBottom: 80 }}>
-          
+
 
 
           {/* Clean Segmented Tab Switcher */}
@@ -2474,8 +2474,8 @@ export const RoomManagementPage: React.FC = () => {
                     background: isActive
                       ? 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)'
                       : isCompleted
-                      ? '#dcfce7'
-                      : '#f1f5f9',
+                        ? '#dcfce7'
+                        : '#f1f5f9',
                     color: isActive ? '#ffffff' : isCompleted ? '#15803d' : '#64748b',
                     boxShadow: isActive ? '0 2px 8px rgba(79, 70, 229, 0.3)' : 'none',
                     transition: 'all 0.2s ease',
@@ -2966,7 +2966,7 @@ export const RoomManagementPage: React.FC = () => {
               <div className="bm-ref-profile-name">J. Sudharshan</div>
               <div className="bm-ref-profile-role">Admin</div>
             </div>
-            
+
           </div>
 
           <div className="bm-ref-drawer-menu">

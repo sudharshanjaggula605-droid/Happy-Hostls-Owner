@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Users, Search, Bed, Wrench, X, Check, 
-  Phone, Calendar, BookOpen, AlertTriangle, UserPlus, Info, 
+import {
+  Users, Search, Bed, Wrench, X, Check,
+  Phone, Calendar, BookOpen, AlertTriangle, UserPlus, Info,
   CheckCircle2, RefreshCw, ShieldAlert, Plus, Clock, Tag
 } from 'lucide-react';
 
@@ -684,7 +684,7 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
 
       {/* FLOOR SELECTOR CARDS GRID */}
       <div className="orp-floors-grid">
-        <div 
+        <div
           className={`orp-floor-card ${selectedFloor === '1st Floor' ? 'selected' : ''}`}
           onClick={() => setSelectedFloor(selectedFloor === '1st Floor' ? 'All' : '1st Floor')}
         >
@@ -697,7 +697,7 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
           </div>
         </div>
 
-        <div 
+        <div
           className={`orp-floor-card ${selectedFloor === '2nd Floor' ? 'selected' : ''}`}
           onClick={() => setSelectedFloor(selectedFloor === '2nd Floor' ? 'All' : '2nd Floor')}
         >
@@ -710,7 +710,7 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
           </div>
         </div>
 
-        <div 
+        <div
           className={`orp-floor-card ${selectedFloor === '3rd Floor' ? 'selected' : ''}`}
           onClick={() => setSelectedFloor(selectedFloor === '3rd Floor' ? 'All' : '3rd Floor')}
         >
@@ -736,7 +736,7 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
       <div className="orp-controls-row">
         <div className="orp-search-box">
           <Search size={16} color="#94a3b8" />
-          <input 
+          <input
             type="text"
             placeholder="Search room, resident or sharing..."
             value={searchQuery}
@@ -779,8 +779,8 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
             const isVacant = assignedCount === 0;
 
             return (
-              <div 
-                key={room.roomNumber} 
+              <div
+                key={room.roomNumber}
                 className="orp-room-card"
                 onClick={() => {
                   setActiveRoom(room);
@@ -842,7 +842,7 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
         <div className="orp-modal-overlay" onClick={() => setActiveRoom(null)}>
           <div className="orp-modal-container mobile-sheet" ref={roomModalRef} onClick={e => e.stopPropagation()}>
             <div className="orp-modal-handle" />
-            
+
             {/* Modal Header */}
             <div className="orp-modal-header">
               <div>
@@ -868,10 +868,10 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
             {/* Interactive Bed Cards Layout */}
             <div className="orp-bed-layout-section">
               <div className="orp-bed-layout-heading">Tap any bed card below to take action:</div>
-              
+
               <div className="orp-beds-grid">
                 {activeRoom.beds.map(bed => (
-                  <div 
+                  <div
                     key={bed.id}
                     className={`orp-bed-card ${bed.status.toLowerCase()}`}
                     onClick={() => {
@@ -1033,7 +1033,7 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
             </div>
 
             <div className="orp-modal-footer">
-              <button 
+              <button
                 className="orp-primary-btn orange"
                 onClick={() => handleUnreserve(selectedBed.bed.id)}
               >
@@ -1078,7 +1078,7 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
             </div>
 
             <div className="orp-modal-footer">
-              <button 
+              <button
                 className="orp-primary-btn red"
                 onClick={() => handleRemoveMaintenance(selectedBed.bed.id)}
               >
@@ -1099,7 +1099,7 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
         <div className="orp-modal-overlay nested" onClick={() => setActiveSubModal(null)}>
           <div className="orp-modal-container mobile-sheet" ref={subModalRef} onClick={e => e.stopPropagation()}>
             <div className="orp-modal-handle" />
-            
+
             <div className="orp-submodal-header blue">
               <UserPlus size={22} color="#2563eb" />
               <div>
@@ -1113,19 +1113,19 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
 
             {/* Quick Action Selector */}
             <div className="orp-vacant-actions-tabs">
-              <button 
+              <button
                 className={`orp-vtab ${activeSubModal === 'AddResident' ? 'active' : ''}`}
                 onClick={() => setActiveSubModal('AddResident')}
               >
                 <UserPlus size={15} /> Add Resident
               </button>
-              <button 
+              <button
                 className="orp-vtab"
                 onClick={() => setActiveSubModal('ReserveBed')}
               >
                 <Clock size={15} /> Reserve Bed
               </button>
-              <button 
+              <button
                 className="orp-vtab"
                 onClick={() => setActiveSubModal('ReportMaintenance')}
               >
@@ -1143,11 +1143,11 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
               <form onSubmit={handleAddResidentSubmit} className="orp-form">
                 <div className="orp-form-group">
                   <label className="orp-label">Resident Full Name *</label>
-                  <input 
-                    type="text" 
-                    className="orp-input" 
-                    placeholder="e.g. Ramesh Chandra" 
-                    required 
+                  <input
+                    type="text"
+                    className="orp-input"
+                    placeholder="e.g. Ramesh Chandra"
+                    required
                     value={newResidentForm.name}
                     onChange={e => setNewResidentForm({ ...newResidentForm, name: e.target.value })}
                   />
@@ -1155,11 +1155,11 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
 
                 <div className="orp-form-group">
                   <label className="orp-label">Mobile Phone Number *</label>
-                  <input 
-                    type="tel" 
-                    className="orp-input" 
-                    placeholder="e.g. +91 98765 43210" 
-                    required 
+                  <input
+                    type="tel"
+                    className="orp-input"
+                    placeholder="e.g. +91 98765 43210"
+                    required
                     value={newResidentForm.phone}
                     onChange={e => setNewResidentForm({ ...newResidentForm, phone: e.target.value })}
                   />
@@ -1168,19 +1168,19 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
                 <div className="orp-form-row">
                   <div className="orp-form-group half">
                     <label className="orp-label">Course / Profession</label>
-                    <input 
-                      type="text" 
-                      className="orp-input" 
-                      placeholder="e.g. B.Tech / Software Dev" 
+                    <input
+                      type="text"
+                      className="orp-input"
+                      placeholder="e.g. B.Tech / Software Dev"
                       value={newResidentForm.course}
                       onChange={e => setNewResidentForm({ ...newResidentForm, course: e.target.value })}
                     />
                   </div>
                   <div className="orp-form-group half">
                     <label className="orp-label">Check-in Date</label>
-                    <input 
-                      type="date" 
-                      className="orp-input" 
+                    <input
+                      type="date"
+                      className="orp-input"
                       value={newResidentForm.checkInDate}
                       onChange={e => setNewResidentForm({ ...newResidentForm, checkInDate: e.target.value })}
                     />
@@ -1233,11 +1233,11 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
               <form onSubmit={handleReserveBedSubmit} className="orp-form">
                 <div className="orp-form-group">
                   <label className="orp-label">Reserve For (Name) *</label>
-                  <input 
-                    type="text" 
-                    className="orp-input" 
-                    placeholder="e.g. Ankit Sharma" 
-                    required 
+                  <input
+                    type="text"
+                    className="orp-input"
+                    placeholder="e.g. Ankit Sharma"
+                    required
                     value={reserveForm.reservedBy}
                     onChange={e => setReserveForm({ ...reserveForm, reservedBy: e.target.value })}
                   />
@@ -1245,11 +1245,11 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
 
                 <div className="orp-form-group">
                   <label className="orp-label">Contact Phone Number *</label>
-                  <input 
-                    type="tel" 
-                    className="orp-input" 
-                    placeholder="e.g. +91 98765 43210" 
-                    required 
+                  <input
+                    type="tel"
+                    className="orp-input"
+                    placeholder="e.g. +91 98765 43210"
+                    required
                     value={reserveForm.phone}
                     onChange={e => setReserveForm({ ...reserveForm, phone: e.target.value })}
                   />
@@ -1257,10 +1257,10 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
 
                 <div className="orp-form-group">
                   <label className="orp-label">Advance Amount Paid (₹)</label>
-                  <input 
-                    type="number" 
-                    className="orp-input" 
-                    placeholder="2000" 
+                  <input
+                    type="number"
+                    className="orp-input"
+                    placeholder="2000"
                     value={reserveForm.advancePaid}
                     onChange={e => setReserveForm({ ...reserveForm, advancePaid: e.target.value })}
                   />
@@ -1312,10 +1312,10 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
               <form onSubmit={handleReportMaintenanceSubmit} className="orp-form">
                 <div className="orp-form-group">
                   <label className="orp-label">Maintenance Issue Description *</label>
-                  <textarea 
-                    className="orp-textarea" 
-                    placeholder="e.g. Broken bed frame, Painting work required" 
-                    required 
+                  <textarea
+                    className="orp-textarea"
+                    placeholder="e.g. Broken bed frame, Painting work required"
+                    required
                     rows={3}
                     value={maintenanceForm.issue}
                     onChange={e => setMaintenanceForm({ ...maintenanceForm, issue: e.target.value })}
@@ -1324,7 +1324,7 @@ export const OccupancyRatePage: React.FC<OccupancyRatePageProps> = ({ onBack }) 
 
                 <div className="orp-form-group">
                   <label className="orp-label">Priority Level</label>
-                  <select 
+                  <select
                     className="orp-select"
                     value={maintenanceForm.priority}
                     onChange={e => setMaintenanceForm({ ...maintenanceForm, priority: e.target.value as any })}

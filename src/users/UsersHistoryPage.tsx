@@ -270,6 +270,8 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
   // Step 5 Tenant details form
   const [wizName, setWizName] = useState('');
   const [wizMobile, setWizMobile] = useState('');
+  const [wizAltMobile, setWizAltMobile] = useState('');
+  const [wizAadhaar, setWizAadhaar] = useState('');
   const [wizEmail, setWizEmail] = useState('');
   const [wizJoinDate, setWizJoinDate] = useState('2026-08-05');
   const [wizRent, setWizRent] = useState<number>(7500);
@@ -283,6 +285,8 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
     setWizBed(null);
     setWizName('');
     setWizMobile('');
+    setWizAltMobile('');
+    setWizAadhaar('');
     setWizEmail('');
     setWizJoinDate('2026-08-05');
     setWizRent(7500);
@@ -805,6 +809,29 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
                         placeholder="e.g. 9876543210"
                         value={wizMobile}
                         onChange={(e) => setWizMobile(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-group-field">
+                      <label className="form-field-label">Alternative Mobile Number</label>
+                      <input 
+                        type="text" 
+                        className="modal-text-input"
+                        placeholder="e.g. 9876543211"
+                        value={wizAltMobile}
+                        onChange={(e) => setWizAltMobile(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-group-field">
+                      <label className="form-field-label">Aadhar No. *</label>
+                      <input 
+                        type="text" 
+                        required
+                        className="modal-text-input"
+                        placeholder="e.g. 1234 5678 9012"
+                        value={wizAadhaar}
+                        onChange={(e) => setWizAadhaar(e.target.value)}
                       />
                     </div>
 

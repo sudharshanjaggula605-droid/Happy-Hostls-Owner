@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, History, Calendar, Banknote, Phone, CalendarDays, Contact2, X, Check, MessageSquare, MessageCircle, AlertTriangle, User } from 'lucide-react';
+import { ChevronLeft, History, Calendar, Banknote, Phone, CalendarDays, Contact2, X, Check, MessageSquare, MessageCircle, AlertTriangle, User, Upload } from 'lucide-react';
 
 interface StaffMember {
   id: string;
@@ -76,6 +76,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
   onNavigateToAttendance
 }) => {
   const [activeCalendarStaff, setActiveCalendarStaff] = useState<StaffMember | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isGlobalAttendanceModalOpen, setIsGlobalAttendanceModalOpen] = useState(false);
   const [globalAttendanceState, setGlobalAttendanceState] = useState<Record<string, 'present' | 'absent' | null>>({});
   const [notificationPrefs, setNotificationPrefs] = useState<Record<string, { whatsapp?: boolean; sms?: boolean }>>({});
@@ -383,15 +384,24 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                   )}
                 </div>
 
-                <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <Contact2 size={14} color="#3b82f6" />
-                    <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500' }}>Aadhaar Status</label>
+                <div 
+                  style={{ background: '#eff6ff', padding: '12px', borderRadius: '12px', border: '1px solid #bfdbfe', cursor: 'pointer', transition: 'all 0.2s' }}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Contact2 size={14} color="#3b82f6" />
+                      <label style={{ fontSize: '12px', color: '#2563eb', fontWeight: '500', cursor: 'pointer' }}>Aadhaar Status</label>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#2563eb', fontWeight: '600' }}>
+                      <Upload size={14} /> Upload
+                    </div>
                   </div>
                   {isEditingStaff ? (
                     <select
                       style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #bfdbfe', marginTop: '4px', fontSize: '15px', background: 'white' }}
                       value={editedStaffData?.aadhaarStatus || 'Not Uploaded'}
+                      onClick={(e) => e.stopPropagation()}
                       onChange={e => setEditedStaffData(prev => prev ? { ...prev, aadhaarStatus: e.target.value as any } : prev)}
                     >
                       <option value="Not Uploaded">Not Uploaded</option>
@@ -401,6 +411,24 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                   ) : (
                     <p style={{ fontSize: '16px', color: '#1d4ed8', fontWeight: '600' }}>{selectedStaff.aadhaarStatus}</p>
                   )}
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    style={{ display: 'none' }} 
+                    accept="image/*,.pdf"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        if (isEditingStaff) {
+                          setEditedStaffData(prev => prev ? { ...prev, aadhaarStatus: 'Pending Verification' } : prev);
+                        } else {
+                          setStaffMembers(prev => prev.map(s => s.id === selectedStaff.id ? { ...s, aadhaarStatus: 'Pending Verification' } : s));
+                          setSelectedStaff(prev => prev ? { ...prev, aadhaarStatus: 'Pending Verification' } : prev);
+                        }
+                        setToastMessage('Aadhaar document uploaded successfully.');
+                        setTimeout(() => setToastMessage(null), 3000);
+                      }
+                    }}
+                  />
                 </div>
 
                 <div
@@ -437,7 +465,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                 </>
               ) : (
                 <>
-                  <button className="ref-btn-cancel" style={{ flex: 1, color: '#ef4444', borderColor: '#ef4444', background: '#fef2f2', fontWeight: '600', padding: '12px', borderRadius: '12px' }} onClick={() => setShowRemoveAlert(true)}>Remove</button>
+                  <button className="ref-btn-cancel" style={{ flex: 1, color: '#64748b', borderColor: '#cbd5e1', background: '#f8fafc', fontWeight: '600', padding: '12px', borderRadius: '12px' }} onClick={() => setShowRemoveAlert(true)}>Remove</button>
                   <button className="ref-btn-approve" style={{ flex: 1, fontWeight: '600', padding: '12px', borderRadius: '12px' }} onClick={handleEditStaff}>Edit</button>
                 </>
               )}

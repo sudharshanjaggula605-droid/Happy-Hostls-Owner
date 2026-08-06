@@ -687,7 +687,7 @@ function App() {
 
           {/* SUBSCRIPTION PLANS SCREEN */}
           {currentScreen === 'subscription-plans' && (
-            <SubscriptionPlansPage 
+            <SubscriptionPlansPage
               currentPlan={currentPlan}
               onUpdatePlan={(newPlan) => setCurrentPlan(newPlan)}
               onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }}

@@ -8108,12 +8108,12 @@ table, .users-table {
 .ref-section-history-btn {
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
   background: #ffffff;
   border: 1px solid #cbd5e1;
   color: #334155;
   border-radius: 12px;
-  padding: 5px 12px;
+  padding: 7px 10px;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -8151,33 +8151,183 @@ table, .users-table {
 
 .ref-user-suggestions-box {
   background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  margin-top: 6px;
-  max-height: 180px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  margin-top: 8px;
+  max-height: 220px;
   overflow-y: auto;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 .ref-user-suggestion-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-bottom: 1px solid #f1f5f9;
   cursor: pointer;
-  transition: background 0.1s ease;
+  transition: all 0.15s ease;
+}
+
+.ref-user-suggestion-item:last-child {
+  border-bottom: none;
 }
 
 .ref-user-suggestion-item:hover {
   background: #f8fafc;
 }
 
-.ref-no-user-text {
-  padding: 12px;
+.ref-user-sug-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ref-user-sug-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ref-user-sug-room {
   font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.ref-user-sug-badge {
+  font-size: 13px;
+  font-weight: 700;
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  padding: 4px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.ref-no-user-text {
+  padding: 14px;
+  font-size: 13px;
   color: #64748b;
   text-align: center;
+}
+
+/* Selected User Card Banner */
+.ref-selected-user-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.ref-selected-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ref-selected-user-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ref-selected-user-room {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.ref-change-user-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ref-change-user-btn:hover {
+  background: #cbd5e1;
+  color: #0f172a;
+}
+
+/* Attractive Balance Amount & Status Card */
+.ref-balance-status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-top: 10px;
+  transition: all 0.2s ease;
+}
+
+.ref-balance-status-card.is-cleared {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.ref-balance-status-card.is-partial {
+  background: #fefce8;
+  border: 1px solid #fef08a;
+}
+
+.ref-balance-status-card.is-pending {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.ref-balance-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ref-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+}
+
+.ref-stat-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ref-status-chip {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.chip-cleared {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.chip-partial {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.chip-pending {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 .ref-remaining-calc-callout {

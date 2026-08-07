@@ -96,8 +96,11 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
     return matchesName || matchesRoom || matchesPhone;
   });
 
-  // Filtered residents for Collect Fee Modal Search (Name or Contact Number)
+  // Filtered residents for Collect Fee Modal Search (Only users with pending payment)
   const collectSearchResults = feeTransactions.filter(fee => {
+    const isPending = fee.dues > 0 || fee.status === 'Pending' || fee.status === 'Partial' || fee.status === 'Overdue';
+    if (!isPending) return false;
+
     if (!collectUserSearch.trim()) return true;
     const query = collectUserSearch.toLowerCase();
     const matchesName = fee.studentName.toLowerCase().includes(query);
@@ -227,7 +230,7 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
           {/* DATE BELOW THE PAYMENTS HEADING */}
           <div className="ref-date-below-heading">
             <Calendar size={13} style={{ color: '#2563eb' }} />
-            <span>July 2026 • Current Billing Month</span>
+            <span>July 2026</span>
           </div>
         </div>
 
@@ -242,7 +245,7 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
           }}
         >
           <PlusCircle size={17} />
-          <span>Collect Fee</span>
+          <span>Collect</span>
         </button>
       </div>
 
@@ -306,9 +309,10 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
             if (onOpenPaymentHistory) onOpenPaymentHistory();
             else setIsAnalyticsOpen(true);
           }}
+          title="Payment History"
+          aria-label="Payment History"
         >
-          <History size={15} />
-          <span>Payment History</span>
+          <History size={17} />
         </button>
       </div>
 
@@ -338,11 +342,8 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
               </div>
 
               {/* SECOND LINE: LAST PAYMENT ON DATE */}
-              <div className="ref-uploaded-text flex items-center justify-between">
+              <div className="ref-uploaded-text">
                 <span>Last payment on: <strong style={{ color: '#1e293b' }}>{fee.lastPaymentDate || fee.uploadedDate || '26 Jul 2026'}</strong></span>
-                <span className={`ref-mini-status-tag tag-${fee.status.toLowerCase()}`}>
-                  {fee.status === 'Paid' ? 'Cleared' : fee.status === 'Partial' ? `Due ₹${fee.dues.toLocaleString('en-IN')}` : `Pending ₹${fee.dues.toLocaleString('en-IN')}`}
-                </span>
               </div>
             </div>
           ))
@@ -358,7 +359,6 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
             <div className="ref-modal-header">
               <div>
                 <h3 className="ref-modal-title">Collect Fee Payment</h3>
-                <p className="ref-modal-subtitle">Select user & record payment details</p>
               </div>
               <button className="ref-close-btn" onClick={() => setIsCollectModalOpen(false)}>
                 <X size={18} />
@@ -367,70 +367,66 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
 
             <form onSubmit={handleProcessFeePayment} className="ref-modal-body">
               {/* USER SELECTION SEARCH FIELD */}
+              {/* USER SELECTION AREA */}
               <div className="ref-form-group">
-                <label className="ref-form-label">
-                  <User size={14} style={{ display: 'inline', marginRight: 4 }} />
-                  Select Resident User (Search Name or Contact No)
-                </label>
-                <div className="ref-input-with-icon" style={{ position: 'relative' }}>
-                  <Search size={16} className="ref-input-icon" />
-                  <input
-                    type="text"
-                    placeholder="Type name or phone number..."
-                    value={selectedCollectResident ? `${selectedCollectResident.studentName} (Room ${selectedCollectResident.roomNumber})` : collectUserSearch}
-                    onChange={e => {
-                      setSelectedCollectResident(null);
-                      setCollectUserSearch(e.target.value);
-                    }}
-                    className="ref-form-input"
-                    style={{ paddingLeft: '36px' }}
-                  />
-                  {selectedCollectResident && (
+                {selectedCollectResident ? (
+                  <div className="ref-selected-user-card">
+                    <div className="ref-selected-user-info">
+                      <span className="ref-selected-user-name">{selectedCollectResident.studentName}</span>
+                      <span className="ref-selected-user-room">Room {selectedCollectResident.roomNumber}</span>
+                    </div>
                     <button
                       type="button"
-                      className="ref-clear-search-btn"
-                      style={{ position: 'absolute', right: '10px' }}
+                      className="ref-change-user-btn"
                       onClick={() => {
                         setSelectedCollectResident(null);
                         setCollectUserSearch('');
                         setCollectPayAmount('');
                       }}
+                      title="Change Resident"
                     >
-                      <X size={14} />
+                      <X size={16} />
                     </button>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        placeholder="Type name or phone number..."
+                        value={collectUserSearch}
+                        onChange={e => setCollectUserSearch(e.target.value)}
+                        className="ref-form-input"
+                        style={{ paddingLeft: '12px', paddingRight: '12px' }}
+                      />
+                    </div>
 
-                {/* USER DROPDOWN SUGGESTIONS (IF NOT SELECTED YET) */}
-                {!selectedCollectResident && (
-                  <div className="ref-user-suggestions-box">
-                    {collectSearchResults.length === 0 ? (
-                      <div className="ref-no-user-text">No matching resident found.</div>
-                    ) : (
-                      collectSearchResults.map(res => (
-                        <div
-                          key={res.id}
-                          className="ref-user-suggestion-item"
-                          onClick={() => {
-                            setSelectedCollectResident(res);
-                            setCollectPayAmount(res.dues > 0 ? res.dues.toString() : res.amount.toString());
-                          }}
-                        >
-                          <div>
-                            <div className="font-bold text-slate-800">{res.studentName}</div>
-                            <div className="text-xs text-slate-500">
-                              Room {res.roomNumber} • <Phone size={11} style={{ display: 'inline' }} /> {res.phone}
+                    {/* USER DROPDOWN SUGGESTIONS (IF NOT SELECTED YET) */}
+                    <div className="ref-user-suggestions-box">
+                      {collectSearchResults.length === 0 ? (
+                        <div className="ref-no-user-text">No residents with pending payment found.</div>
+                      ) : (
+                        collectSearchResults.map(res => (
+                          <div
+                            key={res.id}
+                            className="ref-user-suggestion-item"
+                            onClick={() => {
+                              setSelectedCollectResident(res);
+                              setCollectPayAmount(res.dues > 0 ? res.dues.toString() : res.amount.toString());
+                            }}
+                          >
+                            <div className="ref-user-sug-info">
+                              <span className="ref-user-sug-name">{res.studentName}</span>
+                              <span className="ref-user-sug-room">Room {res.roomNumber}</span>
+                            </div>
+                            <div className="ref-user-sug-badge">
+                              ₹{res.dues.toLocaleString('en-IN')}
                             </div>
                           </div>
-                          <div className="text-right">
-                            <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                              Dues: ₹{res.dues.toLocaleString('en-IN')}
-                            </span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                        ))
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -469,29 +465,27 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
                       />
                     </div>
 
-                    {/* DYNAMIC REMAINING AMOUNT CALCULATION BOX */}
+                    {/* ATTRACTIVE BALANCE AMOUNT & STATUS CARD */}
                     {(() => {
                       const entered = parseFloat(collectPayAmount) || 0;
                       const targetDue = selectedCollectResident.dues > 0 ? selectedCollectResident.dues : selectedCollectResident.amount;
                       const remaining = Math.max(0, targetDue - entered);
+                      const statusLabel = remaining === 0 ? 'Cleared' : entered > 0 ? 'Partial' : 'Pending';
+                      const isCleared = statusLabel === 'Cleared';
+                      const isPartial = statusLabel === 'Partial';
                       
                       return (
-                        <div className="ref-remaining-calc-callout">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs font-semibold text-slate-600">Calculated Remaining Balance:</span>
-                            <span className={`text-sm font-extrabold ${remaining > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
-                              ₹{remaining.toLocaleString('en-IN')}
+                        <div className={`ref-balance-status-card ${isCleared ? 'is-cleared' : isPartial ? 'is-partial' : 'is-pending'}`}>
+                          <div className="ref-balance-stat-item">
+                            <span className="ref-stat-label">Balance Amount</span>
+                            <span className="ref-stat-val">₹{remaining.toLocaleString('en-IN')}</span>
+                          </div>
+                          <div className="ref-balance-stat-item" style={{ textAlign: 'right' }}>
+                            <span className="ref-stat-label">Status</span>
+                            <span className={`ref-status-chip ${isCleared ? 'chip-cleared' : isPartial ? 'chip-partial' : 'chip-pending'}`}>
+                              {statusLabel}
                             </span>
                           </div>
-                          {remaining > 0 ? (
-                            <p className="text-[11px] text-amber-600 mt-0.5">
-                              * Payment amount is less than total due. Status will be set to <strong>Partial</strong>.
-                            </p>
-                          ) : entered > 0 ? (
-                            <p className="text-[11px] text-emerald-600 mt-0.5">
-                              * Full payment covered! Account will be marked as <strong>Cleared</strong>.
-                            </p>
-                          ) : null}
                         </div>
                       );
                     })()}
@@ -542,7 +536,7 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
                       Cancel
                     </button>
                     <button type="submit" className="ref-btn-submit">
-                      Confirm & Collect Fee
+                      Collect
                     </button>
                   </div>
                 </>
@@ -780,7 +774,7 @@ export const FeesManagementPage: React.FC<FeesManagementPageProps> = ({
           <div className="ref-modal-card receipt-card" onClick={e => e.stopPropagation()}>
             <div className="ref-receipt-header">
               <div>
-                <div className="ref-receipt-brand">🏡 HAPPY HOSTELS PRO</div>
+                <div className="ref-receipt-brand">HAPPY HOSTELS PRO</div>
                 <div className="ref-receipt-sub">Fee Payment Receipt</div>
               </div>
               <button className="ref-close-btn" onClick={() => setReceiptData(null)}>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, History, Calendar, Banknote, Phone, CalendarDays, Contact2, X, Check, MessageSquare, MessageCircle, AlertTriangle, User, Upload } from 'lucide-react';
+import { ChevronLeft, History, Calendar, Banknote, Phone, CalendarDays, Contact2, X, Check, MessageSquare, MessageCircle, AlertTriangle, User, Upload, MapPin, Plus } from 'lucide-react';
 
 interface StaffMember {
   id: string;
@@ -12,6 +12,7 @@ interface StaffMember {
   presentDays: number;
   absentDays: number;
   aadhaarNumber: string;
+  address: string;
 }
 
 interface StaffManagementPageProps {
@@ -33,7 +34,8 @@ const initialStaffMembers: StaffMember[] = [
     joinedDate: '2025-03-10',
     presentDays: 25,
     absentDays: 1,
-    aadhaarNumber: '1234 5678 9012'
+    aadhaarNumber: '1234 5678 9012',
+    address: 'Flat 302, Sai Residency, Hitech City, Hyderabad'
   },
   {
     id: 'st-2',
@@ -45,7 +47,8 @@ const initialStaffMembers: StaffMember[] = [
     joinedDate: '2025-05-15',
     presentDays: 24,
     absentDays: 2,
-    aadhaarNumber: '2345 6789 0123'
+    aadhaarNumber: '2345 6789 0123',
+    address: 'Plot 45, Green Meadows, Madhapur, Hyderabad'
   },
   {
     id: 'st-3',
@@ -57,7 +60,8 @@ const initialStaffMembers: StaffMember[] = [
     joinedDate: '2024-11-01',
     presentDays: 26,
     absentDays: 0,
-    aadhaarNumber: '3456 7890 1234'
+    aadhaarNumber: '3456 7890 1234',
+    address: 'H.No 12-4, Near Bus Stand, Gachibowli, Hyderabad'
   },
   {
     id: 'st-4',
@@ -69,7 +73,8 @@ const initialStaffMembers: StaffMember[] = [
     joinedDate: '2025-01-20',
     presentDays: 25,
     absentDays: 1,
-    aadhaarNumber: '4567 8901 2345'
+    aadhaarNumber: '4567 8901 2345',
+    address: 'Street No 5, Jubilee Hills, Hyderabad'
   }
 ];
 
@@ -92,6 +97,54 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
   const [editedStaffData, setEditedStaffData] = useState<StaffMember | null>(null);
   const [showRemoveAlert, setShowRemoveAlert] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Add Staff Modal State
+  const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
+  const [newStaffName, setNewStaffName] = useState('');
+  const [newStaffJoinedDate, setNewStaffJoinedDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [newStaffSalary, setNewStaffSalary] = useState('');
+  const [newStaffContact, setNewStaffContact] = useState('');
+  const [newStaffAltContact, setNewStaffAltContact] = useState('');
+  const [newStaffAadhaar, setNewStaffAadhaar] = useState('');
+  const [newStaffAddress, setNewStaffAddress] = useState('');
+
+  const handleAddStaffSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newStaffName.trim() || !newStaffContact.trim() || !newStaffSalary) return;
+
+    const names = newStaffName.trim().split(' ');
+    const initials = names.length > 1 
+      ? `${names[0][0]}${names[1][0]}`.toUpperCase() 
+      : names[0].substring(0, 2).toUpperCase();
+
+    const newStaff: StaffMember = {
+      id: `st-${Date.now()}`,
+      name: newStaffName.trim(),
+      initials,
+      salaryMonthly: Number(newStaffSalary),
+      contact: newStaffContact.trim(),
+      altContact: newStaffAltContact.trim(),
+      joinedDate: newStaffJoinedDate,
+      presentDays: 0,
+      absentDays: 0,
+      aadhaarNumber: newStaffAadhaar.trim(),
+      address: newStaffAddress.trim()
+    };
+
+    setStaffMembers(prev => [newStaff, ...prev]);
+    setIsAddStaffModalOpen(false);
+
+    // Reset form
+    setNewStaffName('');
+    setNewStaffSalary('');
+    setNewStaffContact('');
+    setNewStaffAltContact('');
+    setNewStaffAadhaar('');
+    setNewStaffAddress('');
+
+    setToastMessage(`Staff member "${newStaff.name}" added successfully.`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   // Real data state for attendance
   const [attendanceDB, setAttendanceDB] = useState<Record<string, { absentDates: number[]; holidayDates: number[] }>>(() => {
@@ -117,7 +170,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
     const appContent = document.querySelector('.app-content') as HTMLElement;
     if (!appContent) return;
 
-    if (activeCalendarStaff || isGlobalAttendanceModalOpen || selectedStaff || showRemoveAlert) {
+    if (activeCalendarStaff || isGlobalAttendanceModalOpen || selectedStaff || showRemoveAlert || isAddStaffModalOpen) {
       appContent.style.overflow = 'hidden';
     } else {
       appContent.style.overflow = 'auto';
@@ -126,7 +179,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
     return () => {
       appContent.style.overflow = 'auto';
     };
-  }, [activeCalendarStaff, isGlobalAttendanceModalOpen, selectedStaff, showRemoveAlert]);
+  }, [activeCalendarStaff, isGlobalAttendanceModalOpen, selectedStaff, showRemoveAlert, isAddStaffModalOpen]);
 
   // Helper to get real present/absent counts
   const getAttendanceStats = (staffId: string) => {
@@ -176,18 +229,67 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
   };
 
   return (
-    <div className="staff-management-page-container">
+    <div className="staff-management-page-container" style={{ width: '100%', boxSizing: 'border-box' }}>
 
-      {/* TOP HEADER BAR (EXACT MATCH TO REFERENCE PHOTO) */}
-      <div className="sm-header-bar">
+      {/* TOP HEADER BAR */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        boxSizing: 'border-box',
+        paddingBottom: '12px',
+        marginBottom: '16px',
+        borderBottom: '1px solid #f1f5f9',
+      }}>
+        {/* Staff title — far left */}
+        <h1 style={{
+          fontSize: '22px',
+          fontWeight: '800',
+          margin: 0,
+          padding: 0,
+          color: '#0f172a',
+          lineHeight: 1,
+          flexShrink: 0,
+          alignSelf: 'center',
+        }}>
+          Staff
+        </h1>
 
-        <h1 className="sm-header-title">Staff</h1>
-        <button className="sm-history-circle-btn" onClick={onOpenHistory} title="Payment History">
-          <History size={18} />
-        </button>
+        {/* Spacer fills all middle space */}
+        <div style={{ flex: 1 }} />
+
+        {/* Buttons — far right */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <button
+            onClick={() => setIsAddStaffModalOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '7px 12px',
+              borderRadius: '20px',
+              background: '#eff6ff',
+              color: '#2563eb',
+              border: '1px solid #bfdbfe',
+              fontWeight: '700',
+              fontSize: '13px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 6px rgba(37, 99, 235, 0.12)',
+            }}
+          >
+            <Plus size={16} /> Add Staff
+          </button>
+
+          <button className="sm-history-circle-btn" onClick={onOpenHistory} title="Payment History">
+            <History size={18} />
+          </button>
+        </div>
       </div>
 
-      <div style={{ padding: '0 16px', marginBottom: '16px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <button
           className="quick-action-pill"
           style={{ width: '100%', padding: '12px', background: 'var(--primary-gradient)', color: 'white', border: 'none', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: '600', fontSize: '15px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}
@@ -449,6 +551,26 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                 </div>
               </div>
 
+              {/* Address */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <MapPin size={22} color="#16a34a" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Address</div>
+                  {isEditingStaff ? (
+                    <textarea
+                      rows={2}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', fontFamily: 'inherit', resize: 'vertical' }}
+                      value={editedStaffData?.address || ''}
+                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, address: e.target.value } : prev)}
+                    />
+                  ) : (
+                    <div style={{ fontSize: '15px', color: '#0f172a', fontWeight: '500', lineHeight: '1.4' }}>{selectedStaff.address || 'N/A'}</div>
+                  )}
+                </div>
+              </div>
+
             </div>
 
             <div style={{ padding: '20px 24px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', gap: '12px' }}>
@@ -464,6 +586,141 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                 </>
               )}
             </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ADD STAFF MODAL */}
+      {isAddStaffModalOpen && (
+        <div className="ref-modal-overlay" onClick={() => setIsAddStaffModalOpen(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 1100 }}>
+          <div style={{ background: 'white', borderRadius: '24px', width: '100%', maxWidth: '420px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
+            
+            {/* Modal Header */}
+            <div style={{ background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)', padding: '24px', position: 'relative', color: 'white', flexShrink: 0 }}>
+              <button
+                style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', cursor: 'pointer', backdropFilter: 'blur(4px)' }}
+                onClick={() => setIsAddStaffModalOpen(false)}
+              >
+                <X size={18} />
+              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'white', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }}>
+                  <Plus size={24} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>Add New Staff</h3>
+                  <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.85)', marginTop: '2px' }}>Fill in staff details below</p>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleAddStaffSubmit} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto' }}>
+              
+              {/* Name Input */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', display: 'block' }}>Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ramesh Kumar"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                  value={newStaffName}
+                  onChange={e => setNewStaffName(e.target.value)}
+                />
+              </div>
+
+              {/* Date of Joining */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', display: 'block' }}>Date of Joining *</label>
+                <input
+                  type="date"
+                  required
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                  value={newStaffJoinedDate}
+                  onChange={e => setNewStaffJoinedDate(e.target.value)}
+                />
+              </div>
+
+              {/* Salary */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', display: 'block' }}>Salary (₹) *</label>
+                <input
+                  type="number"
+                  required
+                  placeholder="e.g. 18000"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                  value={newStaffSalary}
+                  onChange={e => setNewStaffSalary(e.target.value)}
+                />
+              </div>
+
+              {/* Contact */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', display: 'block' }}>Contact *</label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="e.g. 9876543210"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                  value={newStaffContact}
+                  onChange={e => setNewStaffContact(e.target.value)}
+                />
+              </div>
+
+              {/* Alternative Number */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', display: 'block' }}>Alternative Number</label>
+                <input
+                  type="tel"
+                  placeholder="e.g. 9876543211"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                  value={newStaffAltContact}
+                  onChange={e => setNewStaffAltContact(e.target.value)}
+                />
+              </div>
+
+              {/* Aadhaar No */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', display: 'block' }}>Adhaar No</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 1234 5678 9012"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                  value={newStaffAadhaar}
+                  onChange={e => setNewStaffAadhaar(e.target.value)}
+                />
+              </div>
+
+              {/* Address */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', display: 'block' }}>Address</label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. House No, Street, City"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }}
+                  value={newStaffAddress}
+                  onChange={e => setNewStaffAddress(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '8px', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
+                <button
+                  type="button"
+                  style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '600', color: '#64748b', background: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }}
+                  onClick={() => setIsAddStaffModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '600', color: 'white', background: '#2563eb', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)' }}
+                >
+                  Save Staff
+                </button>
+              </div>
+
+            </form>
 
           </div>
         </div>

@@ -771,10 +771,6 @@ function App() {
             <OverdueDuesPage
               onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }}
               onOpenHistory={() => setCurrentScreen('payment-history')}
-              onNavigateToCollectFee={(res) => {
-                setSelectedCollectResident(res);
-                setCurrentScreen('collect-fee');
-              }}
               showToast={showToast}
             />
           )}
@@ -838,10 +834,6 @@ function App() {
                 }}
                 onOpenPaymentHistory={() => setCurrentScreen('payment-history')}
                 onOpenDuePayments={() => setCurrentScreen('overdue-dues')}
-                onNavigateToCollectFee={(res) => {
-                  setSelectedCollectResident(res);
-                  setCurrentScreen('collect-fee');
-                }}
                 onOpenStaffManagement={() => setCurrentScreen('staff-management')}
                 onOpenExpenses={() => setCurrentScreen('expenses-management')}
               />
@@ -896,10 +888,7 @@ function App() {
                 setActiveTab('fees');
               }}
               onOpenHistory={() => setCurrentScreen('payment-history')}
-              onNavigateToCollectFee={(res) => {
-                setSelectedCollectResident(res);
-                setCurrentScreen('collect-fee');
-              }}
+              showToast={showToast}
             />
           )}
 

@@ -1,1034 +1,252 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
+  Building,
   BedDouble,
   Users,
-  Key,
   Wrench,
-  ChevronRight,
+  Clock,
   Plus,
   Search,
-  Filter,
   ArrowLeft,
-  MoreVertical,
+  X,
+  CheckCircle,
+  Edit3,
+  Trash2,
+  Bath,
+  Wind,
   Wifi,
   Tv,
-  Bath,
-  FileText,
-  Bell,
-  X,
-  Building,
-  DoorOpen,
-  Download,
-  Settings as SettingsIcon,
-  HelpCircle,
-  LogOut,
+  Maximize2,
+  Shield,
+  Phone,
+  User,
+  Calendar,
+  AlertTriangle,
+  Check,
+  CheckSquare,
+  Square,
+  ChevronRight,
+  Filter,
+  Sparkles,
   CheckCircle2
 } from 'lucide-react';
+import type { BedStatus, BedResident, BedModel, RoomModel, FloorModel } from '../types';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
-/*  DATA TYPES                                                                */
+/*  INITIAL SEED DATA                                                          */
 /* ─────────────────────────────────────────────────────────────────────────── */
-export type BedStatus = 'vacant' | 'reserved' | 'occupied' | 'maintenance';
-
-export interface Student {
-  name: string;
-  phone: string;
-  checkInDate: string;
-  duration: number; // in months
-  monthlyRent: number;
-  advancePaid: boolean | number;
-  notes?: string;
-}
-
-export interface Bed {
-  id: string;
-  bedNumber: string; // e.g. "B101-A", "B101-B"
-  bedType: string; // e.g. "Single Bed", "Bunk Bed"
-  status: BedStatus;
-  sortIndex: number;
-  monthlyRent: number;
-  student?: Student;
-}
-
-export interface Room {
-  id: string;
-  roomNumber: string;
-  floorId: string;
-  floorName: string;
-  roomType: string; // e.g. "Single Sharing", "Double Sharing"
-  monthlyRent: number;
-  description?: string;
-  amenities: string[];
-  beds: Bed[];
-}
-
-export interface Floor {
-  id: string;
-  floorName: string;
-  totalRooms: number;
-  totalBeds: number;
-  rooms: Room[];
-}
-
-export interface Hostel {
-  id: string;
-  name: string;
-  floors: Floor[];
-}
-
-/* ─────────────────────────────────────────────────────────────────────────── */
-/*  LOCAL STORAGE KEYS                                                        */
-/* ─────────────────────────────────────────────────────────────────────────── */
-const STORAGE_HOSTELS_KEY = 'happyhostel_room_management_hostels_list';
-const STORAGE_ACTIVE_ID_KEY = 'happyhostel_room_management_active_id';
-
-/* ─────────────────────────────────────────────────────────────────────────── */
-/*  SEED DATA EXACTLY MATCHING REFERENCE MOCKUPS                              */
-/* ─────────────────────────────────────────────────────────────────────────── */
-const DEFAULT_HOSTELS: Hostel[] = [
+const initialFloorsData: FloorModel[] = [
   {
-    id: 'h-1',
-    name: 'HappyHostel Main Branch',
-    floors: [
+    id: 'f1',
+    floorNumber: 'Floor 1',
+    rooms: [
       {
-        id: 'f-1',
-        floorName: 'Floor 1',
-        totalRooms: 20,
-        totalBeds: 40,
-        rooms: [
+        id: 'r101',
+        roomNumber: '101',
+        floorId: 'f1',
+        sharingType: '2-Sharing (Double)',
+        features: ['Attached Bathroom', 'Air Conditioning (AC)', 'High-Speed WiFi'],
+        rentPerMonth: 8500,
+        beds: [
           {
-            id: 'r-101',
-            roomNumber: 'Room 101',
-            floorId: 'f-1',
-            floorName: 'Floor 1',
-            roomType: 'Single Sharing',
-            monthlyRent: 8000,
-            description: 'Well furnished single sharing room with attached bathroom.',
-            amenities: ['Wi-Fi', 'AC', 'Attached Bath', 'Wardrobe'],
-            beds: [
-              {
-                id: 'b-101-a',
-                bedNumber: 'B101-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 8000,
-                student: {
-                  name: 'Rohit Sharma',
-                  phone: '9876543210',
-                  checkInDate: '01 May 2024',
-                  duration: 12,
-                  monthlyRent: 8000,
-                  advancePaid: true,
-                  notes: 'Standard resident'
-                }
-              },
-              {
-                id: 'b-101-b',
-                bedNumber: 'B101-B',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 2,
-                monthlyRent: 8000,
-                student: {
-                  name: 'Aman Verma',
-                  phone: '9876543211',
-                  checkInDate: '10 Apr 2024',
-                  duration: 12,
-                  monthlyRent: 8000,
-                  advancePaid: true
-                }
-              }
-            ]
+            id: 'b101a',
+            bedNumber: 'Bed 101-A',
+            status: 'occupied',
+            resident: {
+              id: 'res1',
+              name: 'Rahul Sharma',
+              phone: '+91 98765 43210',
+              checkInDate: '2024-01-15',
+              course: 'B.Tech CSE',
+              rentAmount: 8500,
+              paymentStatus: 'Paid',
+              emergencyContact: '+91 98765 00000'
+            }
           },
           {
-            id: 'r-102',
-            roomNumber: 'Room 102',
-            floorId: 'f-1',
-            floorName: 'Floor 1',
-            roomType: 'Double Sharing',
-            monthlyRent: 6500,
-            amenities: ['Wi-Fi', 'Attached Bath'],
-            beds: [
-              {
-                id: 'b-102-a',
-                bedNumber: 'B102-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 6500,
-                student: {
-                  name: 'Vikas Kumar',
-                  phone: '9876522334',
-                  checkInDate: '15 Jan 2024',
-                  duration: 6,
-                  monthlyRent: 6500,
-                  advancePaid: true
-                }
-              },
-              {
-                id: 'b-102-b',
-                bedNumber: 'B102-B',
-                bedType: 'Single Bed',
-                status: 'vacant',
-                sortIndex: 2,
-                monthlyRent: 6500
-              }
-            ]
-          },
-          {
-            id: 'r-103',
-            roomNumber: 'Room 103',
-            floorId: 'f-1',
-            floorName: 'Floor 1',
-            roomType: 'Double Sharing',
-            monthlyRent: 6500,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-103-a', bedNumber: 'B103-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 6500 },
-              { id: 'b-103-b', bedNumber: 'B103-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 6500 }
-            ]
-          },
-          {
-            id: 'r-104',
-            roomNumber: 'Room 104',
-            floorId: 'f-1',
-            floorName: 'Floor 1',
-            roomType: 'Double Sharing',
-            monthlyRent: 6500,
-            amenities: ['Wi-Fi', 'AC'],
-            beds: [
-              {
-                id: 'b-104-a',
-                bedNumber: 'B104-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 6500,
-                student: {
-                  name: 'Kavya Nair',
-                  phone: '9876533445',
-                  checkInDate: '20 Feb 2024',
-                  duration: 12,
-                  monthlyRent: 6500,
-                  advancePaid: true
-                }
-              },
-              {
-                id: 'b-104-b',
-                bedNumber: 'B104-B',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 2,
-                monthlyRent: 6500,
-                student: {
-                  name: 'Priya Singh',
-                  phone: '9876555443',
-                  checkInDate: '05 Mar 2024',
-                  duration: 12,
-                  monthlyRent: 6500,
-                  advancePaid: true
-                }
-              }
-            ]
-          },
-          {
-            id: 'r-105',
-            roomNumber: 'Room 105',
-            floorId: 'f-1',
-            floorName: 'Floor 1',
-            roomType: 'Double Sharing',
-            monthlyRent: 6500,
-            amenities: ['Wi-Fi'],
-            beds: [
-              {
-                id: 'b-105-a',
-                bedNumber: 'B105-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 6500,
-                student: {
-                  name: 'Siddharth Rao',
-                  phone: '9876577889',
-                  checkInDate: '12 Apr 2024',
-                  duration: 12,
-                  monthlyRent: 6500,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-105-b', bedNumber: 'B105-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 6500 }
-            ]
-          },
-          {
-            id: 'r-106',
-            roomNumber: 'Room 106',
-            floorId: 'f-1',
-            floorName: 'Floor 1',
-            roomType: 'Double Sharing',
-            monthlyRent: 6500,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-106-a', bedNumber: 'B106-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 6500 },
-              { id: 'b-106-b', bedNumber: 'B106-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 6500 }
-            ]
+            id: 'b101b',
+            bedNumber: 'Bed 101-B',
+            status: 'vacant'
           }
         ]
       },
       {
-        id: 'f-2',
-        floorName: 'Floor 2',
-        totalRooms: 18,
-        totalBeds: 36,
-        rooms: [
+        id: 'r102',
+        roomNumber: '102',
+        floorId: 'f1',
+        sharingType: '3-Sharing (Triple)',
+        features: ['Attached Bathroom', 'Hot Water Geyser', 'Study Desk & Chair'],
+        rentPerMonth: 7000,
+        beds: [
           {
-            id: 'r-201',
-            roomNumber: 'Room 201',
-            floorId: 'f-2',
-            floorName: 'Floor 2',
-            roomType: 'Single Sharing',
-            monthlyRent: 7500,
-            amenities: ['Wi-Fi', 'AC'],
-            beds: [
-              {
-                id: 'b-201-a',
-                bedNumber: 'B201-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 7500,
-                student: {
-                  name: 'Amit Verma',
-                  phone: '9876543212',
-                  checkInDate: '01 Jan 2024',
-                  duration: 12,
-                  monthlyRent: 7500,
-                  advancePaid: true
-                }
-              },
-              {
-                id: 'b-201-b',
-                bedNumber: 'B201-B',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 2,
-                monthlyRent: 7500,
-                student: {
-                  name: 'Rohan Mehta',
-                  phone: '9876511223',
-                  checkInDate: '10 Feb 2024',
-                  duration: 12,
-                  monthlyRent: 7500,
-                  advancePaid: true
-                }
-              }
-            ]
+            id: 'b102a',
+            bedNumber: 'Bed 102-A',
+            status: 'occupied',
+            resident: {
+              id: 'res2',
+              name: 'Vikram Singh',
+              phone: '+91 98123 45678',
+              checkInDate: '2024-02-01',
+              course: 'MBA Marketing',
+              rentAmount: 7000,
+              paymentStatus: 'Paid',
+              emergencyContact: '+91 98123 11111'
+            }
           },
           {
-            id: 'r-202',
-            roomNumber: 'Room 202',
-            floorId: 'f-2',
-            floorName: 'Floor 2',
-            roomType: 'Double Sharing',
-            monthlyRent: 6500,
-            amenities: ['Wi-Fi'],
-            beds: [
-              {
-                id: 'b-202-a',
-                bedNumber: 'B202-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 6500,
-                student: {
-                  name: 'Anish Giri',
-                  phone: '9876599887',
-                  checkInDate: '25 Mar 2024',
-                  duration: 6,
-                  monthlyRent: 6500,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-202-b', bedNumber: 'B202-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 6500 }
-            ]
+            id: 'b102b',
+            bedNumber: 'Bed 102-B',
+            status: 'occupied',
+            resident: {
+              id: 'res3',
+              name: 'Amit Kumar',
+              phone: '+91 97111 22334',
+              checkInDate: '2024-03-10',
+              course: 'B.Com Finance',
+              rentAmount: 7000,
+              paymentStatus: 'Pending',
+              emergencyContact: '+91 97111 99999'
+            }
           },
           {
-            id: 'r-205',
-            roomNumber: 'Room 205',
-            floorId: 'f-2',
-            floorName: 'Floor 2',
-            roomType: 'Double Sharing',
-            monthlyRent: 8000,
-            amenities: ['Wi-Fi', 'AC', 'Attached Bath'],
-            beds: [
-              {
-                id: 'b-205-a',
-                bedNumber: 'B205-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 8000,
-                student: {
-                  name: 'Aman Verma',
-                  phone: '9876543211',
-                  checkInDate: '10 Apr 2024',
-                  duration: 12,
-                  monthlyRent: 8000,
-                  advancePaid: true,
-                  notes: 'Premium resident'
-                }
-              },
-              {
-                id: 'b-205-b',
-                bedNumber: 'B205-B',
-                bedType: 'Single Bed',
-                status: 'vacant',
-                sortIndex: 2,
-                monthlyRent: 8000
-              },
-              {
-                id: 'b-205-c',
-                bedNumber: 'B205-C',
-                bedType: 'Single Bed',
-                status: 'vacant',
-                sortIndex: 3,
-                monthlyRent: 8000
-              }
-            ]
+            id: 'b102c',
+            bedNumber: 'Bed 102-C',
+            status: 'maintenance',
+            maintenanceReason: 'AC Servicing & Electrical Maintenance'
           }
         ]
       },
       {
-        id: 'f-3',
-        floorName: 'Floor 3',
-        totalRooms: 4,
-        totalBeds: 8,
-        rooms: [
+        id: 'r103',
+        roomNumber: '103',
+        floorId: 'f1',
+        sharingType: '1-Sharing (Single)',
+        features: ['Attached Bathroom', 'Air Conditioning (AC)', 'Private Balcony', 'High-Speed WiFi'],
+        rentPerMonth: 12500,
+        beds: [
           {
-            id: 'r-301',
-            roomNumber: 'Room 301',
-            floorId: 'f-3',
-            floorName: 'Floor 3',
-            roomType: 'Single Sharing',
-            monthlyRent: 7500,
-            amenities: ['Wi-Fi', 'AC'],
-            beds: [
-              {
-                id: 'b-301-a',
-                bedNumber: 'B301-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 7500,
-                student: {
-                  name: 'Arjun Reddy',
-                  phone: '9876500998',
-                  checkInDate: '15 Mar 2024',
-                  duration: 12,
-                  monthlyRent: 7500,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-301-b', bedNumber: 'B301-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7500 }
-            ]
+            id: 'b103a',
+            bedNumber: 'Bed 103-A',
+            status: 'reserved',
+            reservedFor: 'Priya S.',
+            reservedUntil: '15th Aug 2026'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'f2',
+    floorNumber: 'Floor 2',
+    rooms: [
+      {
+        id: 'r201',
+        roomNumber: '201',
+        floorId: 'f2',
+        sharingType: '2-Sharing (Double)',
+        features: ['Attached Bathroom', 'Air Conditioning (AC)'],
+        rentPerMonth: 8500,
+        beds: [
+          {
+            id: 'b201a',
+            bedNumber: 'Bed 201-A',
+            status: 'occupied',
+            resident: {
+              id: 'res4',
+              name: 'Suresh Patel',
+              phone: '+91 99887 76655',
+              checkInDate: '2024-01-10',
+              course: 'M.Tech IT',
+              rentAmount: 8500,
+              paymentStatus: 'Paid',
+              emergencyContact: '+91 99887 00000'
+            }
           },
           {
-            id: 'r-302',
-            roomNumber: 'Room 302',
-            floorId: 'f-3',
-            floorName: 'Floor 3',
-            roomType: 'Double Sharing',
-            monthlyRent: 6500,
-            amenities: ['Wi-Fi', 'Attached Bath'],
-            beds: [
-              {
-                id: 'b-302-a',
-                bedNumber: 'B302-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 6500,
-                student: {
-                  name: 'Manish Malhotra',
-                  phone: '9876588776',
-                  checkInDate: '01 Apr 2024',
-                  duration: 6,
-                  monthlyRent: 6500,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-302-b', bedNumber: 'B302-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 6500 }
-            ]
-          },
-          {
-            id: 'r-303',
-            roomNumber: 'Room 303',
-            floorId: 'f-3',
-            floorName: 'Floor 3',
-            roomType: 'Double Sharing',
-            monthlyRent: 6500,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-303-a', bedNumber: 'B303-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 6500 },
-              { id: 'b-303-b', bedNumber: 'B303-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 6500 }
-            ]
-          },
-          {
-            id: 'r-312',
-            roomNumber: 'Room 312',
-            floorId: 'f-3',
-            floorName: 'Floor 3',
-            roomType: 'Single Sharing',
-            monthlyRent: 7500,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-312-a', bedNumber: 'B312-A', bedType: 'Single Bed', status: 'maintenance', sortIndex: 1, monthlyRent: 7500 }
-            ]
+            id: 'b201b',
+            bedNumber: 'Bed 201-B',
+            status: 'vacant'
           }
         ]
       },
       {
-        id: 'f-4',
-        floorName: 'Floor 4',
-        totalRooms: 3,
-        totalBeds: 6,
-        rooms: [
+        id: 'r202',
+        roomNumber: '202',
+        floorId: 'f2',
+        sharingType: '4-Sharing (Quad)',
+        features: ['Hot Water Geyser', 'Study Desk & Chair', 'High-Speed WiFi'],
+        rentPerMonth: 6000,
+        beds: [
           {
-            id: 'r-401',
-            roomNumber: 'Room 401',
-            floorId: 'f-4',
-            floorName: 'Floor 4',
-            roomType: 'Double Sharing',
-            monthlyRent: 7000,
-            amenities: ['Wi-Fi', 'AC'],
-            beds: [
-              {
-                id: 'b-401-a',
-                bedNumber: 'B401-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 7000,
-                student: {
-                  name: 'Tanmay Bhat',
-                  phone: '9876512345',
-                  checkInDate: '10 Feb 2024',
-                  duration: 12,
-                  monthlyRent: 7000,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-401-b', bedNumber: 'B401-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7000 }
-            ]
+            id: 'b202a',
+            bedNumber: 'Bed 202-A',
+            status: 'vacant'
           },
           {
-            id: 'r-402',
-            roomNumber: 'Room 402',
-            floorId: 'f-4',
-            floorName: 'Floor 4',
-            roomType: 'Single Sharing',
-            monthlyRent: 8500,
-            amenities: ['Wi-Fi', 'AC', 'Attached Bath'],
-            beds: [
-              {
-                id: 'b-402-a',
-                bedNumber: 'B402-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 8500,
-                student: {
-                  name: 'Suresh Raina',
-                  phone: '9876523456',
-                  checkInDate: '01 May 2024',
-                  duration: 12,
-                  monthlyRent: 8500,
-                  advancePaid: true
-                }
-              }
-            ]
+            id: 'b202b',
+            bedNumber: 'Bed 202-B',
+            status: 'vacant'
           },
           {
-            id: 'r-403',
-            roomNumber: 'Room 403',
-            floorId: 'f-4',
-            floorName: 'Floor 4',
-            roomType: 'Double Sharing',
-            monthlyRent: 7000,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-403-a', bedNumber: 'B403-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 7000 },
-              { id: 'b-403-b', bedNumber: 'B403-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7000 }
-            ]
+            id: 'b202c',
+            bedNumber: 'Bed 202-C',
+            status: 'occupied',
+            resident: {
+              id: 'res5',
+              name: 'Deepak Verma',
+              phone: '+91 95554 43322',
+              checkInDate: '2024-05-01',
+              course: 'BCA',
+              rentAmount: 6000,
+              paymentStatus: 'Paid'
+            }
+          },
+          {
+            id: 'b202d',
+            bedNumber: 'Bed 202-D',
+            status: 'vacant'
           }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'f3',
+    floorNumber: 'Floor 3',
+    rooms: [
+      {
+        id: 'r301',
+        roomNumber: '301',
+        floorId: 'f3',
+        sharingType: '2-Sharing (Double)',
+        features: ['Attached Bathroom', 'Private Balcony'],
+        rentPerMonth: 8000,
+        beds: [
+          { id: 'b301a', bedNumber: 'Bed 301-A', status: 'vacant' },
+          { id: 'b301b', bedNumber: 'Bed 301-B', status: 'vacant' }
         ]
       },
       {
-        id: 'f-5',
-        floorName: 'Floor 5',
-        totalRooms: 3,
-        totalBeds: 5,
-        rooms: [
+        id: 'r302',
+        roomNumber: '302',
+        floorId: 'f3',
+        sharingType: '1-Sharing (Single)',
+        features: ['Air Conditioning (AC)', 'High-Speed WiFi'],
+        rentPerMonth: 12000,
+        beds: [
           {
-            id: 'r-501',
-            roomNumber: 'Room 501',
-            floorId: 'f-5',
-            floorName: 'Floor 5',
-            roomType: 'Double Sharing',
-            monthlyRent: 7200,
-            amenities: ['Wi-Fi', 'AC'],
-            beds: [
-              {
-                id: 'b-501-a',
-                bedNumber: 'B501-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 7200,
-                student: {
-                  name: 'Kartik Aaryan',
-                  phone: '9876534567',
-                  checkInDate: '20 Mar 2024',
-                  duration: 12,
-                  monthlyRent: 7200,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-501-b', bedNumber: 'B501-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7200 }
-            ]
-          },
-          {
-            id: 'r-502',
-            roomNumber: 'Room 502',
-            floorId: 'f-5',
-            floorName: 'Floor 5',
-            roomType: 'Single Sharing',
-            monthlyRent: 8000,
-            amenities: ['Wi-Fi', 'AC'],
-            beds: [
-              { id: 'b-502-a', bedNumber: 'B502-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 8000 }
-            ]
-          },
-          {
-            id: 'r-503',
-            roomNumber: 'Room 503',
-            floorId: 'f-5',
-            floorName: 'Floor 5',
-            roomType: 'Double Sharing',
-            monthlyRent: 7200,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-503-a', bedNumber: 'B503-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 7200 },
-              { id: 'b-503-b', bedNumber: 'B503-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7200 }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'f-6',
-        floorName: 'Floor 6 (Penthouse)',
-        totalRooms: 3,
-        totalBeds: 5,
-        rooms: [
-          {
-            id: 'r-601',
-            roomNumber: 'Room 601',
-            floorId: 'f-6',
-            floorName: 'Floor 6 (Penthouse)',
-            roomType: 'Executive Suite',
-            monthlyRent: 12000,
-            amenities: ['Wi-Fi', 'AC', 'Attached Bath', 'Wardrobe', 'Balcony'],
-            beds: [
-              {
-                id: 'b-601-a',
-                bedNumber: 'B601-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 12000,
-                student: {
-                  name: 'Hardik Pandya',
-                  phone: '9876598765',
-                  checkInDate: '01 May 2024',
-                  duration: 12,
-                  monthlyRent: 12000,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-601-b', bedNumber: 'B601-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 12000 }
-            ]
-          },
-          {
-            id: 'r-602',
-            roomNumber: 'Room 602',
-            floorId: 'f-6',
-            floorName: 'Floor 6 (Penthouse)',
-            roomType: 'Single Suite',
-            monthlyRent: 10000,
-            amenities: ['Wi-Fi', 'AC', 'Attached Bath', 'Balcony'],
-            beds: [
-              { id: 'b-602-a', bedNumber: 'B602-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 10000 }
-            ]
-          },
-          {
-            id: 'r-603',
-            roomNumber: 'Room 603',
-            floorId: 'f-6',
-            floorName: 'Floor 6 (Penthouse)',
-            roomType: 'Executive Double',
-            monthlyRent: 9500,
-            amenities: ['Wi-Fi', 'AC', 'Attached Bath'],
-            beds: [
-              { id: 'b-603-a', bedNumber: 'B603-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 9500 },
-              { id: 'b-603-b', bedNumber: 'B603-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 9500 }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'f-7',
-        floorName: 'Floor 7',
-        totalRooms: 4,
-        totalBeds: 8,
-        rooms: [
-          {
-            id: 'r-701',
-            roomNumber: 'Room 701',
-            floorId: 'f-7',
-            floorName: 'Floor 7',
-            roomType: 'Single Sharing',
-            monthlyRent: 7800,
-            amenities: ['Wi-Fi', 'AC'],
-            beds: [
-              {
-                id: 'b-701-a',
-                bedNumber: 'B701-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 7800,
-                student: {
-                  name: 'Vikram Seth',
-                  phone: '9876541100',
-                  checkInDate: '01 Mar 2024',
-                  duration: 12,
-                  monthlyRent: 7800,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-701-b', bedNumber: 'B701-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7800 }
-            ]
-          },
-          {
-            id: 'r-702',
-            roomNumber: 'Room 702',
-            floorId: 'f-7',
-            floorName: 'Floor 7',
-            roomType: 'Double Sharing',
-            monthlyRent: 6800,
-            amenities: ['Wi-Fi'],
-            beds: [
-              {
-                id: 'b-702-a',
-                bedNumber: 'B702-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 6800,
-                student: {
-                  name: 'Rishabh Pant',
-                  phone: '9876542211',
-                  checkInDate: '15 Apr 2024',
-                  duration: 12,
-                  monthlyRent: 6800,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-702-b', bedNumber: 'B702-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 6800 }
-            ]
-          },
-          {
-            id: 'r-703',
-            roomNumber: 'Room 703',
-            floorId: 'f-7',
-            floorName: 'Floor 7',
-            roomType: 'Double Sharing',
-            monthlyRent: 6800,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-703-a', bedNumber: 'B703-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 6800 },
-              { id: 'b-703-b', bedNumber: 'B703-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 6800 }
-            ]
-          },
-          {
-            id: 'r-704',
-            roomNumber: 'Room 704',
-            floorId: 'f-7',
-            floorName: 'Floor 7',
-            roomType: 'Double Sharing',
-            monthlyRent: 6800,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-704-a', bedNumber: 'B704-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 6800 },
-              { id: 'b-704-b', bedNumber: 'B704-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 6800 }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'f-8',
-        floorName: 'Floor 8',
-        totalRooms: 4,
-        totalBeds: 8,
-        rooms: [
-          {
-            id: 'r-801',
-            roomNumber: 'Room 801',
-            floorId: 'f-8',
-            floorName: 'Floor 8',
-            roomType: 'Single Sharing',
-            monthlyRent: 8000,
-            amenities: ['Wi-Fi', 'AC'],
-            beds: [
-              {
-                id: 'b-801-a',
-                bedNumber: 'B801-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 8000,
-                student: {
-                  name: 'KL Rahul',
-                  phone: '9876543322',
-                  checkInDate: '01 Feb 2024',
-                  duration: 12,
-                  monthlyRent: 8000,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-801-b', bedNumber: 'B801-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 8000 }
-            ]
-          },
-          {
-            id: 'r-802',
-            roomNumber: 'Room 802',
-            floorId: 'f-8',
-            floorName: 'Floor 8',
-            roomType: 'Double Sharing',
-            monthlyRent: 7000,
-            amenities: ['Wi-Fi'],
-            beds: [
-              {
-                id: 'b-802-a',
-                bedNumber: 'B802-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 7000,
-                student: {
-                  name: 'Shreyas Iyer',
-                  phone: '9876544433',
-                  checkInDate: '20 May 2024',
-                  duration: 12,
-                  monthlyRent: 7000,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-802-b', bedNumber: 'B802-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7000 }
-            ]
-          },
-          {
-            id: 'r-803',
-            roomNumber: 'Room 803',
-            floorId: 'f-8',
-            floorName: 'Floor 8',
-            roomType: 'Double Sharing',
-            monthlyRent: 7000,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-803-a', bedNumber: 'B803-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 7000 },
-              { id: 'b-803-b', bedNumber: 'B803-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7000 }
-            ]
-          },
-          {
-            id: 'r-804',
-            roomNumber: 'Room 804',
-            floorId: 'f-8',
-            floorName: 'Floor 8',
-            roomType: 'Double Sharing',
-            monthlyRent: 7000,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-804-a', bedNumber: 'B804-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 7000 },
-              { id: 'b-804-b', bedNumber: 'B804-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7000 }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'f-9',
-        floorName: 'Floor 9',
-        totalRooms: 4,
-        totalBeds: 8,
-        rooms: [
-          {
-            id: 'r-901',
-            roomNumber: 'Room 901',
-            floorId: 'f-9',
-            floorName: 'Floor 9',
-            roomType: 'Single Sharing',
-            monthlyRent: 8200,
-            amenities: ['Wi-Fi', 'AC'],
-            beds: [
-              {
-                id: 'b-901-a',
-                bedNumber: 'B901-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 8200,
-                student: {
-                  name: 'Shubman Gill',
-                  phone: '9876555544',
-                  checkInDate: '10 Apr 2024',
-                  duration: 12,
-                  monthlyRent: 8200,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-901-b', bedNumber: 'B901-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 8200 }
-            ]
-          },
-          {
-            id: 'r-902',
-            roomNumber: 'Room 902',
-            floorId: 'f-9',
-            floorName: 'Floor 9',
-            roomType: 'Double Sharing',
-            monthlyRent: 7200,
-            amenities: ['Wi-Fi'],
-            beds: [
-              {
-                id: 'b-902-a',
-                bedNumber: 'B902-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 7200,
-                student: {
-                  name: 'Yuzvendra Chahal',
-                  phone: '9876566655',
-                  checkInDate: '01 Jun 2024',
-                  duration: 12,
-                  monthlyRent: 7200,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-902-b', bedNumber: 'B902-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7200 }
-            ]
-          },
-          {
-            id: 'r-903',
-            roomNumber: 'Room 903',
-            floorId: 'f-9',
-            floorName: 'Floor 9',
-            roomType: 'Double Sharing',
-            monthlyRent: 7200,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-903-a', bedNumber: 'B903-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 7200 },
-              { id: 'b-903-b', bedNumber: 'B903-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7200 }
-            ]
-          },
-          {
-            id: 'r-904',
-            roomNumber: 'Room 904',
-            floorId: 'f-9',
-            floorName: 'Floor 9',
-            roomType: 'Double Sharing',
-            monthlyRent: 7200,
-            amenities: ['Wi-Fi'],
-            beds: [
-              { id: 'b-904-a', bedNumber: 'B904-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 7200 },
-              { id: 'b-904-b', bedNumber: 'B904-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 7200 }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'f-10',
-        floorName: 'Floor 10 (Executive Penthouse)',
-        totalRooms: 3,
-        totalBeds: 6,
-        rooms: [
-          {
-            id: 'r-1001',
-            roomNumber: 'Room 1001',
-            floorId: 'f-10',
-            floorName: 'Floor 10 (Executive Penthouse)',
-            roomType: 'Executive Suite',
-            monthlyRent: 13500,
-            amenities: ['Wi-Fi', 'AC', 'Attached Bath', 'Balcony', 'TV'],
-            beds: [
-              {
-                id: 'b-1001-a',
-                bedNumber: 'B1001-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 13500,
-                student: {
-                  name: 'Jasprit Bumrah',
-                  phone: '9876577766',
-                  checkInDate: '01 Jan 2024',
-                  duration: 12,
-                  monthlyRent: 13500,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-1001-b', bedNumber: 'B1001-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 13500 }
-            ]
-          },
-          {
-            id: 'r-1002',
-            roomNumber: 'Room 1002',
-            floorId: 'f-10',
-            floorName: 'Floor 10 (Executive Penthouse)',
-            roomType: 'Executive Suite',
-            monthlyRent: 13500,
-            amenities: ['Wi-Fi', 'AC', 'Attached Bath', 'Balcony'],
-            beds: [
-              {
-                id: 'b-1002-a',
-                bedNumber: 'B1002-A',
-                bedType: 'Single Bed',
-                status: 'occupied',
-                sortIndex: 1,
-                monthlyRent: 13500,
-                student: {
-                  name: 'Mohammed Shami',
-                  phone: '9876588877',
-                  checkInDate: '15 Feb 2024',
-                  duration: 12,
-                  monthlyRent: 13500,
-                  advancePaid: true
-                }
-              },
-              { id: 'b-1002-b', bedNumber: 'B1002-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 13500 }
-            ]
-          },
-          {
-            id: 'r-1003',
-            roomNumber: 'Room 1003',
-            floorId: 'f-10',
-            floorName: 'Floor 10 (Executive Penthouse)',
-            roomType: 'Executive Double',
-            monthlyRent: 11000,
-            amenities: ['Wi-Fi', 'AC', 'Attached Bath'],
-            beds: [
-              { id: 'b-1003-a', bedNumber: 'B1003-A', bedType: 'Single Bed', status: 'vacant', sortIndex: 1, monthlyRent: 11000 },
-              { id: 'b-1003-b', bedNumber: 'B1003-B', bedType: 'Single Bed', status: 'vacant', sortIndex: 2, monthlyRent: 11000 }
-            ]
+            id: 'b302a',
+            bedNumber: 'Bed 302-A',
+            status: 'occupied',
+            resident: {
+              id: 'res6',
+              name: 'Rohan Gupta',
+              phone: '+91 91234 56789',
+              checkInDate: '2024-04-12',
+              course: 'BBA',
+              rentAmount: 12000,
+              paymentStatus: 'Paid'
+            }
           }
         ]
       }
@@ -1036,2163 +254,1945 @@ const DEFAULT_HOSTELS: Hostel[] = [
   }
 ];
 
+const ALL_FEATURES = [
+  'Attached Bathroom',
+  'Air Conditioning (AC)',
+  'Private Balcony',
+  'Hot Water Geyser',
+  'Study Desk & Chair',
+  'High-Speed WiFi'
+];
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/*  MAIN ROOM MANAGEMENT PAGE COMPONENT                                       */
+/* ─────────────────────────────────────────────────────────────────────────── */
 export const RoomManagementPage: React.FC = () => {
-  /* ── State & Storage ── */
-  const [hostels, setHostels] = useState<Hostel[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_HOSTELS_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed?.[0]?.floors?.length >= 10) {
-          return parsed;
-        }
-      }
-      return DEFAULT_HOSTELS;
-    } catch {
-      return DEFAULT_HOSTELS;
-    }
+  const [floors, setFloors] = useState<FloorModel[]>(initialFloorsData);
+  const [selectedFloorId, setSelectedFloorId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Modals state
+  const [isAddFloorModalOpen, setIsAddFloorModalOpen] = useState(false);
+  const [addFloorStep, setAddFloorStep] = useState<1 | 2>(1);
+  const [newFloorName, setNewFloorName] = useState('');
+  const [newFloorRoomCount, setNewFloorRoomCount] = useState<number>(2);
+  const [newFloorRoomsDraft, setNewFloorRoomsDraft] = useState<
+    { roomNumber: string; sharingType: string; bedCount: number; features: string[] }[]
+  >([]);
+
+  const [isAddRoomModalOpen, setIsAddRoomModalOpen] = useState(false);
+  const [targetFloorIdForNewRoom, setTargetFloorIdForNewRoom] = useState<string | null>(null);
+  const [newRoomDraft, setNewRoomDraft] = useState<{
+    roomNumber: string;
+    sharingType: string;
+    bedCount: number;
+    features: string[];
+    rentPerMonth: number;
+  }>({
+    roomNumber: '',
+    sharingType: '2-Sharing (Double)',
+    bedCount: 2,
+    features: ['Attached Bathroom', 'High-Speed WiFi'],
+    rentPerMonth: 8000
   });
 
-  const [activeHostelId, setActiveHostelId] = useState<string>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
-      return saved && hostels.some(h => h.id === saved) ? saved : hostels[0]?.id || 'h-1';
-    } catch {
-      return hostels[0]?.id || 'h-1';
-    }
+  // Active room popup
+  const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
+
+  // Bed action modals
+  const [activeBedAction, setActiveBedAction] = useState<{
+    floorId: string;
+    roomId: string;
+    bed: BedModel;
+    type: 'assign' | 'maintenance' | 'reserved' | 'view_resident' | 'view_maintenance' | 'view_reserved' | 'options';
+  } | null>(null);
+
+  // Form states for bed action modals
+  const [assignForm, setAssignForm] = useState({
+    name: '',
+    phone: '',
+    altPhone: '',
+    address: '',
+    aadhaarNumber: '',
+    email: '',
+    checkInDate: new Date().toISOString().split('T')[0],
+    rentAmount: 8000
   });
+  const [maintenanceForm, setMaintenanceForm] = useState({ reason: '' });
+  const [reservedForm, setReservedForm] = useState({ reservedFor: '', untilDate: '' });
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_HOSTELS_KEY, JSON.stringify(hostels));
-    } catch (e) {
-      console.error('Failed to save hostels:', e);
-    }
-  }, [hostels]);
+  // CRUD Edit / Delete Modals State
+  const [editingFloor, setEditingFloor] = useState<FloorModel | null>(null);
+  const [editingRoom, setEditingRoom] = useState<{ floorId: string; room: RoomModel } | null>(null);
+  const [editingBed, setEditingBed] = useState<{ floorId: string; roomId: string; bed: BedModel } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    type: 'floor' | 'room' | 'bed';
+    id: string;
+    title: string;
+    floorId?: string;
+    roomId?: string;
+  } | null>(null);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_ACTIVE_ID_KEY, activeHostelId);
-    } catch (e) {
-      console.error('Failed to save active hostel ID:', e);
-    }
-  }, [activeHostelId]);
-
-  const activeHostel = hostels.find(h => h.id === activeHostelId) || hostels[0];
-
-  /* ── View Navigation State ── */
-  type ViewState =
-    | 'dashboard'
-    | 'floors-list'
-    | 'floor-details'
-    | 'rooms-list'
-    | 'room-details'
-    | 'beds-in-room'
-    | 'bed-details'
-    | 'add-bed'
-    | 'add-room'
-    | 'filters'
-    | 'reports'
-    | 'notifications'
-    | 'menu-drawer'
-    | 'settings'
-    | 'allocate-bed';
-
-  const [currentView, setCurrentView] = useState<ViewState>('dashboard');
-  const [dashTab, setDashTab] = useState<'floors' | 'beds' | 'stats'>('floors');
-
-  useEffect(() => {
-    const handleOpenAddBed = () => setCurrentView('add-bed');
-    window.addEventListener('open-add-bed', handleOpenAddBed);
-    return () => window.removeEventListener('open-add-bed', handleOpenAddBed);
-  }, []);
-
-
-  /* ── Selected Pointers for Detail Views ── */
-  const [selectedFloorId, setSelectedFloorId] = useState<string>('f-1');
-  const [selectedRoomId, setSelectedRoomId] = useState<string>('r-101');
-  const [selectedBedId, setSelectedBedId] = useState<string>('b-101-a');
-
-  /* ── Bed Allocation Form State ── */
-  const [residentMode, setResidentMode] = useState<'existing' | 'new'>('existing');
-  const [allocateTargetBedId, setAllocateTargetBedId] = useState<string>('');
-  const [allocateStudentName, setAllocateStudentName] = useState<string>('');
-  const [allocateStudentPhone, setAllocateStudentPhone] = useState<string>('');
-  const [allocateCheckInDate, setAllocateCheckInDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
-  );
-  const [allocateRent, setAllocateRent] = useState<number>(8000);
-  const [allocateAdvancePaid, setAllocateAdvancePaid] = useState<boolean>(true);
-  const [allocateNotes, setAllocateNotes] = useState<string>('');
-
-  const existingResidents: Student[] = [
-    { name: 'Rohit Sharma', phone: '9876543210', checkInDate: '01 May 2024', duration: 12, monthlyRent: 8000, advancePaid: true },
-    { name: 'Aman Verma', phone: '9876543211', checkInDate: '10 Apr 2024', duration: 12, monthlyRent: 8000, advancePaid: true },
-    { name: 'Vikas Kumar', phone: '9876522334', checkInDate: '15 Jan 2024', duration: 6, monthlyRent: 6500, advancePaid: true },
-    { name: 'Kavya Nair', phone: '9876533445', checkInDate: '20 Feb 2024', duration: 12, monthlyRent: 6500, advancePaid: true },
-    { name: 'Priya Singh', phone: '9876555443', checkInDate: '05 Mar 2024', duration: 12, monthlyRent: 6500, advancePaid: true },
-    { name: 'Siddharth Rao', phone: '9876577889', checkInDate: '12 Apr 2024', duration: 12, monthlyRent: 6500, advancePaid: true },
-    { name: 'Rahul Sharma', phone: '9876500112', checkInDate: '01 Jun 2024', duration: 12, monthlyRent: 8000, advancePaid: true }
-  ];
-
-  /* ── Search & Filter State ── */
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFloorFilter, setSelectedFloorFilter] = useState('All Floors');
-  const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState('All Room Types');
-  const [selectedBedTypeFilter, setSelectedBedTypeFilter] = useState('All Bed Types');
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState('All Status');
-
-  /* ── Form Inputs ── */
-  const [formFloorId, setFormFloorId] = useState('f-1');
-  const [formRoomId, setFormRoomId] = useState('r-101');
-  const [formBedIdText, setFormBedIdText] = useState('B101-C');
-  const [formBedType, setFormBedType] = useState('Single Bed');
-  const [formRent, setFormRent] = useState(8000);
-  const [formStatus, setFormStatus] = useState<BedStatus>('vacant');
-  const [formNotes, setFormNotes] = useState('');
-  const [formStudentName, setFormStudentName] = useState('');
-  const [formStudentPhone, setFormStudentPhone] = useState('');
-
-  // Step-by-Step Add Room Form State
-  const [addRoomStep, setAddRoomStep] = useState<number>(1);
-  const [formRoomNumberInput, setFormRoomNumberInput] = useState('Room 107');
-  const [formRoomTypeInput, setFormRoomTypeInput] = useState('Double Sharing');
-  const [formBedCount, setFormBedCount] = useState<number>(2);
-  const [formBedTypeInput, setFormBedTypeInput] = useState<string>('Single Bed');
-  const [formRentAmount, setFormRentAmount] = useState<number>(8000);
-  const [formRoomDesc, setFormRoomDesc] = useState<string>('Well furnished room with attached bathroom.');
-  const [formSelectedAmenities, setFormSelectedAmenities] = useState<string[]>([
-    'Wi-Fi',
-    'AC',
-    'Attached Bath'
-  ]);
-
-  const toggleAmenity = (amenity: string) => {
-    setFormSelectedAmenities(prev =>
-      prev.includes(amenity) ? prev.filter(a => a !== amenity) : [...prev, amenity]
-    );
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
-  /* ── Computed Metrics across active Hostel ── */
-  let computedTotalBeds = 0;
-  let computedOccupiedBeds = 0;
-  let computedVacantBeds = 0;
-  let computedMaintenanceBeds = 0;
-  let computedReservedBeds = 0;
+  /* ───────────────────────────────────────────────────────────────────────── */
+  /*  CALCULATE STATS                                                         */
+  /* ───────────────────────────────────────────────────────────────────────── */
+  let totalRooms = 0;
+  let totalBeds = 0;
+  let occupiedBeds = 0;
+  let vacantBeds = 0;
+  let maintenanceBeds = 0;
+  let reservedBeds = 0;
 
-  activeHostel.floors.forEach(f => {
-    f.rooms.forEach(r => {
-      r.beds.forEach(b => {
-        computedTotalBeds++;
-        if (b.status === 'occupied') computedOccupiedBeds++;
-        else if (b.status === 'vacant') computedVacantBeds++;
-        else if (b.status === 'maintenance') computedMaintenanceBeds++;
-        else if (b.status === 'reserved') computedReservedBeds++;
+  floors.forEach((fl) => {
+    totalRooms += fl.rooms.length;
+    fl.rooms.forEach((rm) => {
+      totalBeds += rm.beds.length;
+      rm.beds.forEach((bd) => {
+        if (bd.status === 'occupied') occupiedBeds++;
+        else if (bd.status === 'vacant') vacantBeds++;
+        else if (bd.status === 'maintenance') maintenanceBeds++;
+        else if (bd.status === 'reserved') reservedBeds++;
       });
     });
   });
 
-  /* ── Helper Resolution Objects ── */
-  const currentFloorObj = activeHostel.floors.find(f => f.id === selectedFloorId) || activeHostel.floors[0] || {
-    id: 'f-1',
-    floorName: 'Floor 1',
-    totalRooms: 20,
-    totalBeds: 40,
-    rooms: []
+  const occupancyRate = totalBeds > 0 ? Math.round((occupiedBeds / totalBeds) * 100) : 0;
+
+  /* ───────────────────────────────────────────────────────────────────────── */
+  /*  FLOOR CRUD HANDLERS                                                     */
+  /* ───────────────────────────────────────────────────────────────────────── */
+  const handleOpenAddFloor = () => {
+    setNewFloorName(`Floor ${floors.length + 1}`);
+    setNewFloorRoomCount(2);
+    setAddFloorStep(1);
+    setIsAddFloorModalOpen(true);
   };
 
-  // All beds across active hostel with room & floor metadata
-  const allBedsWithMetadata = activeHostel.floors.flatMap(f =>
-    f.rooms.flatMap(r =>
-      r.beds.map(b => ({
-        bed: b,
-        room: r,
-        floor: f
-      }))
-    )
-  );
-
-  const defaultRoomFallback: Room = {
-    id: 'r-default',
-    roomNumber: 'Room 101',
-    floorId: 'f-1',
-    floorName: 'Floor 1',
-    roomType: 'Single Sharing',
-    monthlyRent: 8000,
-    description: 'Well furnished single sharing room with attached bathroom.',
-    amenities: ['Wi-Fi', 'AC', 'Attached Bath', 'Wardrobe'],
-    beds: [
-      { id: 'b-default-1', bedNumber: 'B101-A', bedType: 'Single Bed', status: 'occupied', sortIndex: 1, monthlyRent: 8000 },
-      { id: 'b-default-2', bedNumber: 'B101-B', bedType: 'Single Bed', status: 'occupied', sortIndex: 2, monthlyRent: 8000 }
-    ]
-  };
-
-  let currentRoomObj: Room = defaultRoomFallback;
-  activeHostel.floors.forEach(f => {
-    const found = f.rooms.find(r => r.id === selectedRoomId);
-    if (found) currentRoomObj = found;
-  });
-  if (currentRoomObj === defaultRoomFallback && activeHostel.floors[0]?.rooms[0]) {
-    currentRoomObj = activeHostel.floors[0].rooms[0];
-  }
-
-  const handleSelectRoom = (roomId: string) => {
-    activeHostel.floors.forEach(f => {
-      const found = f.rooms.find(r => r.id === roomId);
-      if (found) {
-        setSelectedFloorId(f.id);
-        setSelectedRoomId(found.id);
-        setCurrentView('room-details');
-      }
-    });
-  };
-
-  const defaultBedFallback: Bed = {
-    id: 'b-default-1',
-    bedNumber: 'B101-A',
-    bedType: 'Single Bed',
-    status: 'occupied',
-    sortIndex: 1,
-    monthlyRent: 8000,
-    student: {
-      name: 'Rohit Sharma',
-      phone: '9876543210',
-      checkInDate: '01 May 2024',
-      duration: 12,
-      monthlyRent: 8000,
-      advancePaid: true,
-      notes: 'Standard resident'
+  const handleProceedToAddFloorStep2 = () => {
+    if (!newFloorName.trim()) {
+      showToast('Please enter a floor name/number');
+      return;
     }
-  };
-
-  let currentBedObj: Bed = defaultBedFallback;
-  let parentRoomForBed: Room = currentRoomObj || defaultRoomFallback;
-  let parentFloorForBed: Floor = currentFloorObj;
-
-  activeHostel.floors.forEach(f => {
-    f.rooms.forEach(r => {
-      const found = r.beds.find(b => b.id === selectedBedId);
-      if (found) {
-        currentBedObj = found;
-        parentRoomForBed = r;
-        parentFloorForBed = f;
-      }
-    });
-  });
-  if (currentBedObj === defaultBedFallback && currentRoomObj?.beds?.[0]) {
-    currentBedObj = currentRoomObj.beds[0];
-  }
-
-  const handleSelectBed = (bedId: string) => {
-    activeHostel.floors.forEach(f => {
-      f.rooms.forEach(r => {
-        const found = r.beds.find(b => b.id === bedId);
-        if (found) {
-          setSelectedFloorId(f.id);
-          setSelectedRoomId(r.id);
-          setSelectedBedId(found.id);
-          if (found.status === 'vacant' || found.status === 'reserved') {
-            setAllocateTargetBedId(found.id);
-            setAllocateRent(found.monthlyRent || r.monthlyRent || 8000);
-            setCurrentView('allocate-bed');
-          } else {
-            setCurrentView('bed-details');
-          }
-        }
+    const count = Math.max(1, Math.min(10, newFloorRoomCount));
+    const draft = [];
+    for (let i = 1; i <= count; i++) {
+      const roomNum = `${floors.length + 1}0${i}`;
+      draft.push({
+        roomNumber: roomNum,
+        sharingType: '2-Sharing (Double)',
+        bedCount: 2,
+        features: ['Attached Bathroom', 'High-Speed WiFi']
       });
-    });
+    }
+    setNewFloorRoomsDraft(draft);
+    setAddFloorStep(2);
   };
 
-  /* ── Helper Functions for Updates ── */
-  const updateFloors = (newFloors: Floor[]) => {
-    setHostels(prev =>
-      prev.map(h => (h.id === activeHostel.id ? { ...h, floors: newFloors } : h))
-    );
-  };
-
-  const handleSaveBed = () => {
-    if (!formBedIdText.trim()) return;
-
-    const newBed: Bed = {
-      id: `b-${Date.now()}`,
-      bedNumber: formBedIdText.trim(),
-      bedType: formBedType,
-      status: formStatus,
-      sortIndex: 99,
-      monthlyRent: formRent,
-      student: formStudentName ? {
-        name: formStudentName,
-        phone: formStudentPhone || '9876543210',
-        checkInDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-        duration: 12,
-        monthlyRent: formRent,
-        advancePaid: true,
-        notes: formNotes
-      } : undefined
-    };
-
-    updateFloors(
-      activeHostel.floors.map(f => ({
-        ...f,
-        rooms: f.rooms.map(r => {
-          if (r.id === formRoomId) {
-            return { ...r, beds: [...r.beds, newBed] };
-          }
-          return r;
-        })
-      }))
-    );
-
-    setCurrentView('dashboard');
-  };
-
-  const handleSaveRoom = () => {
-    if (!formRoomNumberInput.trim()) return;
-
-    const roomNumClean = formRoomNumberInput.trim();
-    const bedLetterPrefix = roomNumClean.replace(/\s+/g, '');
-
-    const generatedBeds: Bed[] = Array.from({ length: formBedCount }, (_, idx) => {
-      const letter = String.fromCharCode(65 + idx);
+  const handleSaveNewFloor = () => {
+    const newFloorId = `f_${Date.now()}`;
+    const createdRooms: RoomModel[] = newFloorRoomsDraft.map((r, idx) => {
+      const roomId = `r_${Date.now()}_${idx}`;
+      const beds: BedModel[] = [];
+      for (let b = 1; b <= r.bedCount; b++) {
+        beds.push({
+          id: `b_${roomId}_${b}`,
+          bedNumber: `Bed ${r.roomNumber}-${String.fromCharCode(64 + b)}`,
+          status: 'vacant'
+        });
+      }
       return {
-        id: `b-${Date.now()}-${idx + 1}`,
-        bedNumber: `${bedLetterPrefix}-${letter}`,
-        bedType: formBedTypeInput,
-        status: 'vacant',
-        sortIndex: idx + 1,
-        monthlyRent: formRentAmount
+        id: roomId,
+        roomNumber: r.roomNumber || `${newFloorId}-${idx + 1}`,
+        floorId: newFloorId,
+        sharingType: r.sharingType,
+        features: r.features,
+        rentPerMonth: r.sharingType.includes('Single') ? 12000 : 8000,
+        beds
       };
     });
 
-    const targetFloor = activeHostel.floors.find(f => f.id === formFloorId);
-
-    const newRoom: Room = {
-      id: `r-${Date.now()}`,
-      roomNumber: roomNumClean,
-      floorId: formFloorId,
-      floorName: targetFloor?.floorName || 'Floor 1',
-      roomType: formRoomTypeInput,
-      monthlyRent: formRentAmount,
-      description: formRoomDesc,
-      amenities: formSelectedAmenities,
-      beds: generatedBeds
+    const newFloor: FloorModel = {
+      id: newFloorId,
+      floorNumber: newFloorName.trim(),
+      rooms: createdRooms
     };
 
-    updateFloors(
-      activeHostel.floors.map(f => {
-        if (f.id === formFloorId) {
+    setFloors([...floors, newFloor]);
+    setIsAddFloorModalOpen(false);
+    showToast(`Added ${newFloorName} with ${createdRooms.length} rooms!`);
+  };
+
+  const handleEditFloorSave = () => {
+    if (!editingFloor || !editingFloor.floorNumber.trim()) return;
+    setFloors(floors.map((f) => (f.id === editingFloor.id ? editingFloor : f)));
+    setEditingFloor(null);
+    showToast('Floor name updated successfully!');
+  };
+
+  const handleDeleteFloor = (floorId: string) => {
+    setFloors(floors.filter((f) => f.id !== floorId));
+    if (selectedFloorId === floorId) setSelectedFloorId(null);
+    setDeleteConfirm(null);
+    showToast('Floor deleted successfully');
+  };
+
+  /* ───────────────────────────────────────────────────────────────────────── */
+  /*  ROOM CRUD HANDLERS                                                      */
+  /* ───────────────────────────────────────────────────────────────────────── */
+  const handleOpenAddRoom = (floorId: string) => {
+    setTargetFloorIdForNewRoom(floorId);
+    const targetFloor = floors.find((f) => f.id === floorId);
+    const roomNum = targetFloor ? `${targetFloor.rooms.length + 1}01` : '101';
+    setNewRoomDraft({
+      roomNumber: roomNum,
+      sharingType: '2-Sharing (Double)',
+      bedCount: 2,
+      features: ['Attached Bathroom', 'High-Speed WiFi'],
+      rentPerMonth: 8000
+    });
+    setIsAddRoomModalOpen(true);
+  };
+
+  const handleSaveNewRoom = () => {
+    if (!targetFloorIdForNewRoom || !newRoomDraft.roomNumber.trim()) return;
+    const roomId = `r_${Date.now()}`;
+    const beds: BedModel[] = [];
+    for (let b = 1; b <= newRoomDraft.bedCount; b++) {
+      beds.push({
+        id: `b_${roomId}_${b}`,
+        bedNumber: `Bed ${newRoomDraft.roomNumber}-${String.fromCharCode(64 + b)}`,
+        status: 'vacant'
+      });
+    }
+
+    const createdRoom: RoomModel = {
+      id: roomId,
+      roomNumber: newRoomDraft.roomNumber.trim(),
+      floorId: targetFloorIdForNewRoom,
+      sharingType: newRoomDraft.sharingType,
+      features: newRoomDraft.features,
+      rentPerMonth: newRoomDraft.rentPerMonth,
+      beds
+    };
+
+    setFloors(
+      floors.map((f) => {
+        if (f.id === targetFloorIdForNewRoom) {
+          return { ...f, rooms: [...f.rooms, createdRoom] };
+        }
+        return f;
+      })
+    );
+    setIsAddRoomModalOpen(false);
+    showToast(`Added Room ${createdRoom.roomNumber}!`);
+  };
+
+  const handleEditRoomSave = () => {
+    if (!editingRoom || !editingRoom.room.roomNumber.trim()) return;
+    setFloors(
+      floors.map((f) => {
+        if (f.id === editingRoom.floorId) {
           return {
             ...f,
-            totalRooms: (f.totalRooms || f.rooms.length) + 1,
-            totalBeds: (f.totalBeds || 0) + generatedBeds.length,
-            rooms: [...f.rooms, newRoom]
+            rooms: f.rooms.map((r) => (r.id === editingRoom.room.id ? editingRoom.room : r))
           };
         }
         return f;
       })
     );
-
-    setAddRoomStep(1);
-    setCurrentView('dashboard');
+    setEditingRoom(null);
+    showToast(`Room ${editingRoom.room.roomNumber} updated!`);
   };
 
-  const handleConfirmAllocation = () => {
-    updateFloors(
-      activeHostel.floors.map(f => ({
-        ...f,
-        rooms: f.rooms.map(r => ({
-          ...r,
-          beds: r.beds.map(b => {
-            if (b.id === allocateTargetBedId) {
-              return {
-                ...b,
-                status: 'occupied',
-                monthlyRent: allocateRent,
-                student: {
-                  name: allocateStudentName,
-                  phone: allocateStudentPhone,
-                  checkInDate: new Date(allocateCheckInDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-                  duration: 12,
-                  monthlyRent: allocateRent,
-                  advancePaid: allocateAdvancePaid,
-                  notes: allocateNotes
-                }
-              };
-            }
-            return b;
-          })
-        }))
-      }))
+  const handleDeleteRoom = (floorId: string, roomId: string) => {
+    setFloors(
+      floors.map((f) => {
+        if (f.id === floorId) {
+          return { ...f, rooms: f.rooms.filter((r) => r.id !== roomId) };
+        }
+        return f;
+      })
     );
-    setCurrentView('dashboard');
+    if (activeRoomId === roomId) setActiveRoomId(null);
+    setDeleteConfirm(null);
+    showToast('Room deleted successfully');
   };
 
-  const handleUnallocateStudent = (roomId: string, bedId: string) => {
-    if (confirm('Are you sure you want to unallocate this student?')) {
-      updateFloors(
-        activeHostel.floors.map(f => ({
-          ...f,
-          rooms: f.rooms.map(r => {
-            if (r.id === roomId) {
-              return {
-                ...r,
-                beds: r.beds.map(b => (b.id === bedId ? { ...b, status: 'vacant', student: undefined } : b))
-              };
-            }
-            return r;
-          })
-        }))
-      );
-      setCurrentView('dashboard');
+  /* ───────────────────────────────────────────────────────────────────────── */
+  /*  BED CRUD & STATUS HANDLERS                                              */
+  /* ───────────────────────────────────────────────────────────────────────── */
+  const handleAddBedToRoom = (floorId: string, roomId: string) => {
+    setFloors(
+      floors.map((f) => {
+        if (f.id === floorId) {
+          return {
+            ...f,
+            rooms: f.rooms.map((r) => {
+              if (r.id === roomId) {
+                const nextChar = String.fromCharCode(65 + r.beds.length);
+                const newBed: BedModel = {
+                  id: `b_${Date.now()}`,
+                  bedNumber: `Bed ${r.roomNumber}-${nextChar}`,
+                  status: 'vacant'
+                };
+                return { ...r, beds: [...r.beds, newBed] };
+              }
+              return r;
+            })
+          };
+        }
+        return f;
+      })
+    );
+    showToast('New bed added to room!');
+  };
+
+  const handleEditBedSave = () => {
+    if (!editingBed || !editingBed.bed.bedNumber.trim()) return;
+    setFloors(
+      floors.map((f) => {
+        if (f.id === editingBed.floorId) {
+          return {
+            ...f,
+            rooms: f.rooms.map((r) => {
+              if (r.id === editingBed.roomId) {
+                return {
+                  ...r,
+                  beds: r.beds.map((b) => (b.id === editingBed.bed.id ? editingBed.bed : b))
+                };
+              }
+              return r;
+            })
+          };
+        }
+        return f;
+      })
+    );
+    setEditingBed(null);
+    showToast('Bed updated successfully!');
+  };
+
+  const handleDeleteBed = (floorId: string, roomId: string, bedId: string) => {
+    setFloors(
+      floors.map((f) => {
+        if (f.id === floorId) {
+          return {
+            ...f,
+            rooms: f.rooms.map((r) => {
+              if (r.id === roomId) {
+                return { ...r, beds: r.beds.filter((b) => b.id !== bedId) };
+              }
+              return r;
+            })
+          };
+        }
+        return f;
+      })
+    );
+    setActiveBedAction(null);
+    setDeleteConfirm(null);
+    showToast('Bed removed from room');
+  };
+
+  // Bed Status Actions: Assign, Maintenance, Reserved, Unassign, Remove Maintenance, Remove Reserved
+  const handleAssignResidentSubmit = () => {
+    if (!activeBedAction || !assignForm.name.trim()) {
+      showToast('Please enter full name');
+      return;
     }
+    if (!assignForm.phone.trim()) {
+      showToast('Please enter mobile number');
+      return;
+    }
+    const resident: BedResident = {
+      id: `res_${Date.now()}`,
+      name: assignForm.name.trim(),
+      phone: assignForm.phone.trim(),
+      checkInDate: assignForm.checkInDate || new Date().toISOString().split('T')[0],
+      course: 'Tenant',
+      rentAmount: Number(assignForm.rentAmount) || 8000,
+      paymentStatus: 'Paid',
+      emergencyContact: assignForm.altPhone.trim() || assignForm.phone.trim(),
+      email: assignForm.email.trim(),
+      address: assignForm.address.trim(),
+      aadhaarNumber: assignForm.aadhaarNumber.trim()
+    };
+
+    updateBedInState(activeBedAction.floorId, activeBedAction.roomId, activeBedAction.bed.id, {
+      status: 'occupied',
+      resident
+    });
+    setActiveBedAction(null);
+    showToast(`Tenant ${resident.name} assigned & saved!`);
   };
 
-  const handleToggleBedStatus = (roomId: string, bedId: string, nextStatus: BedStatus) => {
-    updateFloors(
-      activeHostel.floors.map(f => ({
-        ...f,
-        rooms: f.rooms.map(r => {
-          if (r.id === roomId) {
-            return {
-              ...r,
-              beds: r.beds.map(b => (b.id === bedId ? { ...b, status: nextStatus, student: nextStatus === 'vacant' || nextStatus === 'maintenance' ? undefined : b.student } : b))
-            };
-          }
-          return r;
-        })
-      }))
+  const handlePutInMaintenanceSubmit = () => {
+    if (!activeBedAction) return;
+    const reason = maintenanceForm.reason.trim() || 'Scheduled Maintenance';
+    updateBedInState(activeBedAction.floorId, activeBedAction.roomId, activeBedAction.bed.id, {
+      status: 'maintenance',
+      maintenanceReason: reason
+    });
+    setActiveBedAction(null);
+    showToast('Bed placed under maintenance');
+  };
+
+  const handlePutInReservedSubmit = () => {
+    if (!activeBedAction) return;
+    const reservedFor = reservedForm.reservedFor.trim() || 'Guest / Upcoming Resident';
+    updateBedInState(activeBedAction.floorId, activeBedAction.roomId, activeBedAction.bed.id, {
+      status: 'reserved',
+      reservedFor,
+      reservedUntil: reservedForm.untilDate || 'TBD'
+    });
+    setActiveBedAction(null);
+    showToast('Bed reserved successfully');
+  };
+
+  const handleRemoveFromMaintenance = (floorId: string, roomId: string, bedId: string) => {
+    updateBedInState(floorId, roomId, bedId, {
+      status: 'vacant',
+      maintenanceReason: undefined
+    });
+    setActiveBedAction(null);
+    showToast('Removed from maintenance (Now Vacant)');
+  };
+
+  const handleRemoveFromReserved = (floorId: string, roomId: string, bedId: string) => {
+    updateBedInState(floorId, roomId, bedId, {
+      status: 'vacant',
+      reservedFor: undefined,
+      reservedUntil: undefined
+    });
+    setActiveBedAction(null);
+    showToast('Reservation removed (Now Vacant)');
+  };
+
+  const handleUnassignResident = (floorId: string, roomId: string, bedId: string) => {
+    updateBedInState(floorId, roomId, bedId, {
+      status: 'vacant',
+      resident: undefined
+    });
+    setActiveBedAction(null);
+    showToast('Resident unassigned (Bed is now Vacant)');
+  };
+
+  const updateBedInState = (floorId: string, roomId: string, bedId: string, updates: Partial<BedModel>) => {
+    setFloors(
+      floors.map((f) => {
+        if (f.id === floorId) {
+          return {
+            ...f,
+            rooms: f.rooms.map((r) => {
+              if (r.id === roomId) {
+                return {
+                  ...r,
+                  beds: r.beds.map((b) => (b.id === bedId ? { ...b, ...updates } : b))
+                };
+              }
+              return r;
+            })
+          };
+        }
+        return f;
+      })
     );
   };
 
-  /* ─────────────────────────────────────────────────────────────────────────── */
-  /*  RENDER SCREEN VIEWS MATCHING REFERENCE DESIGN SYSTEM                       */
-  /* ─────────────────────────────────────────────────────────────────────────── */
+  /* ───────────────────────────────────────────────────────────────────────── */
+  /*  SEARCH FILTERING LOGIC                                                  */
+  /* ───────────────────────────────────────────────────────────────────────── */
+  const query = searchQuery.trim().toLowerCase();
 
+  const filteredFloors = floors
+    .map((fl) => {
+      const floorMatch = fl.floorNumber.toLowerCase().includes(query);
+      const matchingRooms = fl.rooms.filter((rm) => {
+        const roomMatch = rm.roomNumber.toLowerCase().includes(query);
+        const residentMatch = rm.beds.some(
+          (b) => b.resident && b.resident.name.toLowerCase().includes(query)
+        );
+        return floorMatch || roomMatch || residentMatch;
+      });
+
+      if (floorMatch || matchingRooms.length > 0) {
+        return {
+          ...fl,
+          rooms: query && !floorMatch ? matchingRooms : fl.rooms
+        };
+      }
+      return null;
+    })
+    .filter(Boolean) as FloorModel[];
+
+  const selectedFloor = floors.find((f) => f.id === selectedFloorId);
+  const activeRoom = activeRoomId
+    ? floors.flatMap((f) => f.rooms).find((r) => r.id === activeRoomId)
+    : null;
+  const activeRoomFloor = activeRoom
+    ? floors.find((f) => f.id === activeRoom.floorId)
+    : null;
+
+  /* ───────────────────────────────────────────────────────────────────────── */
+  /*  RENDER                                                                   */
+  /* ───────────────────────────────────────────────────────────────────────── */
   return (
-    <div className="bm-ref-app-container">
+    <div style={{ background: '#F8FAFC', minHeight: '100%', paddingBottom: '80px', color: '#1E293B', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      
+      {/* Toast Banner */}
+      {toastMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '52px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 9999,
+            background: '#1E293B',
+            color: '#FFFFFF',
+            padding: '10px 18px',
+            borderRadius: '24px',
+            fontSize: '13px',
+            fontWeight: 600,
+            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.35)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            maxWidth: '90%',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <CheckCircle size={16} color="#10B981" />
+          {toastMessage}
+        </div>
+      )}
 
-      {/* ────────────────── SCREEN 1: DASHBOARD (HOME) ────────────────── */}
-      {currentView === 'dashboard' && (
-        <div className="bm-ref-screen animate-fade-in" style={{ paddingBottom: 80 }}>
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/*  HEADER & ROOM MANAGEMENT TITLE                                    */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <div style={{ padding: '16px 16px 12px 16px', background: '#FFFFFF', borderBottom: '1px solid #E2E8F0' }}>
+        <div style={{ marginBottom: '12px' }}>
+          <h1 style={{ fontSize: '20px', fontWeight: 800, color: '#0F172A', margin: 0, letterSpacing: '-0.02em' }}>
+            Room Management
+          </h1>
+        </div>
 
+        {/* ── STATS CARDS BAR ── */}
+        <div
+          style={{
+            background: '#F1F5F9',
+            borderRadius: '14px',
+            padding: '12px 14px',
+            marginBottom: '12px'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>Occupancy Rate</span>
+            <span style={{ fontSize: '14px', fontWeight: 800, color: '#4F46E5' }}>{occupancyRate}% Occupied</span>
+          </div>
 
+          {/* Progress Bar */}
+          <div style={{ height: '8px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden', display: 'flex', marginBottom: '12px' }}>
+            <div style={{ width: `${occupancyRate}%`, background: '#10B981', transition: 'width 0.3s' }} />
+            <div style={{ width: `${totalBeds > 0 ? (vacantBeds / totalBeds) * 100 : 0}%`, background: '#3B82F6', transition: 'width 0.3s' }} />
+            <div style={{ width: `${totalBeds > 0 ? (maintenanceBeds / totalBeds) * 100 : 0}%`, background: '#EF4444', transition: 'width 0.3s' }} />
+            <div style={{ width: `${totalBeds > 0 ? (reservedBeds / totalBeds) * 100 : 0}%`, background: '#F97316', transition: 'width 0.3s' }} />
+          </div>
 
-          {/* Clean Segmented Tab Switcher */}
-          <div
+          {/* Stat Pills Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+            <div style={{ background: '#FFFFFF', padding: '8px 4px', borderRadius: '8px', textAlign: 'center', border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#10B981' }}>{occupiedBeds}</div>
+              <div style={{ fontSize: '10px', color: '#64748B', fontWeight: 600 }}>Occupied</div>
+            </div>
+            <div style={{ background: '#FFFFFF', padding: '8px 4px', borderRadius: '8px', textAlign: 'center', border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#3B82F6' }}>{vacantBeds}</div>
+              <div style={{ fontSize: '10px', color: '#64748B', fontWeight: 600 }}>Vacant</div>
+            </div>
+            <div style={{ background: '#FFFFFF', padding: '8px 4px', borderRadius: '8px', textAlign: 'center', border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#EF4444' }}>{maintenanceBeds}</div>
+              <div style={{ fontSize: '10px', color: '#64748B', fontWeight: 600 }}>Maint</div>
+            </div>
+            <div style={{ background: '#FFFFFF', padding: '8px 4px', borderRadius: '8px', textAlign: 'center', border: '1px solid #E2E8F0' }}>
+              <div style={{ fontSize: '15px', fontWeight: 800, color: '#F97316' }}>{reservedBeds}</div>
+              <div style={{ fontSize: '10px', color: '#64748B', fontWeight: 600 }}>Reserved</div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── SEARCH BAR ── */}
+        <div style={{ position: 'relative' }}>
+          <Search
+            size={16}
+            color="#94A3B8"
+            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search floor, room number, or resident..."
             style={{
-              display: 'flex',
-              background: '#f1f5f9',
-              borderRadius: '14px',
-              padding: '4px',
-              marginBottom: '14px'
+              width: '100%',
+              padding: '10px 36px 10px 36px',
+              fontSize: '13px',
+              borderRadius: '10px',
+              border: '1px solid #CBD5E1',
+              background: '#F8FAFC',
+              outline: 'none',
+              boxSizing: 'border-box'
             }}
-          >
+          />
+          {searchQuery && (
             <button
+              onClick={() => setSearchQuery('')}
               style={{
-                flex: 1,
+                position: 'absolute',
+                right: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
                 border: 'none',
-                padding: '9px 0',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 700,
                 cursor: 'pointer',
-                background: dashTab === 'floors' ? '#ffffff' : 'transparent',
-                color: dashTab === 'floors' ? '#4f46e5' : '#64748b',
-                boxShadow: dashTab === 'floors' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
-                transition: 'all 0.2s ease'
+                color: '#94A3B8'
               }}
-              onClick={() => setDashTab('floors')}
             >
-              🏢 Floors & Rooms ({activeHostel.floors.length})
+              <X size={16} />
             </button>
-            <button
-              style={{
-                flex: 1,
-                border: 'none',
-                padding: '9px 0',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                background: dashTab === 'beds' ? '#ffffff' : 'transparent',
-                color: dashTab === 'beds' ? '#4f46e5' : '#64748b',
-                boxShadow: dashTab === 'beds' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
-                transition: 'all 0.2s ease'
-              }}
-              onClick={() => setDashTab('beds')}
-            >
-              🛏️ All Beds ({allBedsWithMetadata.length})
-            </button>
-            <button
-              style={{
-                flex: 1,
-                border: 'none',
-                padding: '9px 0',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                background: dashTab === 'stats' ? '#ffffff' : 'transparent',
-                color: dashTab === 'stats' ? '#4f46e5' : '#64748b',
-                boxShadow: dashTab === 'stats' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
-                transition: 'all 0.2s ease'
-              }}
-              onClick={() => setDashTab('stats')}
-            >
-              📊 Stats
-            </button>
-          </div>
-
-          {/* ──────────────── TAB 1: FLOORS & ROOMS ──────────────── */}
-          {dashTab === 'floors' && (
-            <div className="animate-fade-in">
-              <div className="bm-ref-search-row" style={{ marginBottom: 12 }}>
-                <div className="bm-ref-search-box" style={{ flex: 1 }}>
-                  <Search size={18} className="bm-ref-search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search floor or room..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="bm-ref-section-header">
-                <h2 className="bm-ref-section-title">All Floors Overview</h2>
-              </div>
-
-              <div className="bm-ref-cards-list" style={{ marginTop: 8 }}>
-                {activeHostel.floors
-                  .filter(f => !searchQuery || f.floorName.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(floor => {
-                    let fTotalBeds = 0;
-                    let fOccupied = 0;
-                    let fVacant = 0;
-
-                    floor.rooms.forEach(r => {
-                      r.beds.forEach(b => {
-                        fTotalBeds++;
-                        if (b.status === 'occupied') fOccupied++;
-                        else if (b.status === 'vacant') fVacant++;
-                      });
-                    });
-
-                    const occupancyPct = fTotalBeds > 0 ? Math.round((fOccupied / fTotalBeds) * 100) : 0;
-
-                    return (
-                      <div
-                        key={floor.id}
-                        className="bm-ref-floor-card"
-                        onClick={() => {
-                          setSelectedFloorId(floor.id);
-                          setCurrentView('floor-details');
-                        }}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div className="bm-ref-floor-card-top">
-                          <div className="bm-ref-icon-box purple">
-                            <Building size={18} />
-                          </div>
-                          <div className="bm-ref-floor-titles">
-                            <div className="bm-ref-floor-name">{floor.floorName}</div>
-                            <div className="bm-ref-floor-sub">
-                              {floor.rooms.length} Rooms • {fTotalBeds} Beds
-                            </div>
-                          </div>
-                          <div className="bm-ref-pct-badge">{occupancyPct}% <ChevronRight size={14} /></div>
-                        </div>
-
-                        <div className="bm-ref-progress-track">
-                          <div className="bm-ref-progress-fill" style={{ width: `${occupancyPct}%` }} />
-                        </div>
-
-                        <div className="bm-ref-floor-footer">
-                          <span>🟢 {fOccupied} Occupied</span>
-                          <span>•</span>
-                          <span>🔴 {fVacant} Vacant</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
           )}
-
-          {/* ──────────────── TAB 2: ALL BEDS ──────────────── */}
-          {dashTab === 'beds' && (
-            <div className="animate-fade-in">
-              <div className="bm-ref-search-row" style={{ marginBottom: 12 }}>
-                <div className="bm-ref-search-box">
-                  <Search size={18} className="bm-ref-search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search bed number or student..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {/* Status Filter Pills */}
-              <div className="bm-ref-amenities-pills" style={{ marginBottom: 12 }}>
-                <button
-                  className={`bm-ref-pct-tag ${selectedStatusFilter === 'All Status' ? 'green' : 'gray'}`}
-                  onClick={() => setSelectedStatusFilter('All Status')}
-                  style={{ border: 'none', cursor: 'pointer', padding: '6px 12px' }}
-                >
-                  All ({allBedsWithMetadata.length})
-                </button>
-                <button
-                  className={`bm-ref-pct-tag ${selectedStatusFilter === 'occupied' ? 'green' : 'gray'}`}
-                  onClick={() => setSelectedStatusFilter('occupied')}
-                  style={{ border: 'none', cursor: 'pointer', padding: '6px 12px' }}
-                >
-                  🟢 Occupied ({allBedsWithMetadata.filter(b => b.bed.status === 'occupied').length})
-                </button>
-                <button
-                  className={`bm-ref-pct-tag ${selectedStatusFilter === 'vacant' ? 'mint' : 'gray'}`}
-                  onClick={() => setSelectedStatusFilter('vacant')}
-                  style={{ border: 'none', cursor: 'pointer', padding: '6px 12px' }}
-                >
-                  🔴 Vacant ({allBedsWithMetadata.filter(b => b.bed.status === 'vacant').length})
-                </button>
-              </div>
-
-              <div className="bm-ref-beds-full-list">
-                {allBedsWithMetadata
-                  .filter(item => {
-                    const matchStatus = selectedStatusFilter === 'All Status' || item.bed.status === selectedStatusFilter;
-                    const matchQuery = !searchQuery ||
-                      item.bed.bedNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      item.room.roomNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      (item.bed.student?.name && item.bed.student.name.toLowerCase().includes(searchQuery.toLowerCase()));
-                    return matchStatus && matchQuery;
-                  })
-                  .map(item => {
-                    const isOccupied = item.bed.status === 'occupied';
-
-                    return (
-                      <div
-                        key={item.bed.id}
-                        className="bm-ref-bed-full-card"
-                        onClick={() => handleSelectBed(item.bed.id)}
-                        style={{
-                          cursor: 'pointer',
-                          borderLeft: isOccupied ? '4px solid #10b981' : '4px solid #ef4444'
-                        }}
-                      >
-                        <div className="bm-ref-bed-full-top">
-                          <div>
-                            <div className="bm-ref-bed-full-num">
-                              {item.bed.bedNumber} {isOccupied ? '🟢' : '🔴'}
-                            </div>
-                            <div className="bm-ref-bed-full-type">
-                              {item.bed.bedType} • {item.room.roomNumber} • {item.floor.floorName}
-                            </div>
-                          </div>
-                          <span
-                            className="bm-ref-badge"
-                            style={{
-                              background: isOccupied ? '#dcfce7' : '#fee2e2',
-                              color: isOccupied ? '#15803d' : '#dc2626'
-                            }}
-                          >
-                            {isOccupied ? 'Occupied' : 'Vacant (Available)'}
-                          </span>
-                        </div>
-
-                        {item.bed.student ? (
-                          <div className="bm-ref-bed-student-box">
-                            <div className="bm-ref-student-lbl">Allotted Resident</div>
-                            <div className="bm-ref-student-name">{item.bed.student.name} ({item.bed.student.phone})</div>
-                            <div className="bm-ref-student-lbl" style={{ marginTop: 4 }}>Since: {item.bed.student.checkInDate}</div>
-                          </div>
-                        ) : (
-                          <div style={{ marginTop: 8, fontSize: 12, color: '#10b981', fontWeight: 700 }}>
-                            + Tap to Allocate Resident
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-
-          {/* ──────────────── TAB 3: STATS OVERVIEW ──────────────── */}
-          {dashTab === 'stats' && (
-            <div className="animate-fade-in">
-              <div className="bm-ref-stats-grid" style={{ marginBottom: 16 }}>
-                <div className="bm-ref-stat-card purple">
-                  <div className="bm-ref-stat-icon-wrap purple"><BedDouble size={20} /></div>
-                  <div>
-                    <div className="bm-ref-stat-val">{computedTotalBeds}</div>
-                    <div className="bm-ref-stat-lbl">Total Capacity</div>
-                  </div>
-                </div>
-
-                <div className="bm-ref-stat-card green">
-                  <div className="bm-ref-stat-icon-wrap green"><Users size={20} /></div>
-                  <div>
-                    <div className="bm-ref-stat-val">{computedOccupiedBeds}</div>
-                    <div className="bm-ref-stat-lbl">Occupied Beds</div>
-                  </div>
-                </div>
-
-                <div className="bm-ref-stat-card orange">
-                  <div className="bm-ref-stat-icon-wrap orange"><Key size={20} /></div>
-                  <div>
-                    <div className="bm-ref-stat-val">{computedVacantBeds}</div>
-                    <div className="bm-ref-stat-lbl">Vacant Beds</div>
-                  </div>
-                </div>
-
-                <div className="bm-ref-stat-card red">
-                  <div className="bm-ref-stat-icon-wrap red"><Wrench size={20} /></div>
-                  <div>
-                    <div className="bm-ref-stat-val">{computedMaintenanceBeds}</div>
-                    <div className="bm-ref-stat-lbl">Under Maintenance</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Occupancy Rate Bar Card */}
-              <div className="bm-ref-overview-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a' }}>Overall Hostel Occupancy</div>
-                    <div style={{ fontSize: 12, color: '#64748b' }}>{activeHostel.name}</div>
-                  </div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: '#10b981' }}>
-                    {computedTotalBeds > 0 ? Math.round((computedOccupiedBeds / computedTotalBeds) * 100) : 0}%
-                  </div>
-                </div>
-
-                <div className="bm-ref-progress-track" style={{ height: 10, margin: '14px 0 10px 0', borderRadius: 6 }}>
-                  <div
-                    className="bm-ref-progress-fill"
-                    style={{
-                      width: `${computedTotalBeds > 0 ? Math.round((computedOccupiedBeds / computedTotalBeds) * 100) : 0}%`,
-                      background: 'linear-gradient(90deg, #10b981, #059669)'
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
         </div>
-      )}
+      </div>
 
-
-      {/* ────────────────── SCREEN 2: FLOORS LIST (< Floors) ────────────────── */}
-      {currentView === 'floors-list' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">Floors</h1>
-          </div>
-
-          <div className="bm-ref-search-row">
-            <div className="bm-ref-search-box full">
-              <Search size={18} className="bm-ref-search-icon" />
-              <input type="text" placeholder="Search floor" />
-            </div>
-          </div>
-
-          <div className="bm-ref-cards-list">
-            {activeHostel.floors.map((floor, idx) => {
-              const pctList = [75, 78, 45, 90, 60];
-              const pct = pctList[idx % pctList.length];
-              return (
-                <div
-                  key={floor.id}
-                  className="bm-ref-floor-card"
-                  onClick={() => {
-                    setSelectedFloorId(floor.id);
-                    setCurrentView('floor-details');
-                  }}
-                >
-                  <div className="bm-ref-floor-card-top">
-                    <div className="bm-ref-icon-box purple">
-                      <Building size={18} />
-                    </div>
-                    <div className="bm-ref-floor-titles">
-                      <div className="bm-ref-floor-name">{floor.floorName}</div>
-                      <div className="bm-ref-floor-sub">
-                        {floor.totalRooms || floor.rooms.length} Rooms • {floor.totalBeds || 40} Beds
-                      </div>
-                    </div>
-                    <div className="bm-ref-pct-badge">{pct}% <ChevronRight size={14} /></div>
-                  </div>
-
-                  <div className="bm-ref-progress-track">
-                    <div className="bm-ref-progress-fill" style={{ width: `${pct}%` }} />
-                  </div>
-
-                  <div className="bm-ref-floor-footer">
-                    <span>{Math.round((pct / 100) * (floor.totalBeds || 40))} Occupied</span>
-                    <span>•</span>
-                    <span>{(floor.totalBeds || 40) - Math.round((pct / 100) * (floor.totalBeds || 40))} Vacant</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 3: FLOOR DETAILS (< Floor 1) ────────────────── */}
-      {currentView === 'floor-details' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">{currentFloorObj.floorName}</h1>
-            <MoreVertical size={20} color="#64748b" style={{ marginLeft: 'auto' }} />
-          </div>
-
-          {/* Floor Overview Card */}
-          <div className="bm-ref-overview-card">
-            <div className="bm-ref-overview-top">
-              <div>
-                <div className="bm-ref-overview-title">{currentFloorObj.floorName} Overview</div>
-                <div className="bm-ref-overview-sub">
-                  {currentFloorObj.totalRooms || currentFloorObj.rooms.length} Rooms • {currentFloorObj.totalBeds || 40} Beds
-                </div>
-              </div>
-              <div className="bm-ref-overview-pct">75%</div>
-            </div>
-
-            <div className="bm-ref-progress-track" style={{ margin: '12px 0 16px 0' }}>
-              <div className="bm-ref-progress-fill" style={{ width: '75%' }} />
-            </div>
-
-            {/* 3 Stat Cards in a row */}
-            <div className="bm-ref-triple-stats">
-              <div className="bm-ref-mini-stat green">
-                <div className="bm-ref-mini-num">30</div>
-                <div className="bm-ref-mini-lbl">Occupied</div>
-              </div>
-              <div className="bm-ref-mini-stat orange">
-                <div className="bm-ref-mini-num">10</div>
-                <div className="bm-ref-mini-lbl">Vacant</div>
-              </div>
-              <div className="bm-ref-mini-stat red">
-                <div className="bm-ref-mini-num">0</div>
-                <div className="bm-ref-mini-lbl">Maintenance</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Section Header */}
-          <div className="bm-ref-section-header" style={{ marginTop: 20 }}>
-            <h2 className="bm-ref-section-title">Rooms on {currentFloorObj.floorName}</h2>
-            <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Tap any room to view bed layout</span>
-          </div>
-
-          {/* Small Room Cards Grid for Floor */}
-          <div className="bm-ref-rooms-cards-grid" style={{ marginTop: 10 }}>
-            {currentFloorObj.rooms.map(room => {
-              const occBeds = room.beds.filter(b => b.status === 'occupied').length;
-              const totalBeds = room.beds.length || 2;
-              const pct = totalBeds > 0 ? Math.round((occBeds / totalBeds) * 100) : 0;
-
-              return (
-                <div
-                  key={room.id}
-                  className="bm-ref-room-full-card"
-                  onClick={() => handleSelectRoom(room.id)}
-                  style={{ cursor: 'pointer', padding: '14px', borderRadius: '16px' }}
-                >
-                  <div className="bm-ref-room-full-top">
-                    <div className="bm-ref-icon-box purple"><DoorOpen size={18} /></div>
-                    <div className="bm-ref-room-full-titles">
-                      <div className="bm-ref-room-full-num">{room.roomNumber}</div>
-                      <div className="bm-ref-room-full-sub">{totalBeds} Beds • {room.roomType || 'Single Sharing'}</div>
-                    </div>
-                    <span className={`bm-ref-pct-tag ${pct === 100 ? 'green' : pct > 0 ? 'mint' : 'gray'}`}>
-                      {pct}%
-                    </span>
-                  </div>
-
-                  {/* Bed Icon Dots (Green = Occupied, Red = Vacant) */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8 }}>
-                    {room.beds.map((b, bi) => (
-                      <span
-                        key={bi}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 4,
-                          fontSize: 10.5,
-                          fontWeight: 700,
-                          padding: '2px 8px',
-                          borderRadius: 10,
-                          background: b.status === 'occupied' ? '#dcfce7' : '#fee2e2',
-                          color: b.status === 'occupied' ? '#15803d' : '#dc2626'
-                        }}
-                      >
-                        {b.status === 'occupied' ? '🟢' : '🔴'} {b.bedNumber}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="bm-ref-room-full-bottom" style={{ marginTop: 8 }}>
-                    <span>{occBeds}/{totalBeds} Occupied</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 4: ROOMS LIST (< Rooms) ────────────────── */}
-      {currentView === 'rooms-list' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">Rooms</h1>
-            <MoreVertical size={20} color="#64748b" style={{ marginLeft: 'auto' }} />
-          </div>
-
-          <div className="bm-ref-search-row">
-            <div className="bm-ref-search-box" style={{ flex: 1 }}>
-              <Search size={18} className="bm-ref-search-icon" />
-              <input type="text" placeholder="Search room" />
-            </div>
-          </div>
-
-          <div className="bm-ref-rooms-cards-grid">
-            {activeHostel.floors.flatMap(f => f.rooms).map((room, idx) => {
-              const occPctList = [100, 50, 0, 100, 50];
-              const pct = occPctList[idx % occPctList.length];
-              const occBeds = pct === 100 ? 2 : pct === 50 ? 1 : 0;
-
-              return (
-                <div
-                  key={room.id}
-                  className="bm-ref-room-full-card"
-                  onClick={() => handleSelectRoom(room.id)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="bm-ref-room-full-top">
-                    <div className="bm-ref-icon-box purple"><DoorOpen size={18} /></div>
-                    <div className="bm-ref-room-full-titles">
-                      <div className="bm-ref-room-full-num">{room.roomNumber}</div>
-                      <div className="bm-ref-room-full-sub">{room.floorName} • {room.beds.length} Beds</div>
-                    </div>
-                    <span className={`bm-ref-pct-tag ${pct === 100 ? 'green' : pct === 50 ? 'mint' : 'gray'}`}>
-                      {pct}%
-                    </span>
-                  </div>
-                  <div className="bm-ref-room-full-bottom">
-                    <span>{occBeds}/{room.beds.length} Occupied</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <button className="bm-ref-fab-btn" onClick={() => setCurrentView('add-room')}>
-            <Plus size={20} /> Add Room
-          </button>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 5: ROOM DETAILS (< Room 101) ────────────────── */}
-      {currentView === 'room-details' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('floor-details')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">{currentRoomObj?.roomNumber || 'Room Details'}</h1>
-            <MoreVertical size={20} color="#64748b" style={{ marginLeft: 'auto' }} />
-          </div>
-
-          {/* Room Overview Box */}
-          <div className="bm-ref-room-header-box">
-            <div className="bm-ref-room-header-top">
-              <div>
-                <div className="bm-ref-room-h-title">{currentRoomObj?.roomNumber || 'Room 101'}</div>
-                <div className="bm-ref-room-h-sub">{currentRoomObj?.floorName || 'Floor 1'} • {currentRoomObj?.beds?.length || 0} Beds</div>
-              </div>
-              <div className="bm-ref-pct-tag green">100%</div>
-            </div>
-            <div className="bm-ref-room-h-occ">
-              {currentRoomObj?.beds?.filter(b => b.status === 'occupied').length || 0} / {currentRoomObj?.beds?.length || 0} Occupied
-            </div>
-          </div>
-
-          {/* Key Details List */}
-          <div className="bm-ref-details-spec-list">
-            <div className="bm-ref-spec-row">
-              <span className="bm-ref-spec-lbl">Room Type</span>
-              <span className="bm-ref-spec-val">{currentRoomObj?.roomType || 'Single Sharing'}</span>
-            </div>
-            <div className="bm-ref-spec-row">
-              <span className="bm-ref-spec-lbl">Rent</span>
-              <span className="bm-ref-spec-val">₹{(currentRoomObj?.monthlyRent || 8000).toLocaleString('en-IN')} / Month</span>
-            </div>
-            <div className="bm-ref-spec-row col">
-              <span className="bm-ref-spec-lbl">Description</span>
-              <span className="bm-ref-spec-desc">
-                {currentRoomObj?.description || 'Well furnished single sharing room with attached bathroom.'}
-              </span>
-            </div>
-            <div className="bm-ref-spec-row col">
-              <span className="bm-ref-spec-lbl">Amenities</span>
-              <div className="bm-ref-amenities-pills">
-                {(currentRoomObj?.amenities || ['Wi-Fi', 'AC', 'Attached Bath', 'Wardrobe']).map((amenity, i) => (
-                  <span key={i} className="bm-ref-amenity-pill">
-                    {amenity === 'Wi-Fi' ? <Wifi size={13} /> : amenity === 'AC' ? <Tv size={13} /> : amenity === 'Attached Bath' ? <Bath size={13} /> : <DoorOpen size={13} />} {amenity}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Beds in Room Section Header */}
-          <div className="bm-ref-section-header" style={{ marginTop: 24 }}>
-            <h2 className="bm-ref-section-title">Beds Layout in {currentRoomObj?.roomNumber || 'Room'}</h2>
-            <button
-              className="bm-ref-view-all-btn"
-              onClick={() => setCurrentView('beds-in-room')}
-            >
-              All Beds <ChevronRight size={16} />
-            </button>
-          </div>
-
-          {/* Interactive Bed Cards Layout */}
-          <div className="bm-ref-beds-list" style={{ marginTop: 10 }}>
-            {(currentRoomObj?.beds || []).map(bed => {
-              const isOccupied = bed.status === 'occupied';
-
-              return (
-                <div
-                  key={bed.id}
-                  className="bm-ref-bed-row-card"
-                  onClick={() => handleSelectBed(bed.id)}
-                  style={{
-                    cursor: 'pointer',
-                    borderLeft: isOccupied ? '4px solid #10b981' : '4px solid #ef4444',
-                    background: '#ffffff'
-                  }}
-                >
-                  {/* Bed Icon: Green for Occupied, Red for Vacant */}
-                  <div
-                    className="bm-ref-icon-box"
-                    style={{
-                      background: isOccupied ? '#dcfce7' : '#fee2e2',
-                      color: isOccupied ? '#10b981' : '#ef4444'
-                    }}
-                  >
-                    <BedDouble size={20} />
-                  </div>
-
-                  <div className="bm-ref-bed-row-titles">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 14.5, fontWeight: 800, color: '#0f172a' }}>{bed.bedNumber}</span>
-                      <span style={{ fontSize: 12 }}>{isOccupied ? '🟢' : '🔴'}</span>
-                    </div>
-                    <div className="bm-ref-bed-row-type">
-                      {isOccupied ? `Allotted To: ${bed.student?.name || 'Resident'}` : 'Vacant • Tap to Allocate'}
-                    </div>
-                  </div>
-
-                  <span
-                    className="bm-ref-badge"
-                    style={{
-                      background: isOccupied ? '#dcfce7' : '#fee2e2',
-                      color: isOccupied ? '#15803d' : '#dc2626'
-                    }}
-                  >
-                    {isOccupied ? 'Occupied' : 'Vacant (Available)'}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 6: BEDS IN ROOM / ALL BEDS ────────────────── */}
-      {currentView === 'beds-in-room' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('room-details')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">
-              {selectedStatusFilter !== 'All Status'
-                ? `${selectedStatusFilter.charAt(0).toUpperCase() + selectedStatusFilter.slice(1)} Beds`
-                : 'All Beds'}
-            </h1>
-          </div>
-
-          {/* Quick Filter Pills */}
-          <div className="bm-ref-amenities-pills" style={{ marginBottom: 12 }}>
-            <button
-              className={`bm-ref-pct-tag ${selectedStatusFilter === 'All Status' ? 'green' : 'gray'}`}
-              onClick={() => setSelectedStatusFilter('All Status')}
-              style={{ border: 'none', cursor: 'pointer', padding: '6px 12px' }}
-            >
-              All Beds ({allBedsWithMetadata.length})
-            </button>
-            <button
-              className={`bm-ref-pct-tag ${selectedStatusFilter === 'occupied' ? 'green' : 'gray'}`}
-              onClick={() => setSelectedStatusFilter('occupied')}
-              style={{ border: 'none', cursor: 'pointer', padding: '6px 12px' }}
-            >
-              Occupied ({allBedsWithMetadata.filter(b => b.bed.status === 'occupied').length})
-            </button>
-            <button
-              className={`bm-ref-pct-tag ${selectedStatusFilter === 'vacant' ? 'mint' : 'gray'}`}
-              onClick={() => setSelectedStatusFilter('vacant')}
-              style={{ border: 'none', cursor: 'pointer', padding: '6px 12px' }}
-            >
-              Vacant ({allBedsWithMetadata.filter(b => b.bed.status === 'vacant').length})
-            </button>
-            <button
-              className={`bm-ref-pct-tag ${selectedStatusFilter === 'maintenance' ? 'gray' : 'gray'}`}
-              onClick={() => setSelectedStatusFilter('maintenance')}
-              style={{ border: 'none', cursor: 'pointer', padding: '6px 12px' }}
-            >
-              Maintenance ({allBedsWithMetadata.filter(b => b.bed.status === 'maintenance').length})
-            </button>
-          </div>
-
-          <div className="bm-ref-beds-full-list">
-            {allBedsWithMetadata
-              .filter(item => selectedStatusFilter === 'All Status' || item.bed.status === selectedStatusFilter)
-              .map(item => (
-                <div
-                  key={item.bed.id}
-                  className="bm-ref-bed-full-card"
-                  onClick={() => handleSelectBed(item.bed.id)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="bm-ref-bed-full-top">
-                    <div>
-                      <div className="bm-ref-bed-full-num">{item.bed.bedNumber}</div>
-                      <div className="bm-ref-bed-full-type">
-                        {item.bed.bedType} • {item.room.roomNumber} • {item.floor.floorName}
-                      </div>
-                    </div>
-                    <span className={`bm-ref-badge ${item.bed.status === 'occupied' ? 'green' : item.bed.status === 'vacant' ? 'mint' : 'maintenance'}`}>
-                      {item.bed.status.charAt(0).toUpperCase() + item.bed.status.slice(1)}
-                    </span>
-                  </div>
-
-                  {item.bed.student && (
-                    <div className="bm-ref-bed-student-box">
-                      <div className="bm-ref-student-lbl">Allotted To</div>
-                      <div className="bm-ref-student-name">{item.bed.student.name}</div>
-                      <div className="bm-ref-student-lbl" style={{ marginTop: 6 }}>Since</div>
-                      <div className="bm-ref-student-date">{item.bed.student.checkInDate}</div>
-                    </div>
-                  )}
-                </div>
-              ))}
-          </div>
-
-          <button className="bm-ref-fab-btn" onClick={() => setCurrentView('add-bed')}>
-            <Plus size={20} /> Add Bed
-          </button>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 7: BED DETAILS (< Bed Details) ────────────────── */}
-      {currentView === 'bed-details' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('room-details')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">Bed Details</h1>
-          </div>
-
-          {/* Hero Card */}
-          <div className="bm-ref-bed-detail-hero">
-            <div className="bm-ref-bed-detail-hero-top">
-              <div>
-                <div className="bm-ref-bd-hero-num">{currentBedObj?.bedNumber || 'B101-A'}</div>
-                <div className="bm-ref-bd-hero-type">{currentBedObj?.bedType || 'Single Bed'}</div>
-              </div>
-              <span className={`bm-ref-badge ${currentBedObj?.status === 'occupied' ? 'green' : 'mint'}`}>
-                {currentBedObj?.status ? currentBedObj.status.charAt(0).toUpperCase() + currentBedObj.status.slice(1) : 'Occupied'}
-              </span>
-            </div>
-          </div>
-
-          {/* Detail Table */}
-          <div className="bm-ref-details-table">
-            <div className="bm-ref-table-row">
-              <span className="bm-ref-tbl-lbl">Room</span>
-              <span className="bm-ref-tbl-val">{parentRoomForBed?.roomNumber || currentRoomObj?.roomNumber || 'Room 101'}</span>
-            </div>
-            <div className="bm-ref-table-row">
-              <span className="bm-ref-tbl-lbl">Floor</span>
-              <span className="bm-ref-tbl-val">{parentFloorForBed?.floorName || currentRoomObj?.floorName || 'Floor 1'}</span>
-            </div>
-            <div className="bm-ref-table-row">
-              <span className="bm-ref-tbl-lbl">Bed Type</span>
-              <span className="bm-ref-tbl-val">{currentBedObj?.bedType || 'Single Bed'}</span>
-            </div>
-            <div className="bm-ref-table-row">
-              <span className="bm-ref-tbl-lbl">Rent</span>
-              <span className="bm-ref-tbl-val">₹{(currentBedObj?.monthlyRent || 8000).toLocaleString('en-IN')} / Month</span>
-            </div>
-            <div className="bm-ref-table-row">
-              <span className="bm-ref-tbl-lbl">Status</span>
-              <span className="bm-ref-tbl-val">
-                {currentBedObj?.status ? currentBedObj.status.charAt(0).toUpperCase() + currentBedObj.status.slice(1) : 'Occupied'}
-              </span>
-            </div>
-            <div className="bm-ref-table-row">
-              <span className="bm-ref-tbl-lbl">Allotted To</span>
-              <span className="bm-ref-tbl-val bold">{currentBedObj?.student?.name || 'Rohit Sharma'}</span>
-            </div>
-            <div className="bm-ref-table-row">
-              <span className="bm-ref-tbl-lbl">Contact</span>
-              <span className="bm-ref-tbl-val">{currentBedObj?.student?.phone || '9876543210'}</span>
-            </div>
-            <div className="bm-ref-table-row">
-              <span className="bm-ref-tbl-lbl">Since</span>
-              <span className="bm-ref-tbl-val">{currentBedObj?.student?.checkInDate || '01 May 2024'}</span>
-            </div>
-            <div className="bm-ref-table-row">
-              <span className="bm-ref-tbl-lbl">Notes</span>
-              <span className="bm-ref-tbl-val">{currentBedObj?.student?.notes || '-'}</span>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="bm-ref-bd-actions-row">
-            <button
-              className="bm-ref-outline-btn purple"
-              onClick={() => setCurrentView('add-bed')}
-            >
-              Edit
-            </button>
-            <button
-              className="bm-ref-outline-btn orange"
-              onClick={() => {
-                const next: BedStatus = currentBedObj?.status === 'vacant' ? 'occupied' : 'vacant';
-                if (currentRoomObj && currentBedObj) {
-                  handleToggleBedStatus(currentRoomObj.id, currentBedObj.id, next);
-                }
-              }}
-            >
-              Change Status
-            </button>
-            <button
-              className="bm-ref-outline-btn red"
-              onClick={() => {
-                if (currentRoomObj && currentBedObj) {
-                  handleUnallocateStudent(currentRoomObj.id, currentBedObj.id);
-                }
-              }}
-            >
-              Unallocate
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 8: ADD BED (< Add Bed) ────────────────── */}
-      {currentView === 'add-bed' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">Add Bed</h1>
-          </div>
-
-          <div className="bm-ref-form-card">
-            <label className="bm-ref-form-lbl">Floor *</label>
-            <select
-              className="bm-ref-form-input"
-              value={formFloorId}
-              onChange={e => setFormFloorId(e.target.value)}
-            >
-              {activeHostel.floors.map(f => (
-                <option key={f.id} value={f.id}>{f.floorName}</option>
-              ))}
-            </select>
-
-            <label className="bm-ref-form-lbl">Room *</label>
-            <select
-              className="bm-ref-form-input"
-              value={formRoomId}
-              onChange={e => setFormRoomId(e.target.value)}
-            >
-              {activeHostel.floors.flatMap(f => f.rooms).map(r => (
-                <option key={r.id} value={r.id}>{r.roomNumber}</option>
-              ))}
-            </select>
-
-            <label className="bm-ref-form-lbl">Bed ID *</label>
-            <input
-              type="text"
-              className="bm-ref-form-input"
-              placeholder="e.g. B101-A"
-              value={formBedIdText}
-              onChange={e => setFormBedIdText(e.target.value)}
-            />
-
-            <label className="bm-ref-form-lbl">Bed Type *</label>
-            <select
-              className="bm-ref-form-input"
-              value={formBedType}
-              onChange={e => setFormBedType(e.target.value)}
-            >
-              <option value="Single Bed">Single Bed</option>
-              <option value="Bunk Bed">Bunk Bed</option>
-            </select>
-
-            <div className="bm-ref-form-two-col">
-              <div>
-                <label className="bm-ref-form-lbl">Rent (₹)</label>
-                <input
-                  type="number"
-                  className="bm-ref-form-input"
-                  value={formRent}
-                  onChange={e => setFormRent(Number(e.target.value))}
-                />
-              </div>
-              <div>
-                <label className="bm-ref-form-lbl">Status *</label>
-                <select
-                  className="bm-ref-form-input"
-                  value={formStatus}
-                  onChange={e => setFormStatus(e.target.value as BedStatus)}
-                >
-                  <option value="vacant">Vacant</option>
-                  <option value="occupied">Occupied</option>
-                  <option value="maintenance">Maintenance</option>
-                  <option value="reserved">Reserved</option>
-                </select>
-              </div>
-            </div>
-
-            {formStatus === 'occupied' && (
-              <>
-                <label className="bm-ref-form-lbl" style={{ marginTop: 12 }}>Student Name *</label>
-                <input
-                  type="text"
-                  className="bm-ref-form-input"
-                  placeholder="e.g. Rohit Sharma"
-                  value={formStudentName}
-                  onChange={e => setFormStudentName(e.target.value)}
-                />
-
-                <label className="bm-ref-form-lbl">Phone Contact</label>
-                <input
-                  type="text"
-                  className="bm-ref-form-input"
-                  placeholder="9876543210"
-                  value={formStudentPhone}
-                  onChange={e => setFormStudentPhone(e.target.value)}
-                />
-              </>
-            )}
-
-            <label className="bm-ref-form-lbl">Notes</label>
-            <textarea
-              className="bm-ref-form-input textarea"
-              placeholder="Enter notes (optional)"
-              value={formNotes}
-              onChange={e => setFormNotes(e.target.value)}
-            />
-
-            <button className="bm-ref-btn-primary" onClick={handleSaveBed}>
-              Save Bed
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN: STEP-BY-STEP ADD ROOM ────────────────── */}
-      {currentView === 'add-room' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button
-              className="bm-ref-back-btn"
-              onClick={() => {
-                if (addRoomStep > 1) {
-                  setAddRoomStep(prev => prev - 1);
-                } else {
-                  setCurrentView('dashboard');
-                }
-              }}
-            >
-              <ArrowLeft size={18} />
-            </button>
-            <div>
-              <h1 className="bm-ref-sub-title">Add New Room</h1>
-              <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>
-                Step {addRoomStep} of 4 • {addRoomStep === 1 ? 'Basic Info' : addRoomStep === 2 ? 'Beds Setup' : addRoomStep === 3 ? 'Rent & Amenities' : 'Review & Confirm'}
-              </div>
-            </div>
-          </div>
-
-          {/* STEP PROGRESS INDICATOR PILLS */}
-          <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
-            {[
-              { step: 1, label: '1. Basic Info' },
-              { step: 2, label: '2. Beds Setup' },
-              { step: 3, label: '3. Rent & Amenities' },
-              { step: 4, label: '4. Summary' }
-            ].map(s => {
-              const isActive = addRoomStep === s.step;
-              const isCompleted = addRoomStep > s.step;
-
-              return (
-                <button
-                  key={s.step}
-                  type="button"
-                  onClick={() => setAddRoomStep(s.step)}
-                  style={{
-                    flex: 1,
-                    minWidth: 80,
-                    padding: '8px 6px',
-                    borderRadius: 12,
-                    fontSize: 11.5,
-                    fontWeight: 700,
-                    border: 'none',
-                    cursor: 'pointer',
-                    background: isActive
-                      ? 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)'
-                      : isCompleted
-                        ? '#dcfce7'
-                        : '#f1f5f9',
-                    color: isActive ? '#ffffff' : isCompleted ? '#15803d' : '#64748b',
-                    boxShadow: isActive ? '0 2px 8px rgba(79, 70, 229, 0.3)' : 'none',
-                    transition: 'all 0.2s ease',
-                    textAlign: 'center'
-                  }}
-                >
-                  {isCompleted ? '✓ ' : ''}{s.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* ───────── STEP 1: BASIC INFORMATION ───────── */}
-          {addRoomStep === 1 && (
-            <div className="bm-ref-form-card animate-fade-in">
-              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Building size={18} color="#4f46e5" /> Step 1: Select Floor & Room Details
-              </div>
-
-              <label className="bm-ref-form-lbl">Select Floor *</label>
-              <select
-                className="bm-ref-form-input"
-                value={formFloorId}
-                onChange={e => setFormFloorId(e.target.value)}
-              >
-                {activeHostel.floors.map(f => (
-                  <option key={f.id} value={f.id}>
-                    {f.floorName} ({f.rooms.length} Rooms existing)
-                  </option>
-                ))}
-              </select>
-
-              <label className="bm-ref-form-lbl" style={{ marginTop: 12 }}>Room Number / Name *</label>
-              <input
-                type="text"
-                className="bm-ref-form-input"
-                placeholder="e.g. Room 107"
-                value={formRoomNumberInput}
-                onChange={e => setFormRoomNumberInput(e.target.value)}
-              />
-
-              <label className="bm-ref-form-lbl" style={{ marginTop: 12 }}>Room Sharing Type *</label>
-              <select
-                className="bm-ref-form-input"
-                value={formRoomTypeInput}
-                onChange={e => {
-                  const val = e.target.value;
-                  setFormRoomTypeInput(val);
-                  if (val === 'Single Sharing') setFormBedCount(1);
-                  else if (val === 'Double Sharing') setFormBedCount(2);
-                  else if (val === 'Triple Sharing') setFormBedCount(3);
-                  else if (val === 'Four Sharing') setFormBedCount(4);
-                  else if (val === 'Executive Suite') setFormBedCount(2);
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/*  CONTENT VIEW: SUB-PAGE (FLOOR DETAILS) OR MAIN FLOORS LIST        */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <div style={{ padding: '16px' }}>
+        {selectedFloorId && selectedFloor ? (
+          /* ── FLOOR DETAIL SUB-PAGE VIEW ── */
+          <div>
+            {/* Top Navigation Row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <button
+                onClick={() => setSelectedFloorId(null)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#FFFFFF',
+                  border: '1px solid #CBD5E1',
+                  borderRadius: '8px',
+                  padding: '6px 12px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  color: '#334155',
+                  cursor: 'pointer'
                 }}
               >
-                <option value="Single Sharing">Single Sharing (1 Bed)</option>
-                <option value="Double Sharing">Double Sharing (2 Beds)</option>
-                <option value="Triple Sharing">Triple Sharing (3 Beds)</option>
-                <option value="Four Sharing">Four Sharing (4 Beds)</option>
-                <option value="Executive Suite">Executive Suite (2 Beds)</option>
-              </select>
+                <ArrowLeft size={16} />
+                All Floors
+              </button>
 
               <button
-                type="button"
-                className="bm-ref-btn-primary"
-                style={{ marginTop: 20 }}
-                onClick={() => {
-                  if (!formRoomNumberInput.trim()) {
-                    alert('Please enter a room number');
-                    return;
-                  }
-                  setAddRoomStep(2);
+                onClick={() => handleOpenAddRoom(selectedFloor.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#2563EB',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '24px',
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)'
                 }}
               >
-                Next: Beds Setup →
+                <Plus size={16} />
+                Add Room
               </button>
             </div>
-          )}
 
-          {/* ───────── STEP 2: BEDS SETUP ───────── */}
-          {addRoomStep === 2 && (
-            <div className="bm-ref-form-card animate-fade-in">
-              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <BedDouble size={18} color="#4f46e5" /> Step 2: Configure Beds Capacity
-              </div>
-
-              <label className="bm-ref-form-lbl">Total Beds Capacity in Room *</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                <button
-                  type="button"
-                  style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid #cbd5e1', background: '#f8fafc', fontSize: 18, fontWeight: 800, cursor: 'pointer' }}
-                  onClick={() => setFormBedCount(prev => Math.max(1, prev - 1))}
-                >
-                  -
-                </button>
-                <span style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', minWidth: 40, textAlign: 'center' }}>
-                  {formBedCount} Bed{formBedCount > 1 ? 's' : ''}
-                </span>
-                <button
-                  type="button"
-                  style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid #cbd5e1', background: '#f8fafc', fontSize: 18, fontWeight: 800, cursor: 'pointer' }}
-                  onClick={() => setFormBedCount(prev => Math.min(8, prev + 1))}
-                >
-                  +
-                </button>
-              </div>
-
-              <label className="bm-ref-form-lbl">Bed Type *</label>
-              <select
-                className="bm-ref-form-input"
-                value={formBedTypeInput}
-                onChange={e => setFormBedTypeInput(e.target.value)}
-              >
-                <option value="Single Bed">Single Bed</option>
-                <option value="Bunk Bed">Bunk Bed</option>
-              </select>
-
-              {/* Generated Beds Preview */}
-              <div style={{ marginTop: 16, background: '#f8fafc', padding: 12, borderRadius: 12, border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 8 }}>
-                  Generated Beds List Preview:
+            {/* Floor Header Info */}
+            <div style={{ background: '#FFFFFF', padding: '14px', borderRadius: '12px', border: '1px solid #E2E8F0', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4F46E5' }}>
+                    <Building size={20} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '17px', fontWeight: 800, margin: 0, color: '#0F172A' }}>{selectedFloor.floorNumber}</h2>
+                    <p style={{ fontSize: '12px', color: '#64748B', margin: '2px 0 0 0' }}>
+                      {selectedFloor.rooms.length} Rooms • {selectedFloor.rooms.reduce((acc, r) => acc + r.beds.length, 0)} Total Beds
+                    </p>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {Array.from({ length: formBedCount }).map((_, i) => {
-                    const bedLetter = String.fromCharCode(65 + i);
-                    const bedNum = `${formRoomNumberInput.replace(/\s+/g, '')}-${bedLetter}`;
-                    return (
-                      <span
-                        key={i}
-                        style={{
-                          fontSize: 11.5,
-                          fontWeight: 700,
-                          padding: '4px 10px',
-                          borderRadius: 8,
-                          background: '#dcfce7',
-                          color: '#15803d',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 4
-                        }}
-                      >
-                        🛏️ {bedNum} (Vacant)
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
 
-              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-                <button
-                  type="button"
-                  className="bm-ref-outline-btn purple"
-                  style={{ flex: 1 }}
-                  onClick={() => setAddRoomStep(1)}
-                >
-                  ← Back
-                </button>
-                <button
-                  type="button"
-                  className="bm-ref-btn-primary"
-                  style={{ flex: 2 }}
-                  onClick={() => setAddRoomStep(3)}
-                >
-                  Next: Rent & Amenities →
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => setEditingFloor(selectedFloor)}
+                    style={{ background: '#F1F5F9', border: 'none', padding: '9px 11px', borderRadius: '10px', cursor: 'pointer', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Edit Floor Name"
+                  >
+                    <Edit3 size={19} />
+                  </button>
+                  <button
+                    onClick={() =>
+                      setDeleteConfirm({
+                        type: 'floor',
+                        id: selectedFloor.id,
+                        title: selectedFloor.floorNumber
+                      })
+                    }
+                    style={{ background: '#FEF2F2', border: 'none', padding: '9px 11px', borderRadius: '10px', cursor: 'pointer', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Delete Floor"
+                  >
+                    <Trash2 size={19} />
+                  </button>
+                </div>
               </div>
             </div>
-          )}
 
-          {/* ───────── STEP 3: RENT & AMENITIES ───────── */}
-          {addRoomStep === 3 && (
-            <div className="bm-ref-form-card animate-fade-in">
-              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Key size={18} color="#4f46e5" /> Step 3: Rent & Amenities Selection
+            {/* Rooms Grid */}
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#475569', marginBottom: '10px' }}>
+              Rooms on {selectedFloor.floorNumber}
+            </h3>
+
+            {selectedFloor.rooms.length === 0 ? (
+              <div style={{ background: '#FFFFFF', padding: '32px', textAlign: 'center', borderRadius: '12px', border: '1px border-dashed #CBD5E1' }}>
+                <BedDouble size={32} color="#94A3B8" style={{ marginBottom: '8px' }} />
+                <p style={{ fontSize: '14px', fontWeight: 600, color: '#64748B', margin: 0 }}>No rooms created on this floor yet.</p>
+                <button
+                  onClick={() => handleOpenAddRoom(selectedFloor.id)}
+                  style={{ marginTop: '12px', background: '#2563EB', color: '#FFFFFF', border: 'none', borderRadius: '24px', padding: '10px 20px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)' }}
+                >
+                  <Plus size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Add First Room
+                </button>
               </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {selectedFloor.rooms.map((room) => {
+                  const roomOccupied = room.beds.filter((b) => b.status === 'occupied').length;
+                  const roomVacant = room.beds.filter((b) => b.status === 'vacant').length;
+                  const roomMaint = room.beds.filter((b) => b.status === 'maintenance').length;
+                  const roomRes = room.beds.filter((b) => b.status === 'reserved').length;
 
-              <label className="bm-ref-form-lbl">Monthly Rent per Bed (₹) *</label>
-              <input
-                type="number"
-                className="bm-ref-form-input"
-                placeholder="8000"
-                value={formRentAmount}
-                onChange={e => setFormRentAmount(Number(e.target.value))}
-              />
-
-              <label className="bm-ref-form-lbl" style={{ marginTop: 12 }}>Room Amenities *</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6, marginBottom: 12 }}>
-                {[
-                  { name: 'Wi-Fi', icon: <Wifi size={13} /> },
-                  { name: 'AC', icon: <Tv size={13} /> },
-                  { name: 'Attached Bath', icon: <Bath size={13} /> },
-                  { name: 'Wardrobe', icon: <DoorOpen size={13} /> },
-                  { name: 'TV', icon: <Tv size={13} /> },
-                  { name: 'Balcony', icon: <Building size={13} /> },
-                  { name: 'Study Table', icon: <FileText size={13} /> },
-                  { name: 'Geyser', icon: <Wrench size={13} /> }
-                ].map(item => {
-                  const isSelected = formSelectedAmenities.includes(item.name);
                   return (
-                    <button
-                      key={item.name}
-                      type="button"
-                      onClick={() => toggleAmenity(item.name)}
+                    <div
+                      key={room.id}
+                      onClick={() => setActiveRoomId(room.id)}
                       style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        padding: '6px 12px',
-                        borderRadius: 20,
-                        fontSize: 12,
-                        fontWeight: 700,
-                        border: isSelected ? '1px solid #6366f1' : '1px solid #cbd5e1',
-                        background: isSelected ? '#eeedfe' : '#ffffff',
-                        color: isSelected ? '#4f46e5' : '#475569',
+                        background: '#FFFFFF',
+                        borderRadius: '12px',
+                        padding: '14px',
+                        border: '1px solid #E2E8F0',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                         cursor: 'pointer',
-                        transition: 'all 0.2s ease'
+                        transition: 'transform 0.15s, border-color 0.15s'
                       }}
                     >
-                      {item.icon} {item.name} {isSelected ? '✓' : '+'}
-                    </button>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A' }}>Room {room.roomNumber}</span>
+                            <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', background: '#EEF2FF', color: '#4F46E5' }}>
+                              {room.sharingType}
+                            </span>
+                          </div>
+
+                          {/* Features Pills */}
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', margin: '4px 0 0 0' }}>
+                            {room.features.map((feat, i) => (
+                              <span key={i} style={{ fontSize: '10px', background: '#F1F5F9', color: '#475569', padding: '2px 6px', borderRadius: '4px', fontWeight: 500 }}>
+                                {feat}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Top-Right: Navigation Arrow */}
+                        <div style={{ flexShrink: 0, padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <ChevronRight size={22} color="#94A3B8" />
+                        </div>
+                      </div>
+
+                      {/* Bed Status Summary & Action Buttons */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '10px', borderTop: '1px solid #F1F5F9', marginTop: '10px' }}>
+                        <div style={{ display: 'flex', gap: '8px', fontSize: '11px', fontWeight: 600, flexWrap: 'wrap', alignItems: 'center' }}>
+                          <span style={{ color: '#10B981' }}>{roomOccupied} Occupied</span>
+                          <span style={{ color: '#3B82F6' }}>{roomVacant} Vacant</span>
+                          {roomMaint > 0 && <span style={{ color: '#EF4444' }}>{roomMaint} Maint</span>}
+                          {roomRes > 0 && <span style={{ color: '#F97316' }}>{roomRes} Reserved</span>}
+                        </div>
+
+                        {/* Bottom-Right: Edit & Delete Buttons */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingRoom({ floorId: selectedFloor.id, room });
+                            }}
+                            style={{ background: '#F1F5F9', border: 'none', width: '32px', height: '32px', borderRadius: '8px', cursor: 'pointer', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                            title="Edit Room"
+                          >
+                            <Edit3 size={17} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteConfirm({
+                                type: 'room',
+                                id: room.id,
+                                title: `Room ${room.roomNumber}`,
+                                floorId: selectedFloor.id
+                              });
+                            }}
+                            style={{ background: '#FEF2F2', border: 'none', width: '32px', height: '32px', borderRadius: '8px', cursor: 'pointer', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                            title="Delete Room"
+                          >
+                            <Trash2 size={17} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
-
-              <label className="bm-ref-form-lbl">Room Description / Notes</label>
-              <textarea
-                className="bm-ref-form-input textarea"
-                placeholder="e.g. Well furnished single sharing room with attached bathroom."
-                value={formRoomDesc}
-                onChange={e => setFormRoomDesc(e.target.value)}
-              />
-
-              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-                <button
-                  type="button"
-                  className="bm-ref-outline-btn purple"
-                  style={{ flex: 1 }}
-                  onClick={() => setAddRoomStep(2)}
-                >
-                  ← Back
-                </button>
-                <button
-                  type="button"
-                  className="bm-ref-btn-primary"
-                  style={{ flex: 2 }}
-                  onClick={() => setAddRoomStep(4)}
-                >
-                  Next: Review Summary →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ───────── STEP 4: REVIEW & SAVE SUMMARY ───────── */}
-          {addRoomStep === 4 && (
-            <div className="bm-ref-form-card animate-fade-in">
-              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <CheckCircle2 size={18} color="#10b981" /> Step 4: Review & Create Room
-              </div>
-
-              {/* Summary Card */}
-              <div style={{ background: '#f8fafc', borderRadius: 16, border: '1px solid #e2e8f0', padding: 16, marginBottom: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <div>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{formRoomNumberInput}</div>
-                    <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
-                      {activeHostel.floors.find(f => f.id === formFloorId)?.floorName || 'Floor 1'} • {formRoomTypeInput}
-                    </div>
-                  </div>
-                  <span className="bm-ref-badge mint">{formBedCount} Beds</span>
-                </div>
-
-                <div className="bm-ref-details-spec-list" style={{ background: 'transparent', padding: 0 }}>
-                  <div className="bm-ref-spec-row">
-                    <span className="bm-ref-spec-lbl">Monthly Rent</span>
-                    <span className="bm-ref-spec-val">₹{formRentAmount.toLocaleString('en-IN')} / month</span>
-                  </div>
-                  <div className="bm-ref-spec-row">
-                    <span className="bm-ref-spec-lbl">Beds Setup</span>
-                    <span className="bm-ref-spec-val">
-                      {Array.from({ length: formBedCount }).map((_, i) => `${formRoomNumberInput.replace(/\s+/g, '')}-${String.fromCharCode(65 + i)}`).join(', ')}
-                    </span>
-                  </div>
-                  <div className="bm-ref-spec-row col">
-                    <span className="bm-ref-spec-lbl">Amenities ({formSelectedAmenities.length})</span>
-                    <div className="bm-ref-amenities-pills">
-                      {formSelectedAmenities.map((a, i) => (
-                        <span key={i} className="bm-ref-amenity-pill">{a}</span>
-                      ))}
-                    </div>
-                  </div>
-                  {formRoomDesc && (
-                    <div className="bm-ref-spec-row col">
-                      <span className="bm-ref-spec-lbl">Description</span>
-                      <span className="bm-ref-spec-desc">{formRoomDesc}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button
-                  type="button"
-                  className="bm-ref-outline-btn purple"
-                  style={{ flex: 1 }}
-                  onClick={() => setAddRoomStep(3)}
-                >
-                  ← Back
-                </button>
-                <button
-                  type="button"
-                  className="bm-ref-btn-primary"
-                  style={{ flex: 2, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
-                  onClick={handleSaveRoom}
-                >
-                  Confirm & Save Room ✓
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 9: FILTERS MODAL ────────────────── */}
-      {currentView === 'filters' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">Filters</h1>
-            <button
-              className="bm-ref-reset-btn"
-              onClick={() => {
-                setSelectedFloorFilter('All Floors');
-                setSelectedRoomTypeFilter('All Room Types');
-                setSelectedBedTypeFilter('All Bed Types');
-                setSelectedStatusFilter('All Status');
-              }}
-            >
-              Reset
-            </button>
-          </div>
-
-          <div className="bm-ref-form-card">
-            <label className="bm-ref-form-lbl">Floor</label>
-            <select className="bm-ref-form-input" value={selectedFloorFilter} onChange={e => setSelectedFloorFilter(e.target.value)}>
-              <option value="All Floors">All Floors</option>
-              {activeHostel.floors.map(f => <option key={f.id} value={f.id}>{f.floorName}</option>)}
-            </select>
-
-            <label className="bm-ref-form-lbl">Room Type</label>
-            <select className="bm-ref-form-input" value={selectedRoomTypeFilter} onChange={e => setSelectedRoomTypeFilter(e.target.value)}>
-              <option value="All Room Types">All Room Types</option>
-              <option value="Single Sharing">Single Sharing</option>
-              <option value="Double Sharing">Double Sharing</option>
-            </select>
-
-            <label className="bm-ref-form-lbl">Bed Type</label>
-            <select className="bm-ref-form-input" value={selectedBedTypeFilter} onChange={e => setSelectedBedTypeFilter(e.target.value)}>
-              <option value="All Bed Types">All Bed Types</option>
-              <option value="Single Bed">Single Bed</option>
-              <option value="Bunk Bed">Bunk Bed</option>
-            </select>
-
-            <label className="bm-ref-form-lbl">Status</label>
-            <select className="bm-ref-form-input" value={selectedStatusFilter} onChange={e => setSelectedStatusFilter(e.target.value)}>
-              <option value="All Status">All Status</option>
-              <option value="vacant">Vacant</option>
-              <option value="occupied">Occupied</option>
-              <option value="maintenance">Maintenance</option>
-            </select>
-
-            <button className="bm-ref-btn-primary" onClick={() => setCurrentView('dashboard')}>
-              Apply Filters
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 11: REPORTS VIEW ────────────────── */}
-      {currentView === 'reports' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">Reports</h1>
-          </div>
-
-          <div className="bm-ref-reports-list">
-            <div className="bm-ref-report-card">
-              <div className="bm-ref-icon-box purple"><FileText size={18} /></div>
-              <div className="bm-ref-report-titles">
-                <div className="bm-ref-report-name">Bed Occupancy Report</div>
-              </div>
-              <button className="bm-ref-view-link">View</button>
-            </div>
-
-            <div className="bm-ref-report-card">
-              <div className="bm-ref-icon-box purple"><FileText size={18} /></div>
-              <div className="bm-ref-report-titles">
-                <div className="bm-ref-report-name">Room Occupancy Report</div>
-              </div>
-              <button className="bm-ref-view-link">View</button>
-            </div>
-
-            <div className="bm-ref-report-card">
-              <div className="bm-ref-icon-box purple"><FileText size={18} /></div>
-              <div className="bm-ref-report-titles">
-                <div className="bm-ref-report-name">Floor Occupancy Report</div>
-              </div>
-              <button className="bm-ref-view-link">View</button>
-            </div>
-
-            <div className="bm-ref-report-card">
-              <div className="bm-ref-icon-box green"><FileText size={18} /></div>
-              <div className="bm-ref-report-titles">
-                <div className="bm-ref-report-name">Vacant Beds Report</div>
-              </div>
-              <button className="bm-ref-view-link">View</button>
-            </div>
-
-            <div className="bm-ref-report-card">
-              <div className="bm-ref-icon-box red"><FileText size={18} /></div>
-              <div className="bm-ref-report-titles">
-                <div className="bm-ref-report-name">Maintenance Beds Report</div>
-              </div>
-              <button className="bm-ref-view-link">View</button>
-            </div>
-
-            <div className="bm-ref-report-card" style={{ marginTop: 12 }}>
-              <div className="bm-ref-icon-box purple"><Download size={18} /></div>
-              <div className="bm-ref-report-titles">
-                <div className="bm-ref-report-name">Export Data</div>
-              </div>
-              <button className="bm-ref-view-link">Download</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 12: NOTIFICATIONS ────────────────── */}
-      {currentView === 'notifications' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">Notifications</h1>
-            <span className="bm-ref-mark-read" onClick={() => alert('Marked all as read')}>Mark all as read</span>
-          </div>
-
-          <div className="bm-ref-notif-list">
-            <div className="bm-ref-notif-card">
-              <div className="bm-ref-notif-icon green"><BedDouble size={16} /></div>
-              <div className="bm-ref-notif-content">
-                <div className="bm-ref-notif-title">Bed B205 is now Vacant</div>
-                <div className="bm-ref-notif-time">10 May 2024, 10:30 AM</div>
-              </div>
-            </div>
-
-            <div className="bm-ref-notif-card">
-              <div className="bm-ref-notif-icon orange"><Wrench size={16} /></div>
-              <div className="bm-ref-notif-content">
-                <div className="bm-ref-notif-title">Maintenance scheduled for Bed B312</div>
-                <div className="bm-ref-notif-time">09 May 2024, 04:15 PM</div>
-              </div>
-            </div>
-
-            <div className="bm-ref-notif-card">
-              <div className="bm-ref-notif-icon purple"><DoorOpen size={16} /></div>
-              <div className="bm-ref-notif-content">
-                <div className="bm-ref-notif-title">New bed added in Room 203</div>
-                <div className="bm-ref-notif-time">09 May 2024, 11:20 AM</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 10: MORE / MENU DRAWER ────────────────── */}
-      {currentView === 'menu-drawer' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-drawer-profile-box">
-            <div className="bm-ref-avatar">JS</div>
-            <div className="bm-ref-profile-info">
-              <div className="bm-ref-profile-name">J. Sudharshan</div>
-              <div className="bm-ref-profile-role">Admin</div>
-            </div>
-
-          </div>
-
-          <div className="bm-ref-drawer-menu">
-            <button className="bm-ref-drawer-item" onClick={() => setCurrentView('dashboard')}>
-              <Building size={18} /> Dashboard
-            </button>
-            <button className="bm-ref-drawer-item" onClick={() => setCurrentView('beds-in-room')}>
-              <BedDouble size={18} /> Beds
-            </button>
-            <button className="bm-ref-drawer-item" onClick={() => setCurrentView('rooms-list')}>
-              <DoorOpen size={18} /> Rooms
-            </button>
-            <button className="bm-ref-drawer-item" onClick={() => setCurrentView('reports')}>
-              <FileText size={18} /> Reports
-            </button>
-            <button className="bm-ref-drawer-item" onClick={() => setCurrentView('dashboard')}>
-              <Wrench size={18} /> Maintenance
-            </button>
-            <button className="bm-ref-drawer-item" onClick={() => setCurrentView('dashboard')}>
-              <Users size={18} /> Users
-            </button>
-            <button className="bm-ref-drawer-item" onClick={() => setCurrentView('settings')}>
-              <SettingsIcon size={18} /> Settings
-            </button>
-            <button className="bm-ref-drawer-item" onClick={() => alert('Help & Support')}>
-              <HelpCircle size={18} /> Help & Support
-            </button>
-            <div className="bm-ref-dropdown-divider" />
-            <button className="bm-ref-drawer-item danger" onClick={() => alert('Logged out')}>
-              <LogOut size={18} /> Logout
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 13: PROFILE / SETTINGS ────────────────── */}
-      {currentView === 'settings' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('dashboard')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">Settings</h1>
-          </div>
-
-          <div className="bm-ref-profile-card">
-            <div className="bm-ref-profile-card-title">Profile</div>
-            <div className="bm-ref-spec-row" style={{ marginTop: 8 }}>
-              <span className="bm-ref-spec-lbl">Name</span>
-              <span className="bm-ref-spec-val">J. Sudharshan</span>
-            </div>
-            <div className="bm-ref-spec-row">
-              <span className="bm-ref-spec-lbl">Email</span>
-              <span className="bm-ref-spec-val">sudharshan@example.com</span>
-            </div>
-            <div className="bm-ref-spec-row">
-              <span className="bm-ref-spec-lbl">Phone</span>
-              <span className="bm-ref-spec-val">9876543210</span>
-            </div>
-          </div>
-
-          <div className="bm-ref-settings-list" style={{ marginTop: 16 }}>
-            <div className="bm-ref-settings-item" onClick={() => alert('Change password modal')}>
-              <span>Change Password</span>
-              <ChevronRight size={16} color="#94a3b8" />
-            </div>
-            <div className="bm-ref-settings-item" onClick={() => alert('Notification Settings')}>
-              <span>Notification Settings</span>
-              <ChevronRight size={16} color="#94a3b8" />
-            </div>
-            <div className="bm-ref-settings-item" onClick={() => alert('App Settings')}>
-              <span>App Settings</span>
-              <ChevronRight size={16} color="#94a3b8" />
-            </div>
-            <div className="bm-ref-settings-item">
-              <div>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0f172a' }}>About App</div>
-                <div style={{ fontSize: 11, color: '#94a3b8' }}>Version 1.0.0</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ────────────────── SCREEN 14: ALLOCATE BED ────────────────── */}
-      {currentView === 'allocate-bed' && (
-        <div className="bm-ref-screen animate-fade-in">
-          <div className="bm-ref-sub-header">
-            <button className="bm-ref-back-btn" onClick={() => setCurrentView('room-details')}>
-              <ArrowLeft size={18} />
-            </button>
-            <h1 className="bm-ref-sub-title">Allocate Bed</h1>
-          </div>
-
-          <div className="bm-ref-form-card">
-            {/* Vacant Bed Selector */}
-            <label className="bm-ref-form-lbl">Select Available / Vacant Bed *</label>
-            <select
-              className="bm-ref-form-input"
-              value={allocateTargetBedId}
-              onChange={e => setAllocateTargetBedId(e.target.value)}
-            >
-              <option value="">-- Choose Vacant Bed --</option>
-              {allBedsWithMetadata
-                .filter(item => item.bed.status === 'vacant' || item.bed.status === 'reserved')
-                .map(item => (
-                  <option key={item.bed.id} value={item.bed.id}>
-                    {item.bed.bedNumber} ({item.room.roomNumber} • {item.floor.floorName}) - {item.bed.status.toUpperCase()}
-                  </option>
-                ))}
-            </select>
-
-            {/* Resident Mode Segmented Control */}
-            <label className="bm-ref-form-lbl" style={{ marginTop: 12 }}>Assign Resident *</label>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-              <button
-                type="button"
-                className={`bm-ref-pct-tag ${residentMode === 'existing' ? 'green' : 'gray'}`}
-                style={{ border: 'none', cursor: 'pointer', flex: 1, padding: '8px', textAlign: 'center' }}
-                onClick={() => setResidentMode('existing')}
-              >
-                Select Existing Resident
-              </button>
-              <button
-                type="button"
-                className={`bm-ref-pct-tag ${residentMode === 'new' ? 'green' : 'gray'}`}
-                style={{ border: 'none', cursor: 'pointer', flex: 1, padding: '8px', textAlign: 'center' }}
-                onClick={() => setResidentMode('new')}
-              >
-                + Add New Resident
-              </button>
-            </div>
-
-            {residentMode === 'existing' ? (
-              <>
-                <label className="bm-ref-form-lbl">Select Existing Resident *</label>
-                <select
-                  className="bm-ref-form-input"
-                  onChange={e => {
-                    const idx = Number(e.target.value);
-                    if (idx >= 0 && existingResidents[idx]) {
-                      const res = existingResidents[idx];
-                      setAllocateStudentName(res.name);
-                      setAllocateStudentPhone(res.phone);
-                      setAllocateRent(res.monthlyRent);
-                    }
-                  }}
-                >
-                  <option value="-1">-- Choose Registered Resident --</option>
-                  {existingResidents.map((res, idx) => (
-                    <option key={idx} value={idx}>
-                      {res.name} ({res.phone}) - Rent ₹{res.monthlyRent}
-                    </option>
-                  ))}
-                </select>
-              </>
-            ) : (
-              <>
-                <label className="bm-ref-form-lbl">Student Full Name *</label>
-                <input
-                  type="text"
-                  className="bm-ref-form-input"
-                  placeholder="e.g. Rahul Sharma"
-                  value={allocateStudentName}
-                  onChange={e => setAllocateStudentName(e.target.value)}
-                />
-
-                <label className="bm-ref-form-lbl">Phone Contact *</label>
-                <input
-                  type="text"
-                  className="bm-ref-form-input"
-                  placeholder="9876543210"
-                  value={allocateStudentPhone}
-                  onChange={e => setAllocateStudentPhone(e.target.value)}
-                />
-              </>
             )}
+          </div>
+        ) : (
+          /* ── MAIN ALL FLOORS OVERVIEW VIEW ── */
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A', margin: 0 }}>All Floors</h2>
+              <button
+                onClick={handleOpenAddFloor}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#2563EB',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '24px',
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)'
+                }}
+              >
+                <Plus size={16} />
+                Add Floor
+              </button>
+            </div>
 
-            <div className="bm-ref-form-two-col" style={{ marginTop: 8 }}>
-              <div>
-                <label className="bm-ref-form-lbl">Check-In Date</label>
-                <input
-                  type="date"
-                  className="bm-ref-form-input"
-                  value={allocateCheckInDate}
-                  onChange={e => setAllocateCheckInDate(e.target.value)}
-                />
+            {filteredFloors.length === 0 ? (
+              <div style={{ background: '#FFFFFF', padding: '32px', textAlign: 'center', borderRadius: '14px', border: '1px dashed #CBD5E1' }}>
+                <Building size={36} color="#94A3B8" style={{ marginBottom: '8px' }} />
+                <p style={{ fontSize: '14px', fontWeight: 700, color: '#475569', margin: 0 }}>No floors matching search query</p>
               </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {filteredFloors.map((floor) => {
+                  const floorRooms = floor.rooms.length;
+                  let fOccupied = 0;
+                  let fVacant = 0;
+                  let fMaint = 0;
+                  let fRes = 0;
+                  let fTotalBeds = 0;
+
+                  floor.rooms.forEach((r) => {
+                    fTotalBeds += r.beds.length;
+                    r.beds.forEach((b) => {
+                      if (b.status === 'occupied') fOccupied++;
+                      else if (b.status === 'vacant') fVacant++;
+                      else if (b.status === 'maintenance') fMaint++;
+                      else if (b.status === 'reserved') fRes++;
+                    });
+                  });
+
+                  const fPercentage = fTotalBeds > 0 ? Math.round((fOccupied / fTotalBeds) * 100) : 0;
+
+                  return (
+                    <div
+                      key={floor.id}
+                      onClick={() => setSelectedFloorId(floor.id)}
+                      style={{
+                        background: '#FFFFFF',
+                        borderRadius: '14px',
+                        padding: '16px',
+                        border: '1px solid #E2E8F0',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
+                        cursor: 'pointer',
+                        transition: 'transform 0.15s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4F46E5' }}>
+                            <Building size={22} />
+                          </div>
+                          <div>
+                            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0, color: '#0F172A' }}>{floor.floorNumber}</h3>
+                            <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 500 }}>
+                              {floorRooms} Rooms • {fTotalBeds} Beds
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Top-Right: % badge + ChevronRight Arrow */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                          <span style={{ fontSize: '14px', fontWeight: 800, color: '#4F46E5' }}>{fPercentage}%</span>
+                          <ChevronRight size={22} color="#94A3B8" />
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div style={{ height: '6px', background: '#F1F5F9', borderRadius: '3px', overflow: 'hidden', display: 'flex', marginBottom: '10px' }}>
+                        <div style={{ width: `${fPercentage}%`, background: '#10B981' }} />
+                        <div style={{ width: `${fTotalBeds > 0 ? (fVacant / fTotalBeds) * 100 : 0}%`, background: '#3B82F6' }} />
+                        <div style={{ width: `${fTotalBeds > 0 ? (fMaint / fTotalBeds) * 100 : 0}%`, background: '#EF4444' }} />
+                        <div style={{ width: `${fTotalBeds > 0 ? (fRes / fTotalBeds) * 100 : 0}%`, background: '#F97316' }} />
+                      </div>
+
+                      {/* Footer Stats Row with Edit & Delete Buttons on Right */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '8px', fontSize: '11px', fontWeight: 600, flexWrap: 'wrap' }}>
+                          <span style={{ color: '#10B981' }}>{fOccupied} Occupied</span>
+                          <span style={{ color: '#3B82F6' }}>{fVacant} Vacant</span>
+                          {fMaint > 0 && <span style={{ color: '#EF4444' }}>{fMaint} Maint</span>}
+                          {fRes > 0 && <span style={{ color: '#F97316' }}>{fRes} Reserved</span>}
+                        </div>
+
+                        {/* Bottom-Right: Edit & Delete Buttons */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingFloor(floor);
+                            }}
+                            style={{ background: '#F1F5F9', border: 'none', width: '32px', height: '32px', borderRadius: '8px', cursor: 'pointer', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                            title="Edit Floor"
+                          >
+                            <Edit3 size={17} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteConfirm({
+                                type: 'floor',
+                                id: floor.id,
+                                title: floor.floorNumber
+                              });
+                            }}
+                            style={{ background: '#FEF2F2', border: 'none', width: '32px', height: '32px', borderRadius: '8px', cursor: 'pointer', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                            title="Delete Floor"
+                          >
+                            <Trash2 size={17} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/*  ROOM BED LAYOUT POPUP MODAL                                       */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {activeRoom && activeRoomFloor && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1000, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '500px', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', padding: '20px 20px 28px 20px', maxHeight: '100%', overflowY: 'auto', boxShadow: '0 -10px 30px rgba(0,0,0,0.2)' }}>
+            
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
               <div>
-                <label className="bm-ref-form-lbl">Monthly Rent (₹)</label>
-                <input
-                  type="number"
-                  className="bm-ref-form-input"
-                  value={allocateRent}
-                  onChange={e => setAllocateRent(Number(e.target.value))}
-                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#0F172A' }}>Room {activeRoom.roomNumber} Details</h2>
+                  <span style={{ fontSize: '11px', fontWeight: 700, background: '#EEF2FF', color: '#4F46E5', padding: '2px 8px', borderRadius: '12px' }}>
+                    {activeRoom.sharingType}
+                  </span>
+                </div>
+                <p style={{ fontSize: '12px', color: '#64748B', margin: '2px 0 0 0' }}>{activeRoomFloor.floorNumber}</p>
+              </div>
+              <button onClick={() => setActiveRoomId(null)} style={{ background: '#F1F5F9', border: 'none', padding: '6px', borderRadius: '50%', cursor: 'pointer' }}>
+                <X size={18} color="#64748B" />
+              </button>
+            </div>
+
+            {/* Room Features */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
+              {activeRoom.features.map((feat, i) => (
+                <span key={i} style={{ fontSize: '11px', background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '3px 8px', borderRadius: '6px', color: '#475569', fontWeight: 600 }}>
+                  {feat}
+                </span>
+              ))}
+            </div>
+
+            {/* Room Actions Row */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              <button
+                onClick={() => handleAddBedToRoom(activeRoomFloor.id, activeRoom.id)}
+                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#2563EB', color: '#FFFFFF', border: 'none', borderRadius: '24px', padding: '10px 14px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)' }}
+              >
+                <Plus size={16} /> Add Bed
+              </button>
+              <button
+                onClick={() => setEditingRoom({ floorId: activeRoomFloor.id, room: activeRoom })}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#F1F5F9', color: '#334155', border: 'none', borderRadius: '24px', padding: '10px 14px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                <Edit3 size={18} /> Edit Room
+              </button>
+              <button
+                onClick={() => setDeleteConfirm({ type: 'room', id: activeRoom.id, title: `Room ${activeRoom.roomNumber}`, floorId: activeRoomFloor.id })}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#FEF2F2', color: '#EF4444', border: 'none', borderRadius: '24px', padding: '10px 14px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+
+            {/* Beds Grid */}
+            <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#475569', marginBottom: '10px' }}>
+              Bed Layout ({activeRoom.beds.length} Beds)
+            </h3>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '16px' }}>
+              {activeRoom.beds.map((bed) => {
+                let cardBg = '#FFFFFF';
+                let borderColor = '#E2E8F0';
+                let statusBadgeBg = '#E1EFFE';
+                let statusTextColor = '#1E429F';
+                let statusLabel = 'Vacant';
+                let IconComponent = BedDouble;
+
+                if (bed.status === 'occupied') {
+                  cardBg = '#F0FDF4';
+                  borderColor = '#86EFAC';
+                  statusBadgeBg = '#DEF7EC';
+                  statusTextColor = '#03543F';
+                  statusLabel = 'Occupied';
+                  IconComponent = User;
+                } else if (bed.status === 'maintenance') {
+                  cardBg = '#FEF2F2';
+                  borderColor = '#FCA5A5';
+                  statusBadgeBg = '#FDE8E8';
+                  statusTextColor = '#9B1C1C';
+                  statusLabel = 'Maintenance';
+                  IconComponent = Wrench;
+                } else if (bed.status === 'reserved') {
+                  cardBg = '#FFFBEB';
+                  borderColor = '#FDE68A';
+                  statusBadgeBg = '#FEF3C7';
+                  statusTextColor = '#92400E';
+                  statusLabel = 'Reserved';
+                  IconComponent = Clock;
+                }
+
+                return (
+                  <div
+                    key={bed.id}
+                    onClick={() => {
+                      if (bed.status === 'occupied') {
+                        setActiveBedAction({ floorId: activeRoomFloor.id, roomId: activeRoom.id, bed, type: 'view_resident' });
+                      } else if (bed.status === 'maintenance') {
+                        setActiveBedAction({ floorId: activeRoomFloor.id, roomId: activeRoom.id, bed, type: 'view_maintenance' });
+                      } else if (bed.status === 'reserved') {
+                        setActiveBedAction({ floorId: activeRoomFloor.id, roomId: activeRoom.id, bed, type: 'view_reserved' });
+                      } else {
+                        // vacant bed options popup
+                        setActiveBedAction({ floorId: activeRoomFloor.id, roomId: activeRoom.id, bed, type: 'options' });
+                      }
+                    }}
+                    style={{
+                      background: cardBg,
+                      border: `1.5px solid ${borderColor}`,
+                      borderRadius: '12px',
+                      padding: '12px',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                      transition: 'all 0.15s'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A' }}>{bed.bedNumber}</span>
+                      <span style={{ fontSize: '10px', fontWeight: 700, background: statusBadgeBg, color: statusTextColor, padding: '2px 6px', borderRadius: '10px' }}>
+                        {statusLabel}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                        <IconComponent size={14} color={statusTextColor} />
+                      </div>
+                      <div style={{ overflow: 'hidden' }}>
+                        {bed.status === 'occupied' ? (
+                          <>
+                            <div style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                              {bed.resident?.name || 'Resident'}
+                            </div>
+                            <div style={{ fontSize: '10px', color: '#64748B' }}>Tap to view details</div>
+                          </>
+                        ) : bed.status === 'maintenance' ? (
+                          <>
+                            <div style={{ fontSize: '11px', fontWeight: 600, color: '#9B1C1C', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                              Under Maintenance
+                            </div>
+                            <div style={{ fontSize: '10px', color: '#9B1C1C' }}>Tap for actions</div>
+                          </>
+                        ) : bed.status === 'reserved' ? (
+                          <>
+                            <div style={{ fontSize: '11px', fontWeight: 600, color: '#92400E', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                              {bed.reservedFor || 'Reserved'}
+                            </div>
+                            <div style={{ fontSize: '10px', color: '#92400E' }}>Tap for actions</div>
+                          </>
+                        ) : (
+                          <>
+                            <div style={{ fontSize: '12px', fontWeight: 700, color: '#1E429F' }}>Available</div>
+                            <div style={{ fontSize: '10px', color: '#3B82F6' }}>Tap to assign</div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/*  VACANT BED ACTIONS POPUP (Assign, Maintenance, Reserved)           */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {activeBedAction?.type === 'options' && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1100, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '360px', borderRadius: '16px', padding: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0 }}>Options for {activeBedAction.bed.bedNumber}</h3>
+              <button onClick={() => setActiveBedAction(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button
+                onClick={() => {
+                  setAssignForm({
+                    name: '',
+                    phone: '',
+                    altPhone: '',
+                    address: '',
+                    aadhaarNumber: '',
+                    email: '',
+                    checkInDate: new Date().toISOString().split('T')[0],
+                    rentAmount: activeRoom?.rentPerMonth || 8000
+                  });
+                  setActiveBedAction({ ...activeBedAction, type: 'assign' });
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#F0FDF4', border: '1px solid #86EFAC', padding: '12px', borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }}
+              >
+                <User size={20} color="#10B981" />
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#065F46' }}>Assign Resident</div>
+                  <div style={{ fontSize: '11px', color: '#047857' }}>Mark bed as occupied (Green)</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setMaintenanceForm({ reason: '' });
+                  setActiveBedAction({ ...activeBedAction, type: 'maintenance' });
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#FEF2F2', border: '1px solid #FCA5A5', padding: '12px', borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }}
+              >
+                <Wrench size={20} color="#EF4444" />
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#991B1B' }}>Put in Maintenance</div>
+                  <div style={{ fontSize: '11px', color: '#B91C1C' }}>Mark bed under repair (Red)</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setReservedForm({ reservedFor: '', untilDate: '' });
+                  setActiveBedAction({ ...activeBedAction, type: 'reserved' });
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#FFFBEB', border: '1px solid #FDE68A', padding: '12px', borderRadius: '10px', cursor: 'pointer', textAlign: 'left' }}
+              >
+                <Clock size={20} color="#F97316" />
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#9A3412' }}>Put in Reserved</div>
+                  <div style={{ fontSize: '11px', color: '#C2410C' }}>Reserve for upcoming resident (Orange)</div>
+                </div>
+              </button>
+
+              <div style={{ paddingTop: '6px', display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => setEditingBed({ floorId: activeBedAction.floorId, roomId: activeBedAction.roomId, bed: activeBedAction.bed })}
+                  style={{ flex: 1, background: '#F1F5F9', border: 'none', padding: '8px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Rename Bed
+                </button>
+                <button
+                  onClick={() => handleDeleteBed(activeBedAction.floorId, activeBedAction.roomId, activeBedAction.bed.id)}
+                  style={{ background: '#FEF2F2', color: '#EF4444', border: 'none', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Delete Bed
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── ASSIGN RESIDENT FORM MODAL (TENANT DETAILS & ASSIGN - STEP 5 FLOW MATCH) ── */}
+      {activeBedAction?.type === 'assign' && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1100, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '420px', maxHeight: '100%', borderRadius: '20px', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)', overflow: 'hidden' }}>
+            
+            {/* Modal Header - Fixed Sticky */}
+            <div style={{ padding: '14px 16px 12px 16px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#FFFFFF', flexShrink: 0 }}>
+              <button onClick={() => setActiveBedAction(null)} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#F1F5F9', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <ArrowLeft size={16} color="#334155" />
+              </button>
+
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#EFF6FF', color: '#2563EB', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '12px', marginBottom: '2px' }}>
+                  <Sparkles size={11} /> STEP 5 OF 5
+                </div>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A', margin: 0 }}>Tenant Details & Assign</h3>
+              </div>
+
+              <button onClick={() => setActiveBedAction(null)} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#F1F5F9', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <X size={16} color="#64748B" />
+              </button>
+            </div>
+
+            {/* Scrollable Form Body */}
+            <div style={{ padding: '16px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              
+              {/* ALLOCATION SUMMARY Card */}
+              <div style={{ background: '#EFF6FF', border: '1px solid #DBEAFE', borderRadius: '12px', padding: '10px 12px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 800, color: '#1D4ED8', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                  ALLOCATION SUMMARY
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  <span style={{ background: '#FFFFFF', border: '1px solid #CBD5E1', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                    Happy Hostels
+                  </span>
+                  <span style={{ background: '#FFFFFF', border: '1px solid #CBD5E1', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                    Room {activeRoom?.roomNumber} ({activeBedAction.bed.bedNumber})
+                  </span>
+                  <span style={{ background: '#FFFFFF', border: '1px solid #CBD5E1', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, color: '#334155' }}>
+                    {activeRoom?.sharingType}
+                  </span>
+                  <span style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, color: '#2563EB' }}>
+                    ₹{assignForm.rentAmount}/mo
+                  </span>
+                </div>
+              </div>
+
+              {/* Form Fields */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px', display: 'block' }}>Full Name *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Aarav Sharma"
+                    value={assignForm.name}
+                    onChange={(e) => setAssignForm({ ...assignForm, name: e.target.value })}
+                    style={{ width: '100%', padding: '9px 11px', fontSize: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px', display: 'block' }}>Mobile Number *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 9876543210"
+                    value={assignForm.phone}
+                    onChange={(e) => setAssignForm({ ...assignForm, phone: e.target.value })}
+                    style={{ width: '100%', padding: '9px 11px', fontSize: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px', display: 'block' }}>Alternative Mobile Number</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 9876543211"
+                    value={assignForm.altPhone}
+                    onChange={(e) => setAssignForm({ ...assignForm, altPhone: e.target.value })}
+                    style={{ width: '100%', padding: '9px 11px', fontSize: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px', display: 'block' }}>Native Address</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. H.No 4-12, Main Road, Vijayawada, AP"
+                    value={assignForm.address}
+                    onChange={(e) => setAssignForm({ ...assignForm, address: e.target.value })}
+                    style={{ width: '100%', padding: '9px 11px', fontSize: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px', display: 'block' }}>Aadhar No. *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 1234 5678 9012"
+                    value={assignForm.aadhaarNumber}
+                    onChange={(e) => setAssignForm({ ...assignForm, aadhaarNumber: e.target.value })}
+                    style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '10px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px', display: 'block' }}>Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="e.g. aarav@example.com"
+                    value={assignForm.email}
+                    onChange={(e) => setAssignForm({ ...assignForm, email: e.target.value })}
+                    style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '10px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '4px', display: 'block' }}>Joining Date</label>
+                    <input
+                      type="date"
+                      value={assignForm.checkInDate}
+                      onChange={(e) => setAssignForm({ ...assignForm, checkInDate: e.target.value })}
+                      style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '10px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px', display: 'block' }}>Monthly Rent (₹)</label>
+                    <input
+                      type="number"
+                      value={assignForm.rentAmount}
+                      onChange={(e) => setAssignForm({ ...assignForm, rentAmount: Number(e.target.value) })}
+                      style={{ width: '100%', padding: '9px 11px', fontSize: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                </div>
+
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-              <input
-                type="checkbox"
-                id="advancePaidCheck"
-                checked={allocateAdvancePaid}
-                onChange={e => setAllocateAdvancePaid(e.target.checked)}
-              />
-              <label htmlFor="advancePaidCheck" style={{ fontSize: 13, fontWeight: 600, color: '#475569' }}>
-                Advance Rent Paid
-              </label>
+            {/* Fixed Footer Button */}
+            <div style={{ padding: '12px 16px', borderTop: '1px solid #E2E8F0', background: '#FFFFFF', flexShrink: 0 }}>
+              <button
+                onClick={handleAssignResidentSubmit}
+                style={{
+                  width: '100%',
+                  background: '#2563EB',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '12px',
+                  fontSize: '14px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)'
+                }}
+              >
+                <CheckCircle2 size={18} /> Assign & Save User
+              </button>
             </div>
 
-            <label className="bm-ref-form-lbl">Notes</label>
-            <textarea
-              className="bm-ref-form-input textarea"
-              placeholder="e.g. Standard 1 year agreement"
-              value={allocateNotes}
-              onChange={e => setAllocateNotes(e.target.value)}
+          </div>
+        </div>
+      )}
+
+      {/* ── MAINTENANCE FORM MODAL ── */}
+      {activeBedAction?.type === 'maintenance' && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1100, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '360px', borderRadius: '16px', padding: '20px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 10px 0' }}>Put {activeBedAction.bed.bedNumber} in Maintenance</h3>
+            <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 12px 0' }}>This bed will be marked in Red (Under Repair).</p>
+            <input
+              type="text"
+              placeholder="Reason (e.g. Plumbing issue, painting...)"
+              value={maintenanceForm.reason}
+              onChange={(e) => setMaintenanceForm({ reason: e.target.value })}
+              style={{ width: '100%', padding: '9px 10px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', marginBottom: '14px', boxSizing: 'border-box' }}
             />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setActiveBedAction(null)} style={{ flex: 1, background: '#F1F5F9', border: 'none', padding: '9px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={handlePutInMaintenanceSubmit} style={{ flex: 1, background: '#EF4444', color: '#FFFFFF', border: 'none', padding: '9px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                Set Maintenance
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── RESERVED FORM MODAL ── */}
+      {activeBedAction?.type === 'reserved' && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1100, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '360px', borderRadius: '16px', padding: '20px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 10px 0' }}>Put {activeBedAction.bed.bedNumber} in Reserved</h3>
+            <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 12px 0' }}>This bed will be marked in Orange.</p>
+            <input
+              type="text"
+              placeholder="Reserved for name (e.g. S. Kumar)"
+              value={reservedForm.reservedFor}
+              onChange={(e) => setReservedForm({ ...reservedForm, reservedFor: e.target.value })}
+              style={{ width: '100%', padding: '9px 10px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', marginBottom: '10px', boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setActiveBedAction(null)} style={{ flex: 1, background: '#F1F5F9', border: 'none', padding: '9px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={handlePutInReservedSubmit} style={{ flex: 1, background: '#F97316', color: '#FFFFFF', border: 'none', padding: '9px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                Confirm Reserve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── VIEW RESIDENT MODAL (GREEN BED) ── */}
+      {activeBedAction?.type === 'view_resident' && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1100, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '380px', borderRadius: '16px', padding: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#DEF7EC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#03543F' }}>
+                  <User size={18} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0 }}>{activeBedAction.bed.resident?.name}</h3>
+                  <span style={{ fontSize: '11px', color: '#10B981', fontWeight: 700 }}>Occupying {activeBedAction.bed.bedNumber}</span>
+                </div>
+              </div>
+              <button onClick={() => setActiveBedAction(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0', marginBottom: '14px', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div><strong>Phone:</strong> {activeBedAction.bed.resident?.phone}</div>
+              <div><strong>Check-In Date:</strong> {activeBedAction.bed.resident?.checkInDate}</div>
+              <div><strong>Course:</strong> {activeBedAction.bed.resident?.course || 'N/A'}</div>
+              <div><strong>Rent Amount:</strong> ₹{activeBedAction.bed.resident?.rentAmount?.toLocaleString('en-IN')}/mo</div>
+              <div><strong>Payment Status:</strong> <span style={{ color: '#10B981', fontWeight: 700 }}>{activeBedAction.bed.resident?.paymentStatus}</span></div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => handleUnassignResident(activeBedAction.floorId, activeBedAction.roomId, activeBedAction.bed.id)}
+                style={{ flex: 1, background: '#FEF2F2', color: '#EF4444', border: '1px solid #FCA5A5', padding: '10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Unassign / Vacate Resident
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── VIEW MAINTENANCE MODAL (RED BED) ── */}
+      {activeBedAction?.type === 'view_maintenance' && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1100, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '360px', borderRadius: '16px', padding: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#FDE8E8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9B1C1C' }}>
+                <Wrench size={18} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0 }}>{activeBedAction.bed.bedNumber}</h3>
+                <span style={{ fontSize: '11px', color: '#EF4444', fontWeight: 700 }}>Under Maintenance</span>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '13px', color: '#475569', background: '#F8FAFC', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', marginBottom: '14px' }}>
+              <strong>Reason:</strong> {activeBedAction.bed.maintenanceReason || 'General Maintenance'}
+            </p>
 
             <button
-              className="bm-ref-btn-primary"
-              style={{ background: 'linear-gradient(135deg, #10b981, #059669)', marginTop: 14 }}
-              onClick={handleConfirmAllocation}
+              onClick={() => handleRemoveFromMaintenance(activeBedAction.floorId, activeBedAction.roomId, activeBedAction.bed.id)}
+              style={{ width: '100%', background: '#4F46E5', color: '#FFFFFF', border: 'none', padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
             >
-              Confirm Bed Allocation
+              Remove from Maintenance (Set Vacant)
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── VIEW RESERVED MODAL (ORANGE BED) ── */}
+      {activeBedAction?.type === 'view_reserved' && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1100, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '360px', borderRadius: '16px', padding: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#92400E' }}>
+                <Clock size={18} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0 }}>{activeBedAction.bed.bedNumber}</h3>
+                <span style={{ fontSize: '11px', color: '#F97316', fontWeight: 700 }}>Reserved</span>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '13px', color: '#475569', background: '#F8FAFC', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', marginBottom: '14px' }}>
+              <strong>Reserved For:</strong> {activeBedAction.bed.reservedFor || 'Upcoming Guest'}
+            </p>
+
+            <button
+              onClick={() => handleRemoveFromReserved(activeBedAction.floorId, activeBedAction.roomId, activeBedAction.bed.id)}
+              style={{ width: '100%', background: '#4F46E5', color: '#FFFFFF', border: 'none', padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+            >
+              Remove Reservation (Set Vacant)
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/*  ADD FLOOR WIZARD MODAL                                            */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {isAddFloorModalOpen && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1100, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '440px', borderRadius: '16px', padding: '20px', maxHeight: '85vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '17px', fontWeight: 800, margin: 0 }}>Add New Floor</h3>
+              <button onClick={() => setIsAddFloorModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            {addFloorStep === 1 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>Floor Name / Number *</label>
+                  <input
+                    type="text"
+                    value={newFloorName}
+                    onChange={(e) => setNewFloorName(e.target.value)}
+                    placeholder="e.g. Floor 4 or 4th Floor"
+                    style={{ width: '100%', padding: '9px 10px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>Number of Rooms to Create</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={newFloorRoomCount}
+                    onChange={(e) => setNewFloorRoomCount(Number(e.target.value))}
+                    style={{ width: '100%', padding: '9px 10px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <button
+                  onClick={handleProceedToAddFloorStep2}
+                  style={{ marginTop: '8px', background: '#2563EB', color: '#FFFFFF', border: 'none', padding: '12px', borderRadius: '24px', fontSize: '14px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)' }}
+                >
+                  Configure Rooms (Step 2) →
+                </button>
+              </div>
+            ) : (
+              <div>
+                <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 12px 0' }}>Configure details for each room on {newFloorName}:</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
+                  {newFloorRoomsDraft.map((rm, idx) => (
+                    <div key={idx} style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                      <div style={{ fontWeight: 800, fontSize: '13px', color: '#0F172A', marginBottom: '8px' }}>Room #{idx + 1}</div>
+                      
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                        <div>
+                          <label style={{ fontSize: '10px', fontWeight: 700, color: '#64748B' }}>Room No</label>
+                          <input
+                            type="text"
+                            value={rm.roomNumber}
+                            onChange={(e) => {
+                              const updated = [...newFloorRoomsDraft];
+                              updated[idx].roomNumber = e.target.value;
+                              setNewFloorRoomsDraft(updated);
+                            }}
+                            style={{ width: '100%', padding: '6px 8px', fontSize: '12px', borderRadius: '6px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '10px', fontWeight: 700, color: '#64748B' }}>Sharing Type</label>
+                          <select
+                            value={rm.sharingType}
+                            onChange={(e) => {
+                              const updated = [...newFloorRoomsDraft];
+                              updated[idx].sharingType = e.target.value;
+                              const bedsCount = e.target.value.includes('Single')
+                                ? 1
+                                : e.target.value.includes('Double')
+                                ? 2
+                                : e.target.value.includes('Triple')
+                                ? 3
+                                : 4;
+                              updated[idx].bedCount = bedsCount;
+                              setNewFloorRoomsDraft(updated);
+                            }}
+                            style={{ width: '100%', padding: '6px 8px', fontSize: '12px', borderRadius: '6px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                          >
+                            <option value="1-Sharing (Single)">1-Sharing (Single)</option>
+                            <option value="2-Sharing (Double)">2-Sharing (Double)</option>
+                            <option value="3-Sharing (Triple)">3-Sharing (Triple)</option>
+                            <option value="4-Sharing (Quad)">4-Sharing (Quad)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Features Checkboxes */}
+                      <label style={{ fontSize: '10px', fontWeight: 700, color: '#64748B' }}>Features</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', marginTop: '4px' }}>
+                        {ALL_FEATURES.map((feat) => {
+                          const isSelected = rm.features.includes(feat);
+                          return (
+                            <button
+                              type="button"
+                              key={feat}
+                              onClick={() => {
+                                const updated = [...newFloorRoomsDraft];
+                                if (isSelected) {
+                                  updated[idx].features = updated[idx].features.filter((f) => f !== feat);
+                                } else {
+                                  updated[idx].features.push(feat);
+                                }
+                                setNewFloorRoomsDraft(updated);
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: isSelected ? '#EEF2FF' : '#FFFFFF',
+                                border: `1px solid ${isSelected ? '#818CF8' : '#CBD5E1'}`,
+                                borderRadius: '4px',
+                                padding: '4px 6px',
+                                fontSize: '10px',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                color: isSelected ? '#4F46E5' : '#475569'
+                              }}
+                            >
+                              {isSelected ? <CheckSquare size={12} color="#4F46E5" /> : <Square size={12} color="#94A3B8" />}
+                              {feat}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => setAddFloorStep(1)} style={{ flex: 1, background: '#F1F5F9', border: 'none', padding: '10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                    ← Back
+                  </button>
+                  <button onClick={handleSaveNewFloor} style={{ flex: 1, background: '#2563EB', color: '#FFFFFF', border: 'none', padding: '12px', borderRadius: '24px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)' }}>
+                    Create Floor & Rooms
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/*  ADD ROOM MODAL                                                    */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {isAddRoomModalOpen && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1100, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '400px', borderRadius: '16px', padding: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '17px', fontWeight: 800, margin: 0 }}>Add New Room</h3>
+              <button onClick={() => setIsAddRoomModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>Room Number *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 104"
+                  value={newRoomDraft.roomNumber}
+                  onChange={(e) => setNewRoomDraft({ ...newRoomDraft, roomNumber: e.target.value })}
+                  style={{ width: '100%', padding: '9px 10px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>Sharing Type</label>
+                <select
+                  value={newRoomDraft.sharingType}
+                  onChange={(e) => {
+                    const type = e.target.value;
+                    const bedCount = type.includes('Single') ? 1 : type.includes('Double') ? 2 : type.includes('Triple') ? 3 : 4;
+                    setNewRoomDraft({ ...newRoomDraft, sharingType: type, bedCount });
+                  }}
+                  style={{ width: '100%', padding: '9px 10px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                >
+                  <option value="1-Sharing (Single)">1-Sharing (Single)</option>
+                  <option value="2-Sharing (Double)">2-Sharing (Double)</option>
+                  <option value="3-Sharing (Triple)">3-Sharing (Triple)</option>
+                  <option value="4-Sharing (Quad)">4-Sharing (Quad)</option>
+                </select>
+              </div>
+
+              {/* Features selection */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>Room Features</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '6px' }}>
+                  {ALL_FEATURES.map((feat) => {
+                    const isSel = newRoomDraft.features.includes(feat);
+                    return (
+                      <button
+                        type="button"
+                        key={feat}
+                        onClick={() => {
+                          if (isSel) {
+                            setNewRoomDraft({ ...newRoomDraft, features: newRoomDraft.features.filter((f) => f !== feat) });
+                          } else {
+                            setNewRoomDraft({ ...newRoomDraft, features: [...newRoomDraft.features, feat] });
+                          }
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: isSel ? '#EEF2FF' : '#F8FAFC',
+                          border: `1px solid ${isSel ? '#818CF8' : '#CBD5E1'}`,
+                          borderRadius: '6px',
+                          padding: '6px',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          color: isSel ? '#4F46E5' : '#475569'
+                        }}
+                      >
+                        {isSel ? <CheckSquare size={14} color="#4F46E5" /> : <Square size={14} color="#94A3B8" />}
+                        {feat}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <button
+                onClick={handleSaveNewRoom}
+                style={{ marginTop: '8px', background: '#2563EB', color: '#FFFFFF', border: 'none', padding: '12px', borderRadius: '24px', fontSize: '14px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)' }}
+              >
+                Save Room
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/*  EDIT FLOOR MODAL                                                  */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {editingFloor && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1200, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '360px', borderRadius: '16px', padding: '20px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 12px 0' }}>Edit Floor Name</h3>
+            <input
+              type="text"
+              value={editingFloor.floorNumber}
+              onChange={(e) => setEditingFloor({ ...editingFloor, floorNumber: e.target.value })}
+              style={{ width: '100%', padding: '9px 10px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', marginBottom: '14px', boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setEditingFloor(null)} style={{ flex: 1, background: '#F1F5F9', border: 'none', padding: '9px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={handleEditFloorSave} style={{ flex: 1, background: '#4F46E5', color: '#FFFFFF', border: 'none', padding: '9px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/*  EDIT ROOM MODAL                                                   */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {editingRoom && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1200, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '380px', borderRadius: '16px', padding: '20px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 12px 0' }}>Edit Room Details</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>Room Number</label>
+                <input
+                  type="text"
+                  value={editingRoom.room.roomNumber}
+                  onChange={(e) => setEditingRoom({ ...editingRoom, room: { ...editingRoom.room, roomNumber: e.target.value } })}
+                  style={{ width: '100%', padding: '8px 10px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>Sharing Type</label>
+                <select
+                  value={editingRoom.room.sharingType}
+                  onChange={(e) => setEditingRoom({ ...editingRoom, room: { ...editingRoom.room, sharingType: e.target.value } })}
+                  style={{ width: '100%', padding: '8px 10px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                >
+                  <option value="1-Sharing (Single)">1-Sharing (Single)</option>
+                  <option value="2-Sharing (Double)">2-Sharing (Double)</option>
+                  <option value="3-Sharing (Triple)">3-Sharing (Triple)</option>
+                  <option value="4-Sharing (Quad)">4-Sharing (Quad)</option>
+                </select>
+              </div>
+
+              {/* Room Features selection */}
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>Room Features</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '6px' }}>
+                  {ALL_FEATURES.map((feat) => {
+                    const isSel = editingRoom.room.features.includes(feat);
+                    return (
+                      <button
+                        type="button"
+                        key={feat}
+                        onClick={() => {
+                          if (isSel) {
+                            setEditingRoom({
+                              ...editingRoom,
+                              room: {
+                                ...editingRoom.room,
+                                features: editingRoom.room.features.filter((f) => f !== feat)
+                              }
+                            });
+                          } else {
+                            setEditingRoom({
+                              ...editingRoom,
+                              room: {
+                                ...editingRoom.room,
+                                features: [...editingRoom.room.features, feat]
+                              }
+                            });
+                          }
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: isSel ? '#EEF2FF' : '#F8FAFC',
+                          border: `1px solid ${isSel ? '#818CF8' : '#CBD5E1'}`,
+                          borderRadius: '6px',
+                          padding: '6px',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          color: isSel ? '#4F46E5' : '#475569'
+                        }}
+                      >
+                        {isSel ? <CheckSquare size={14} color="#4F46E5" /> : <Square size={14} color="#94A3B8" />}
+                        {feat}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                <button onClick={() => setEditingRoom(null)} style={{ flex: 1, background: '#F1F5F9', border: 'none', padding: '9px', borderRadius: '24px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                  Cancel
+                </button>
+                <button onClick={handleEditRoomSave} style={{ flex: 1, background: '#2563EB', color: '#FFFFFF', border: 'none', padding: '9px', borderRadius: '24px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)' }}>
+                  Save Room
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/*  EDIT BED MODAL                                                    */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {editingBed && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1200, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '360px', borderRadius: '16px', padding: '20px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 12px 0' }}>Edit Bed Label</h3>
+            <input
+              type="text"
+              value={editingBed.bed.bedNumber}
+              onChange={(e) => setEditingBed({ ...editingBed, bed: { ...editingBed.bed, bedNumber: e.target.value } })}
+              style={{ width: '100%', padding: '9px 10px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', marginBottom: '14px', boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setEditingBed(null)} style={{ flex: 1, background: '#F1F5F9', border: 'none', padding: '9px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={handleEditBedSave} style={{ flex: 1, background: '#4F46E5', color: '#FFFFFF', border: 'none', padding: '9px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                Save Bed
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/*  DELETE CONFIRMATION MODAL                                         */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {deleteConfirm && (
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1300, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '340px', borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#FEF2F2', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto' }}>
+              <AlertTriangle size={24} />
+            </div>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 6px 0' }}>Delete {deleteConfirm.type}?</h3>
+            <p style={{ fontSize: '12px', color: '#64748B', margin: '0 0 16px 0' }}>
+              Are you sure you want to delete <strong>{deleteConfirm.title}</strong>? This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setDeleteConfirm(null)} style={{ flex: 1, background: '#F1F5F9', border: 'none', padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (deleteConfirm.type === 'floor') {
+                    handleDeleteFloor(deleteConfirm.id);
+                  } else if (deleteConfirm.type === 'room' && deleteConfirm.floorId) {
+                    handleDeleteRoom(deleteConfirm.floorId, deleteConfirm.id);
+                  }
+                }}
+                style={{ flex: 1, background: '#EF4444', color: '#FFFFFF', border: 'none', padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

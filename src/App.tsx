@@ -531,7 +531,7 @@ function App() {
       case 'fees':
         return null;
       case 'rooms':
-        return 'Room Management';
+        return null;
       case 'settings':
         return 'Settings';
       default:
@@ -649,17 +649,9 @@ function App() {
         {(currentScreen !== 'home' || activeTab !== 'home') && getPageTitle() && (
           <div className="page-title-banner">
             <h2 className="page-title-text">{getPageTitle()}</h2>
-            {activeTab === 'rooms' && (
-              <button
-                type="button"
-                className="header-add-bed-btn"
-                onClick={() => window.dispatchEvent(new CustomEvent('open-add-bed'))}
-              >
-                <Plus size={15} /> Add Bed
-              </button>
-            )}
           </div>
         )}
+
 
 
         {/* MAIN CONTENT CONTAINER */}
@@ -816,7 +808,7 @@ function App() {
 
           {/* SCREEN 3: HAPPYHOSTEL ROOM & BED MANAGEMENT */}
           {currentScreen === 'home' && activeTab === 'rooms' && (
-            <div className="p-16">
+            <div>
               <RoomManagementPage />
             </div>
           )}

@@ -159,3 +159,47 @@ export interface ActivityItem {
   description: string;
   category: 'checkin' | 'request' | 'payment' | 'maintenance';
 }
+
+// New Room Management Redesign Data Models
+export type BedStatus = 'occupied' | 'vacant' | 'maintenance' | 'reserved';
+
+export interface BedResident {
+  id: string;
+  name: string;
+  phone: string;
+  checkInDate: string;
+  course?: string;
+  rentAmount?: number;
+  paymentStatus?: 'Paid' | 'Pending' | 'Overdue';
+  emergencyContact?: string;
+  email?: string;
+  address?: string;
+  aadhaarNumber?: string;
+}
+
+export interface BedModel {
+  id: string;
+  bedNumber: string;
+  status: BedStatus;
+  resident?: BedResident;
+  maintenanceReason?: string;
+  reservedFor?: string;
+  reservedUntil?: string;
+}
+
+export interface RoomModel {
+  id: string;
+  roomNumber: string;
+  floorId: string;
+  sharingType: string;
+  features: string[];
+  beds: BedModel[];
+  rentPerMonth?: number;
+}
+
+export interface FloorModel {
+  id: string;
+  floorNumber: string;
+  rooms: RoomModel[];
+}
+

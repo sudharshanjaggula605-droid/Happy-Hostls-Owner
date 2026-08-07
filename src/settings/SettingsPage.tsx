@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   CheckCircle, 
   ShieldCheck, 
@@ -12,7 +12,9 @@ import {
   Lock,
   X,
   Flag,
-  Hash
+  Hash,
+  Plus,
+  Trash2
 } from 'lucide-react';
 
 interface SettingsPageProps {
@@ -25,8 +27,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
   // Profile Form States
   const [firstName, setFirstName] = useState('Rohit');
   const [lastName, setLastName] = useState('Rajpoot');
-  const [nativePlace, setNativePlace] = useState('');
-  const [guardianName, setGuardianName] = useState('');
+  const [addressLocation, setAddressLocation] = useState('');
   const [mobileNumber, setMobileNumber] = useState('6265775558');
   const [alternateMobile, setAlternateMobile] = useState('');
   const [email] = useState('rohitrajpoot21119@gmail.com');
@@ -45,7 +46,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
     'Wi-Fi', 'Geyser', 'Lift', 'CCTV', 'Food'
   ]);
 
-  const availableAmenities = [
+  const [amenitiesList, setAmenitiesList] = useState([
     'Wi-Fi',
     'Parking',
     'Washing Machine',
@@ -57,7 +58,17 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
     'Study Table & Chair',
     'Almirah',
     'Food'
-  ];
+  ]);
+  const [isAddingAmenity, setIsAddingAmenity] = useState(false);
+  const [newAmenity, setNewAmenity] = useState('');
+
+  // Hostel Photos State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [hostelPhotos, setHostelPhotos] = useState<string[]>([
+    'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80'
+  ]);
 
   // Floor Selection State
   const [selectedFloor, setSelectedFloor] = useState<string>('Ground Floor');
@@ -72,6 +83,36 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
     setSelectedAmenities(prev => 
       prev.includes(name) ? prev.filter(a => a !== name) : [...prev, name]
     );
+  };
+
+  const handleAddAmenitySubmit = () => {
+    if (newAmenity.trim() !== '') {
+      if (!amenitiesList.includes(newAmenity.trim())) {
+        setAmenitiesList([...amenitiesList, newAmenity.trim()]);
+      }
+      if (!selectedAmenities.includes(newAmenity.trim())) {
+        setSelectedAmenities([...selectedAmenities, newAmenity.trim()]);
+      }
+    }
+    setNewAmenity('');
+    setIsAddingAmenity(false);
+  };
+
+  const handleDeletePhoto = (index: number) => {
+    setHostelPhotos(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAddPhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const newPhotoUrl = URL.createObjectURL(file);
+      setHostelPhotos(prev => [newPhotoUrl, ...prev]);
+      if (showToast) showToast('Photo added successfully!');
+    }
   };
 
   // Handle Save Profile Settings
@@ -218,32 +259,17 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
                 />
               </div>
 
-              {/* Native Place */}
+              {/* Address/Location */}
               <div className="settings-field-item">
-                <label className="field-item-label">Native place</label>
+                <label className="field-item-label">Address/Location</label>
                 <div className="prefix-input-wrapper">
                   <MapPin size={16} className="prefix-field-icon" />
                   <input 
                     type="text" 
                     className="settings-text-input prefix-padding" 
-                    placeholder="City or hometown"
-                    value={nativePlace}
-                    onChange={(e) => setNativePlace(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {/* Guardian */}
-              <div className="settings-field-item">
-                <label className="field-item-label">Guardian</label>
-                <div className="prefix-input-wrapper">
-                  <Shield size={16} className="prefix-field-icon" />
-                  <input 
-                    type="text" 
-                    className="settings-text-input prefix-padding" 
-                    placeholder="Parent or guardian name"
-                    value={guardianName}
-                    onChange={(e) => setGuardianName(e.target.value)}
+                    placeholder="Full address or city"
+                    value={addressLocation}
+                    onChange={(e) => setAddressLocation(e.target.value)}
                   />
                 </div>
               </div>
@@ -288,17 +314,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* PROFILE VISIBILITY CARD */}
-          <div className="profile-visibility-card">
-            <div className="visibility-header">
-              <ChevronRight size={16} color="#0284c7" />
-              <span className="visibility-title">Profile Visibility</span>
-            </div>
-            <p className="visibility-desc">
-              Your personal information is only visible to verified hostel managers and staff during your stay.
-            </p>
           </div>
 
           {/* SAVE CHANGES BUTTON & SUBTEXT */}
@@ -413,8 +428,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
             {/* Field 6: AMENITIES (Selectable Pill Chips) */}
             <div className="hostel-field-group">
               <label className="hostel-field-label">AMENITIES</label>
-              <div className="amenities-chips-row">
-                {availableAmenities.map((amenity) => {
+              <div className="amenities-chips-row" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                {amenitiesList.map((amenity) => {
                   const isSelected = selectedAmenities.includes(amenity);
                   return (
                     <button
@@ -427,36 +442,63 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
                     </button>
                   );
                 })}
+                {isAddingAmenity ? (
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Type and enter..."
+                    value={newAmenity}
+                    onChange={(e) => setNewAmenity(e.target.value)}
+                    onBlur={handleAddAmenitySubmit}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddAmenitySubmit()}
+                    className="amenity-chip-btn"
+                    style={{ border: '1px solid #0284c7', background: 'transparent', width: '130px', padding: '6px 14px', outline: 'none', margin: 0 }}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    className="amenity-chip-btn"
+                    style={{ borderStyle: 'dashed', background: 'transparent', display: 'inline-flex', alignItems: 'center', gap: '4px', margin: 0 }}
+                    onClick={() => setIsAddingAmenity(true)}
+                  >
+                    <Plus size={14} /> Add
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Field 7: FLOOR SELECTION CARD WITH IMAGE */}
-            <div className="floor-selection-card">
-              <div className="room-interior-img-wrapper">
-                <img 
-                  src="https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=600&q=80" 
-                  alt="Hostel Floor Interior" 
-                  className="room-interior-img" 
+            {/* Field 7: HOSTEL PHOTOS GALLERY */}
+            <div className="hostel-field-group" style={{ marginTop: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <label className="hostel-field-label" style={{ marginBottom: 0 }}>HOSTEL PHOTOS</label>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  ref={fileInputRef} 
+                  style={{ display: 'none' }} 
+                  onChange={handlePhotoUpload} 
                 />
+                <button type="button" onClick={handleAddPhotoClick} style={{ background: 'transparent', border: 'none', color: '#0284c7', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '13px' }}>
+                  <Plus size={14} /> Add Photo
+                </button>
               </div>
-              <div className="floor-select-subtext">
-                Select a floor to view associated rooms
-              </div>
-
-              {/* Floor Switcher Pills */}
-              <div className="floors-pill-switcher">
-                {['Ground Floor', '1st Floor', '2nd Floor', '3rd Floor'].map((flr) => (
-                  <button
-                    key={flr}
-                    type="button"
-                    className={`floor-pill-btn ${selectedFloor === flr ? 'active' : ''}`}
-                    onClick={() => {
-                      setSelectedFloor(flr);
-                      if (showToast) showToast(`Selected ${flr} rooms view`);
-                    }}
-                  >
-                    {flr}
-                  </button>
+              <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px', WebkitOverflowScrolling: 'touch' }}>
+                {hostelPhotos.length === 0 && (
+                  <div style={{ padding: '24px', background: '#f8fafc', borderRadius: '12px', width: '100%', textAlign: 'center', color: '#64748b' }}>
+                    No photos added yet
+                  </div>
+                )}
+                {hostelPhotos.map((photo, index) => (
+                  <div key={index} style={{ position: 'relative', flexShrink: 0, width: '220px', height: '140px', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                    <img src={photo} alt={`Hostel view ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <button 
+                      type="button"
+                      onClick={() => handleDeletePhoto(index)}
+                      style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                    >
+                      <Trash2 size={12} color="white" />
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>

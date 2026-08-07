@@ -127,6 +127,7 @@ function App() {
   const [supplierSearchQuery, setSupplierSearchQuery] = useState('');
   const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [selectedSupplierCategory, setSelectedSupplierCategory] = useState<string | null>(null);
 
   // Form state for Supplier modal
   const [supName, setSupName] = useState('');
@@ -174,6 +175,10 @@ function App() {
   }, [currentScreen, activeTab]);
 
   const handleGlobalBack = () => {
+    if (selectedSupplierCategory) {
+      setSelectedSupplierCategory(null);
+      return;
+    }
     setHistoryStack(prev => {
       if (prev.length > 1) {
         isBackNav.current = true;
@@ -314,7 +319,7 @@ function App() {
     setEditingSupplier(sup);
     setSupName(sup.name);
     setSupContactPerson(sup.contactPerson);
-    setSupPhone(sup.phone);
+    setSupPhone(sup.phone.replace('+91 ', ''));
     setSupItems(sup.itemsSupplied);
     setSupAddress(sup.address);
     setSupLastDelivery(sup.lastDeliveryDate);
@@ -486,11 +491,22 @@ function App() {
   });
   const totalExpensesSum = filteredExpenses.reduce((sum, item) => sum + item.amount, 0);
 
-  const filteredSuppliers = suppliers.filter(sup =>
-    sup.name.toLowerCase().includes(supplierSearchQuery.toLowerCase()) ||
-    sup.contactPerson.toLowerCase().includes(supplierSearchQuery.toLowerCase()) ||
-    sup.itemsSupplied.toLowerCase().includes(supplierSearchQuery.toLowerCase())
-  );
+  const getSupplierCategory = (items: string) => {
+    const lowerItems = items.toLowerCase();
+    if (lowerItems.includes('veg') || lowerItems.includes('fruit') || lowerItems.includes('onion')) return 'Vegetables & Fruits';
+    if (lowerItems.includes('milk') || lowerItems.includes('dairy') || lowerItems.includes('paneer') || lowerItems.includes('curd') || lowerItems.includes('butter')) return 'Dairy';
+    if (lowerItems.includes('meat') || lowerItems.includes('egg') || lowerItems.includes('poultry')) return 'Meat & Poultry';
+    if (lowerItems.includes('wheat') || lowerItems.includes('rice') || lowerItems.includes('pulse') || lowerItems.includes('spice') || lowerItems.includes('oil') || lowerItems.includes('grocery') || lowerItems.includes('tea') || lowerItems.includes('condiments')) return 'Grocery & Grains';
+    return 'Others';
+  };
+
+  const filteredSuppliers = suppliers.filter(sup => {
+    const matchesSearch = sup.name.toLowerCase().includes(supplierSearchQuery.toLowerCase()) ||
+      sup.contactPerson.toLowerCase().includes(supplierSearchQuery.toLowerCase()) ||
+      sup.itemsSupplied.toLowerCase().includes(supplierSearchQuery.toLowerCase());
+    const matchesCategory = selectedSupplierCategory ? getSupplierCategory(sup.itemsSupplied) === selectedSupplierCategory : true;
+    return matchesSearch && matchesCategory;
+  });
 
   const getPageTitle = () => {
     if (currentScreen === 'edit-menu') return `Edit Menu: ${editingDay || ''}`;
@@ -1148,7 +1164,7 @@ function App() {
                   </div>
 
                   <div className="pantry-inventory-feed">
-                    {pantryItems.map(item => {
+                    {[...pantryItems].sort((a, b) => (a.stock <= a.threshold ? 0 : 1) - (b.stock <= b.threshold ? 0 : 1)).map(item => {
                       const isLow = item.stock <= item.threshold;
                       return (
                         <div key={item.id} className={`pantry-inventory-card ${isLow ? 'low-stock' : 'sufficient-stock'}`}>
@@ -1301,33 +1317,90 @@ function App() {
               {/* TAB 4: SUPPLIERS DIRECTORY */}
               {kitchenTab === 'suppliers' && (
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                    <h2 className="weekly-menu-title" style={{ marginBottom: 0 }}>Suppliers ({filteredSuppliers.length})</h2>
-                    <button
-                      className="quick-action-pill"
-                      style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none' }}
-                      onClick={openAddSupplierModal}
-                    >
-                      <Plus size={14} /> Add Supplier
-                    </button>
-                  </div>
+                  {!selectedSupplierCategory ? (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                        <h2 className="weekly-menu-title" style={{ marginBottom: 0 }}>Supplier Categories</h2>
+                        <button
+                          className="quick-action-pill"
+                          style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none' }}
+                          onClick={openAddSupplierModal}
+                        >
+                          <Plus size={14} /> Add Supplier
+                        </button>
+                      </div>
+                      
+                      <div className="supplier-categories-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '20px' }}>
+                        {['Vegetables & Fruits', 'Dairy', 'Meat & Poultry', 'Grocery & Grains', 'Others'].map(cat => {
+                           const catSuppliers = suppliers.filter(s => getSupplierCategory(s.itemsSupplied) === cat);
+                           let icon = '📦';
+                           let bg = 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)';
+                           let color = '#4b5563';
+                           
+                           if (cat === 'Vegetables & Fruits') { icon = '🥦'; bg = 'linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%)'; color = '#0f766e'; }
+                           if (cat === 'Dairy') { icon = '🥛'; bg = 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)'; color = '#1e40af'; }
+                           if (cat === 'Meat & Poultry') { icon = '🥚'; bg = 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)'; color = '#be123c'; }
+                           if (cat === 'Grocery & Grains') { icon = '🌾'; bg = 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)'; color = '#92400e'; }
+                           
+                           return (
+                             <div 
+                               key={cat}
+                               onClick={() => setSelectedSupplierCategory(cat)}
+                               style={{ 
+                                 background: bg, 
+                                 borderRadius: '16px', 
+                                 padding: '20px 16px', 
+                                 cursor: 'pointer',
+                                 boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                                 border: '1px solid rgba(255,255,255,0.5)',
+                                 display: 'flex',
+                                 flexDirection: 'column',
+                                 alignItems: 'center',
+                                 gap: '10px',
+                                 transition: 'all 0.2s ease',
+                               }}
+                             >
+                               <div style={{ fontSize: '36px', marginBottom: '2px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>{icon}</div>
+                               <div style={{ fontWeight: '700', color: color, textAlign: 'center', fontSize: '15px' }}>{cat}</div>
+                               <div style={{ fontSize: '12px', color: color, opacity: 0.9, fontWeight: '600', background: 'rgba(255,255,255,0.5)', padding: '4px 10px', borderRadius: '12px' }}>
+                                 {catSuppliers.length} Suppliers
+                               </div>
+                             </div>
+                           )
+                        })}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <h2 className="weekly-menu-title" style={{ marginBottom: 0 }}>{selectedSupplierCategory}</h2>
+                        </div>
+                        <button
+                          className="quick-action-pill"
+                          style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none' }}
+                          onClick={openAddSupplierModal}
+                        >
+                          <Plus size={14} /> Add Supplier
+                        </button>
+                      </div>
 
-                  {/* Clean Search Box */}
-                  <div className="search-box-modern" style={{ marginBottom: '14px' }}>
-                    <Search size={16} style={{ color: 'var(--text-muted)' }} />
-                    <input
-                      type="text"
-                      placeholder="Search supplier, contact, or items..."
-                      className="search-box-input"
-                      value={supplierSearchQuery}
-                      onChange={(e) => setSupplierSearchQuery(e.target.value)}
-                    />
-                    {supplierSearchQuery && (
-                      <button style={{ background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setSupplierSearchQuery('')}>
-                        <X size={14} style={{ color: 'var(--text-muted)' }} />
-                      </button>
-                    )}
-                  </div>
+                      {/* Clean Search Box */}
+                      <div className="search-box-modern" style={{ marginBottom: '14px' }}>
+                        <Search size={16} style={{ color: 'var(--text-muted)' }} />
+                        <input
+                          type="text"
+                          placeholder="Search supplier, contact, or items..."
+                          className="search-box-input"
+                          value={supplierSearchQuery}
+                          onChange={(e) => setSupplierSearchQuery(e.target.value)}
+                        />
+                        {supplierSearchQuery && (
+                          <button style={{ background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setSupplierSearchQuery('')}>
+                            <X size={14} style={{ color: 'var(--text-muted)' }} />
+                          </button>
+                        )}
+                      </div>
 
                   {/* Modern Suppliers Cards List */}
                   {filteredSuppliers.length === 0 ? (
@@ -1337,37 +1410,36 @@ function App() {
                   ) : (
                     <div className="supplier-directory-feed">
                       {filteredSuppliers.map(sup => {
-                        const initial = sup.name.charAt(0).toUpperCase();
-                        const pStatus = sup.paymentStatus.toLowerCase();
+                        const initial = sup.contactPerson.charAt(0).toUpperCase();
                         return (
                           <div key={sup.id} className="supplier-directory-card">
-                            {/* TOP ROW: BRAND & CALL BUTTON */}
+                            {/* TOP ROW: CONTACT PERSON & CALL BUTTON */}
                             <div className="supplier-card-top">
                               <div className="supplier-brand-wrap">
                                 <div className="supplier-avatar-badge">{initial}</div>
-                                <div className="supplier-name-text">{sup.name}</div>
+                                <div className="supplier-name-text">{sup.contactPerson}</div>
                               </div>
                               <a href={`tel:${sup.phone}`} className="supplier-call-btn">
                                 <Phone size={13} /> Call
                               </a>
                             </div>
 
-                            {/* MIDDLE GRID: CONTACT PERSON & ITEMS */}
+                            {/* MIDDLE GRID: SUPPLIER NAME & ITEMS */}
                             <div className="supplier-details-grid">
                               <div className="supplier-detail-col">
-                                <span className="supplier-detail-label">Contact Person</span>
-                                <span className="supplier-detail-value">{sup.contactPerson}</span>
+                                <span className="supplier-detail-label">Supplier Name</span>
+                                <span className="supplier-detail-value" style={{ whiteSpace: 'normal', wordBreak: 'break-word', paddingRight: '8px' }}>{sup.name}</span>
                               </div>
                               <div className="supplier-detail-col">
                                 <span className="supplier-detail-label">Items Supplied</span>
-                                <span className="supplier-detail-value">{sup.itemsSupplied}</span>
+                                <span className="supplier-detail-value" style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{sup.itemsSupplied}</span>
                               </div>
                             </div>
 
-                            {/* BOTTOM ROW: PAYMENT STATUS & EDIT/DELETE ACTIONS */}
+                            {/* BOTTOM ROW: CONTACT NUMBER & EDIT/DELETE ACTIONS */}
                             <div className="supplier-card-bottom">
-                              <span className={`supplier-payment-pill ${pStatus}`}>
-                                ● {sup.paymentStatus}
+                              <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Phone size={12} style={{ color: 'var(--text-muted)' }} /> {sup.phone.replace('+91 ', '')}
                               </span>
 
                               <div className="supplier-actions-wrap">
@@ -1390,13 +1462,15 @@ function App() {
                           </div>
                         );
                       })}
-                    </div>
-                  )}
-                </div>
-              )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
-            </div>
-          )}
+          </div>
+        )}
 
           {/* SCREEN: EDIT FOOD MENU */}
           {currentScreen === 'edit-menu' && (

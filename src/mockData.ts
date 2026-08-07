@@ -181,6 +181,26 @@ export const initialSuppliers: Supplier[] = [
     lastDeliveryDate: '2026-07-15',
     paymentStatus: 'Overdue',
   },
+  {
+    id: 's5',
+    name: 'Green Leaf Mandi Traders',
+    contactPerson: 'Arun Yadav',
+    phone: '+91 99885 66778',
+    itemsSupplied: 'Fresh Vegetables, Onions, Potatoes, Tomatoes',
+    address: 'Shop #42, Sabzi Mandi, Main Market',
+    lastDeliveryDate: '2026-08-05',
+    paymentStatus: 'Paid',
+  },
+  {
+    id: 's6',
+    name: 'Fresh Fruits Suppliers',
+    contactPerson: 'Mohammad Tariq',
+    phone: '+91 99886 77889',
+    itemsSupplied: 'Seasonal Fruits, Bananas, Apples, Oranges',
+    address: 'Stall #12, Fruit Market Hub',
+    lastDeliveryDate: '2026-08-06',
+    paymentStatus: 'Pending',
+  },
 ];
 
 // Hostel Management Dashboard Data

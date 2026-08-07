@@ -18,7 +18,8 @@ import {
   Search,
   BookOpen,
   ChevronRight,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Edit3
 } from 'lucide-react';
 
 export interface BookingRequestItem {
@@ -231,9 +232,11 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
   const [searchQuery, setSearchQuery] = useState('');
 
   // -------------------------------------------------------------
-  // BOOKING APPROVAL WIZARD STATE (5 Steps)
+  // BOOKING & TRANSFER APPROVAL WIZARD STATE (5 Steps)
   // -------------------------------------------------------------
   const [activeBookingReq, setActiveBookingReq] = useState<BookingRequestItem | null>(null);
+  const [activeTransferReq, setActiveTransferReq] = useState<TransferRequestItem | null>(null);
+  const [isEditingDetails, setIsEditingDetails] = useState<boolean>(false);
   const [wizardStep, setWizardStep] = useState<number>(1);
   const [wizHostel, setWizHostel] = useState<string>('Happy Hostels');
   const [wizSharing, setWizSharing] = useState<string>('2-Sharing');
@@ -256,10 +259,30 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
   // Start Booking Approval Wizard
   const handleOpenBookingWizard = (req: BookingRequestItem) => {
     setActiveBookingReq(req);
+    setActiveTransferReq(null);
+    setIsEditingDetails(false);
     setWizardStep(1);
     setWizHostel('Happy Hostels');
     setWizSharing(req.sharingPreferred.includes('1') ? '1-Sharing' : req.sharingPreferred.includes('3') ? '3-Sharing' : '2-Sharing');
     setWizFloor(req.floorPreferred || '1st Floor');
+    setWizRoom(null);
+    setWizBed(null);
+    setWizName(req.name);
+    setWizPhone(req.phone);
+    setWizEmail(req.email || `${req.name.toLowerCase().replace(/\s+/g, '.')}@gmail.com`);
+    setWizJoinDate(req.requestedDate || '2026-08-05');
+    setWizRent(7500);
+  };
+
+  // Start Transfer Approval Wizard
+  const handleOpenTransferWizard = (req: TransferRequestItem) => {
+    setActiveTransferReq(req);
+    setActiveBookingReq(null);
+    setIsEditingDetails(false);
+    setWizardStep(1);
+    setWizHostel('Happy Hostels');
+    setWizSharing(req.currentSharing.includes('1') ? '1-Sharing' : req.currentSharing.includes('3') ? '3-Sharing' : '2-Sharing');
+    setWizFloor(req.currentSharing.includes('2nd') ? '2nd Floor' : req.currentSharing.includes('3rd') ? '3rd Floor' : '1st Floor');
     setWizRoom(null);
     setWizBed(null);
     setWizName(req.name);
@@ -366,20 +389,61 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
     });
   }, [transferRequests, activeFilter, searchQuery]);
 
+  // Complete Transfer Approval Wizard
+  const handleCompleteTransferApproval = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeTransferReq || !wizRoom || !wizBed) {
+      if (showToast) showToast('Please select a room and bed before approving transfer');
+      return;
+    }
+
+    const newTargetRoomStr = `Room ${wizRoom.roomNumber} (${wizBed.bedNumber})`;
+    const newTargetSharingStr = `${wizSharing} (${wizFloor})`;
+
+    // 1. Mark Transfer Request as Approved
+    setTransferRequests(prev => prev.map(r => r.id === activeTransferReq.id ? { 
+      ...r, 
+      status: 'Approved',
+      targetRoom: newTargetRoomStr,
+      targetSharing: newTargetSharingStr
+    } : r));
+
+    // 2. Vacate tenant's old bed in room inventory
+    setInventoryRooms(prevRooms => prevRooms.map(room => {
+      return {
+        ...room,
+        beds: room.beds.map(bed => {
+          if (bed.occupantName === activeTransferReq.name) {
+            return { ...bed, status: 'Vacant', occupantName: undefined };
+          }
+          return bed;
+        })
+      };
+    }));
+
+    // 3. Occupy new bed in room inventory
+    setInventoryRooms(prevRooms => prevRooms.map(r => {
+      if (r.roomNumber === wizRoom.roomNumber && r.hostelName === wizHostel) {
+        return {
+          ...r,
+          beds: r.beds.map(b => b.id === wizBed.id ? { ...b, status: 'Occupied', occupantName: wizName } : b)
+        };
+      }
+      return r;
+    }));
+
+    setTransferSuccessPopup(true);
+    if (showToast) showToast(`Approved transfer for ${wizName} to Room ${wizRoom.roomNumber} (${wizBed.bedNumber})!`);
+    setActiveTransferReq(null);
+    setTimeout(() => {
+      setTransferSuccessPopup(false);
+    }, 2500);
+  };
+
   // Reject Transfer Request
   const handleRejectTransfer = (id: string, name: string) => {
     setTransferRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Rejected' } : r));
     if (showToast) showToast(`Rejected transfer request for ${name}.`);
-  };
-
-  // Approve Transfer Request
-  const handleApproveTransfer = (id: string, name: string) => {
-    setTransferRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Approved' } : r));
-    setTransferSuccessPopup(true);
-    if (showToast) showToast('Transfer Approved Successfully');
-    setTimeout(() => {
-      setTransferSuccessPopup(false);
-    }, 2500);
   };
 
   // Counts for Booking Requests
@@ -584,7 +648,7 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
               >
                 <div className="brp-clean-card-left">
                   <h3 className="ref-tenant-name">{req.name}</h3>
-                  <span className="ref-room-pill blue-pill">{req.currentRoom} → {req.targetRoom}</span>
+                  <span className="ref-room-pill blue-pill">{req.currentRoom}</span>
                 </div>
 
                 <button 
@@ -866,12 +930,12 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
 
                 <div className="view-detail-card">
                   <span className="view-detail-label">Current Bed</span>
-                  <span className="view-detail-value">{viewTransferReq.currentRoom} • {viewTransferReq.currentSharing}</span>
+                  <span className="view-detail-value highlight-blue">{viewTransferReq.currentRoom} • {viewTransferReq.currentSharing}</span>
                 </div>
 
                 <div className="view-detail-card">
-                  <span className="view-detail-label">Transfer Bed</span>
-                  <span className="view-detail-value highlight-blue">{viewTransferReq.targetRoom} • {viewTransferReq.targetSharing}</span>
+                  <span className="view-detail-label">Reason for Transfer</span>
+                  <span className="view-detail-value">{viewTransferReq.reason}</span>
                 </div>
 
                 <div className="view-detail-card">
@@ -902,7 +966,7 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                 onClick={() => {
                   const req = viewTransferReq;
                   setViewTransferReq(null);
-                  handleApproveTransfer(req.id, req.name);
+                  handleOpenTransferWizard(req);
                 }}
               >
                 <CheckCircle size={16} />
@@ -929,10 +993,10 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
       )}
 
       {/* ========================================================================= */}
-      {/* BOOKING APPROVAL & BED ALLOCATION WIZARD MODAL (5 STEPS)                  */}
+      {/* BOOKING / TRANSFER APPROVAL & BED ALLOCATION WIZARD MODAL (5 STEPS)        */}
       {/* ========================================================================= */}
-      {activeBookingReq && (
-        <div className="wizard-modal-backdrop" onClick={() => setActiveBookingReq(null)}>
+      {(activeBookingReq || activeTransferReq) && (
+        <div className="wizard-modal-backdrop" onClick={() => { setActiveBookingReq(null); setActiveTransferReq(null); }}>
           <div className="wizard-modal-card" onClick={(e) => e.stopPropagation()}>
             
             {/* WIZARD HEADER */}
@@ -951,21 +1015,21 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                 <div className="wizard-title-group">
                   <div className="wizard-badge-pill">
                     <Sparkles size={13} />
-                    <span>APPROVE BOOKING • STEP {wizardStep} OF 5</span>
+                    <span>{activeTransferReq ? 'APPROVE TRANSFER' : 'APPROVE BOOKING'}</span>
                   </div>
                   <h2 className="wizard-title">
-                    {wizardStep === 1 && 'Applicant Preference Review'}
+                    {wizardStep === 1 && (activeTransferReq ? 'Tenant & Current Bed Review' : 'Applicant Preference Review')}
                     {wizardStep === 2 && 'Sharing & Floor Preference'}
                     {wizardStep === 3 && 'Select Available Room'}
                     {wizardStep === 4 && 'Bed Layout & Bed Selection'}
-                    {wizardStep === 5 && 'Final Assignment & Approval'}
+                    {wizardStep === 5 && 'Details'}
                   </h2>
                 </div>
               </div>
               <button 
                 type="button" 
                 className="wizard-close-btn"
-                onClick={() => setActiveBookingReq(null)}
+                onClick={() => { setActiveBookingReq(null); setActiveTransferReq(null); }}
               >
                 <X size={18} />
               </button>
@@ -991,26 +1055,26 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                         <User size={24} color="#2563eb" />
                       </div>
                       <div>
-                        <h3 className="preview-name">{activeBookingReq.name}</h3>
-                        <p className="preview-sub">{activeBookingReq.course}</p>
+                        <h3 className="preview-name">{activeTransferReq ? activeTransferReq.name : activeBookingReq?.name}</h3>
+                        <p className="preview-sub">{activeTransferReq ? `Reason: ${activeTransferReq.reason}` : activeBookingReq?.course}</p>
                       </div>
                     </div>
                     <div className="preview-details-grid">
                       <div className="p-detail-item">
                         <span className="p-lbl">Phone:</span>
-                        <span className="p-val">{activeBookingReq.phone}</span>
+                        <span className="p-val">{activeTransferReq ? activeTransferReq.phone : activeBookingReq?.phone}</span>
                       </div>
                       <div className="p-detail-item">
-                        <span className="p-lbl">Preferred Sharing:</span>
-                        <span className="p-val highlight-blue">{activeBookingReq.sharingPreferred}</span>
+                        <span className="p-lbl">{activeTransferReq ? 'Current Bed:' : 'Preferred Sharing:'}</span>
+                        <span className="p-val highlight-blue">{activeTransferReq ? activeTransferReq.currentRoom : activeBookingReq?.sharingPreferred}</span>
                       </div>
                       <div className="p-detail-item">
-                        <span className="p-lbl">Preferred Floor:</span>
-                        <span className="p-val highlight-blue">{activeBookingReq.floorPreferred}</span>
+                        <span className="p-lbl">{activeTransferReq ? 'Current Floor:' : 'Preferred Floor:'}</span>
+                        <span className="p-val highlight-blue">{activeTransferReq ? activeTransferReq.currentSharing : activeBookingReq?.floorPreferred}</span>
                       </div>
                       <div className="p-detail-item">
-                        <span className="p-lbl">Requested Move-in:</span>
-                        <span className="p-val">{activeBookingReq.requestedDate}</span>
+                        <span className="p-lbl">{activeTransferReq ? 'Request Date:' : 'Requested Move-in:'}</span>
+                        <span className="p-val">{activeTransferReq ? activeTransferReq.requestedDate : activeBookingReq?.requestedDate}</span>
                       </div>
                     </div>
                   </div>
@@ -1053,7 +1117,7 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                 <div className="wizard-step-pane">
                   <div className="preference-alert-bar">
                     <Sparkles size={14} color="#7c3aed" />
-                    <span>Applicant Preference: <strong>{activeBookingReq.sharingPreferred} ({activeBookingReq.floorPreferred})</strong></span>
+                    <span>{activeTransferReq ? 'Current Bed' : 'Applicant Preference'}: <strong>{activeTransferReq ? activeTransferReq.currentRoom : `${activeBookingReq?.sharingPreferred} (${activeBookingReq?.floorPreferred})`}</strong></span>
                   </div>
 
                   <p className="step-instruction">Select room sharing configuration &amp; floor for {wizHostel}:</p>
@@ -1210,9 +1274,9 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
 
               {/* STEP 5: FINAL CONFIRMATION & SAVE */}
               {wizardStep === 5 && wizRoom && wizBed && (
-                <form onSubmit={handleCompleteBookingApproval} className="wizard-form-step">
+                <form onSubmit={activeTransferReq ? handleCompleteTransferApproval : handleCompleteBookingApproval} className="wizard-form-step">
                   <div className="selected-assignment-summary">
-                    <div className="summary-title">Booking Allocation Summary</div>
+                    <div className="summary-title">{activeTransferReq ? 'New Bed Allocation Summary' : 'Booking Allocation Summary'}</div>
                     <div className="summary-pills">
                       <span className="sum-pill">{wizHostel}</span>
                       <span className="sum-pill highlight-blue">Room {wizRoom.roomNumber} ({wizBed.bedNumber})</span>
@@ -1221,13 +1285,15 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                     </div>
                   </div>
 
+                  {/* DETAILS CARD OR EDITABLE FIELDS */}
                   <div className="wizard-fields-grid">
                     <div className="form-group-field">
                       <label className="form-field-label">Applicant Name *</label>
                       <input 
                         type="text" 
                         required
-                        className="modal-text-input"
+                        readOnly={!isEditingDetails}
+                        className={`modal-text-input ${!isEditingDetails ? 'bg-slate-100 font-semibold' : ''}`}
                         value={wizName}
                         onChange={(e) => setWizName(e.target.value)}
                       />
@@ -1238,7 +1304,8 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                       <input 
                         type="text" 
                         required
-                        className="modal-text-input"
+                        readOnly={!isEditingDetails}
+                        className={`modal-text-input ${!isEditingDetails ? 'bg-slate-100 font-semibold' : ''}`}
                         value={wizPhone}
                         onChange={(e) => setWizPhone(e.target.value)}
                       />
@@ -1248,7 +1315,8 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                       <label className="form-field-label">Email Address</label>
                       <input 
                         type="email"
-                        className="modal-text-input"
+                        readOnly={!isEditingDetails}
+                        className={`modal-text-input ${!isEditingDetails ? 'bg-slate-100 font-semibold' : ''}`}
                         value={wizEmail}
                         onChange={(e) => setWizEmail(e.target.value)}
                       />
@@ -1256,10 +1324,11 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
 
                     <div className="form-two-cols">
                       <div className="form-group-field">
-                        <label className="form-field-label">Joining Date</label>
+                        <label className="form-field-label">Joining / Transfer Date</label>
                         <input 
                           type="date"
-                          className="modal-text-input"
+                          readOnly={!isEditingDetails}
+                          className={`modal-text-input ${!isEditingDetails ? 'bg-slate-100 font-semibold' : ''}`}
                           value={wizJoinDate}
                           onChange={(e) => setWizJoinDate(e.target.value)}
                         />
@@ -1269,7 +1338,8 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                         <label className="form-field-label">Monthly Rent (₹)</label>
                         <input 
                           type="number"
-                          className="modal-text-input"
+                          readOnly={!isEditingDetails}
+                          className={`modal-text-input ${!isEditingDetails ? 'bg-slate-100 font-semibold' : ''}`}
                           value={wizRent}
                           onChange={(e) => setWizRent(Number(e.target.value))}
                         />
@@ -1277,10 +1347,58 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                     </div>
                   </div>
 
-                  <button type="submit" className="wizard-submit-assign-btn">
-                    <CheckCircle size={18} />
-                    <span>Approve Booking &amp; Allocate Bed</span>
-                  </button>
+                  {/* ACTION BUTTONS: EDIT & ALLOCATE */}
+                  <div className="wizard-step5-actions-row" style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                    <button 
+                      type="button" 
+                      className="wizard-edit-toggle-btn"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        padding: '12px 18px',
+                        borderRadius: '12px',
+                        fontWeight: '700',
+                        fontSize: '14px',
+                        border: isEditingDetails ? '1.5px solid #3b82f6' : '1.5px solid #cbd5e1',
+                        background: isEditingDetails ? '#eff6ff' : '#f8fafc',
+                        color: isEditingDetails ? '#2563eb' : '#1e293b',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                      }}
+                      onClick={() => setIsEditingDetails(!isEditingDetails)}
+                    >
+                      <Edit3 size={16} />
+                      <span>{isEditingDetails ? 'Done Editing' : 'Edit Details'}</span>
+                    </button>
+
+                    <button 
+                      type="submit" 
+                      className="wizard-submit-assign-btn"
+                      style={{
+                        flex: 1,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        padding: '12px 20px',
+                        borderRadius: '12px',
+                        fontWeight: '700',
+                        fontSize: '15px',
+                        background: '#2563eb',
+                        color: '#ffffff',
+                        border: 'none',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 6px rgba(37,99,235,0.25)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <CheckCircle size={18} />
+                      <span>Allocate</span>
+                    </button>
+                  </div>
                 </form>
               )}
 

@@ -121,6 +121,19 @@ export interface FeeHistoryItem {
   receiptNo: string;
 }
 
+export interface MonthRentRecord {
+  id: string;
+  monthName: string;
+  isCurrentMonth?: boolean;
+  dateRange: string;
+  amount: number;
+  amountPaid: number;
+  dues: number;
+  status: PaymentStatus;
+  lastPaymentDate?: string;
+  history?: FeeHistoryItem[];
+}
+
 export interface FeeTransaction {
   id: string;
   studentName: string;
@@ -132,9 +145,11 @@ export interface FeeTransaction {
   status: PaymentStatus;
   date: string;
   uploadedDate?: string;
+  lastPaymentDate?: string;
   paymentMethod?: string;
   phone: string;
   history?: FeeHistoryItem[];
+  monthlyRecords?: MonthRentRecord[];
 }
 
 export interface ActivityItem {

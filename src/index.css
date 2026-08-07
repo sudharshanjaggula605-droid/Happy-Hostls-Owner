@@ -1055,7 +1055,8 @@ table, .users-table {
   align-items: center;
   padding-bottom: 6px;
   flex-shrink: 0;
-  z-index: 999;
+  z-index: 1200;
+  position: relative;
 }
 
 .nav-tab-btn {
@@ -6989,6 +6990,7 @@ table, .users-table {
 .modal-overlay-backdrop.bottom-sheet-align {
   align-items: flex-end !important;
   padding: 0 !important;
+  bottom: 64px !important;
 }
 
 .bottom-sheet-content {
@@ -10467,11 +10469,14 @@ table, .users-table {
 
 .sm-header-bar {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   padding-bottom: 12px;
   margin-bottom: 16px;
   border-bottom: 1px solid #f1f5f9;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .sm-back-btn {
@@ -10491,10 +10496,13 @@ table, .users-table {
 }
 
 .sm-header-title {
-  font-size: 18.5px;
+  font-size: 22px;
   font-weight: 800;
   color: #0f172a;
   margin: 0;
+  flex: 1;
+  text-align: left;
+  align-self: center;
 }
 
 .sm-history-circle-btn {

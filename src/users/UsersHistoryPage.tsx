@@ -23,7 +23,8 @@ import {
   ShieldCheck,
   Briefcase,
   PhoneCall,
-  Edit3
+  Edit3,
+  MapPin
 } from 'lucide-react';
 
 export interface TenantUser {
@@ -32,6 +33,7 @@ export interface TenantUser {
   email: string;
   mobile: string;
   altMobile?: string;
+  nativeAddress?: string;
   aadharNo?: string;
   purpose?: string;
   roomNumber: string;
@@ -53,6 +55,7 @@ export const initialTenantUsers: TenantUser[] = [
     email: 'aarav.sharma@example.com',
     mobile: '9876543210',
     altMobile: '9876543211',
+    nativeAddress: 'H.No 4-12, Main Road, Vijayawada, Andhra Pradesh',
     aadharNo: '4532 8901 2345',
     purpose: 'Software Engineer at Tech Corp',
     roomNumber: '101',
@@ -286,6 +289,7 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
   const [editName, setEditName] = useState<string>('');
   const [editMobile, setEditMobile] = useState<string>('');
   const [editAltMobile, setEditAltMobile] = useState<string>('');
+  const [editNativeAddress, setEditNativeAddress] = useState<string>('');
   const [editEmail, setEditEmail] = useState<string>('');
   const [editAadhaar, setEditAadhaar] = useState<string>('');
   const [editPurpose, setEditPurpose] = useState<string>('');
@@ -295,6 +299,7 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
     setEditName(user.name);
     setEditMobile(user.mobile);
     setEditAltMobile(user.altMobile && user.altMobile !== 'N/A' ? user.altMobile : '');
+    setEditNativeAddress(user.nativeAddress && user.nativeAddress !== 'N/A' ? user.nativeAddress : '');
     setEditEmail(user.email);
     setEditAadhaar(user.aadharNo && user.aadharNo !== 'N/A' ? user.aadharNo : '');
     setEditPurpose(user.purpose || 'Working Professional');
@@ -314,6 +319,7 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
       name: editName.trim(),
       mobile: editMobile.trim(),
       altMobile: editAltMobile.trim() || 'N/A',
+      nativeAddress: editNativeAddress.trim() || 'N/A',
       email: editEmail.trim(),
       aadharNo: editAadhaar.trim() || 'N/A',
       purpose: editPurpose.trim() || 'Working Professional',
@@ -339,6 +345,7 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
   const [wizName, setWizName] = useState('');
   const [wizMobile, setWizMobile] = useState('');
   const [wizAltMobile, setWizAltMobile] = useState('');
+  const [wizNativeAddress, setWizNativeAddress] = useState('');
   const [wizAadhaar, setWizAadhaar] = useState('');
   const [wizEmail, setWizEmail] = useState('');
   const [wizJoinDate, setWizJoinDate] = useState('2026-08-05');
@@ -354,6 +361,7 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
     setWizName('');
     setWizMobile('');
     setWizAltMobile('');
+    setWizNativeAddress('');
     setWizAadhaar('');
     setWizEmail('');
     setWizJoinDate('2026-08-05');
@@ -459,6 +467,7 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
       email: wizEmail.trim() || `${wizName.toLowerCase().replace(/\s+/g, '.')}@gmail.com`,
       mobile: wizMobile.trim(),
       altMobile: wizAltMobile.trim() || 'N/A',
+      nativeAddress: wizNativeAddress.trim() || 'N/A',
       aadharNo: wizAadhaar.trim() || 'N/A',
       purpose: 'Working Professional',
       roomNumber: wizRoom.roomNumber,
@@ -884,6 +893,17 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
                     </div>
 
                     <div className="form-group-field">
+                      <label className="form-field-label">Native Address</label>
+                      <input 
+                        type="text" 
+                        className="modal-text-input"
+                        placeholder="e.g. H.No 4-12, Main Road, Vijayawada, AP"
+                        value={wizNativeAddress}
+                        onChange={(e) => setWizNativeAddress(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-group-field">
                       <label className="form-field-label">Aadhar No. *</label>
                       <input 
                         type="text" 
@@ -1078,11 +1098,13 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
                     <div className="user-detail-avatar">
                       {viewingUser.name.split(' ').map(n => n[0]).join('').slice(0,2)}
                     </div>
-                    <div className="user-detail-hero-name">{viewingUser.name}</div>
-                    <div className="user-detail-hero-hostel">{viewingUser.hostelName} • Room {viewingUser.roomNumber} ({viewingUser.bedNumber})</div>
-                    <span className="user-detail-status-badge active">
-                      ● {viewingUser.status}
-                    </span>
+                    <div className="user-detail-hero-info">
+                      <div className="user-detail-hero-name">{viewingUser.name}</div>
+                      <div className="user-detail-hero-hostel">{viewingUser.hostelName} • Room {viewingUser.roomNumber} ({viewingUser.bedNumber})</div>
+                      <span className={`user-detail-status-badge ${viewingUser.status?.toLowerCase() === 'active' ? 'active' : 'inactive'}`}>
+                        ● {viewingUser.status}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="user-detail-info-list">
@@ -1116,6 +1138,17 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
                       <div className="user-detail-info-content">
                         <div className="user-detail-info-label">Alternate Number</div>
                         <div className="user-detail-info-value">{viewingUser.altMobile || 'N/A'}</div>
+                      </div>
+                    </div>
+
+                    {/* Native Address */}
+                    <div className="user-detail-info-row">
+                      <div className="user-detail-info-icon-wrap rose-icon">
+                        <MapPin size={16} />
+                      </div>
+                      <div className="user-detail-info-content">
+                        <div className="user-detail-info-label">Native Address</div>
+                        <div className="user-detail-info-value">{viewingUser.nativeAddress || 'N/A'}</div>
                       </div>
                     </div>
 
@@ -1205,6 +1238,20 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
                         value={editAltMobile}
                         onChange={(e) => setEditAltMobile(e.target.value)}
                         placeholder="Alternate Mobile Number"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="edit-form-field">
+                    <label className="edit-field-label">Native Address</label>
+                    <div className="edit-input-wrapper">
+                      <MapPin size={16} className="edit-input-icon" />
+                      <input 
+                        type="text"
+                        className="edit-text-input"
+                        value={editNativeAddress}
+                        onChange={(e) => setEditNativeAddress(e.target.value)}
+                        placeholder="Native Address (City, District, State)"
                       />
                     </div>
                   </div>

@@ -35,6 +35,7 @@ export const AddUserPage: React.FC<AddUserPageProps> = ({
   const [altMobile, setAltMobile] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
+  const [nativeAddress, setNativeAddress] = useState('');
   const [city, setCity] = useState('Hyderabad');
   const [state, setState] = useState('Telangana');
 
@@ -322,6 +323,20 @@ export const AddUserPage: React.FC<AddUserPageProps> = ({
                   placeholder="Street address, colony, building..."
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="form-group full-width mt-12">
+              <label className="input-label">Native Address</label>
+              <div className="input-icon-wrap">
+                <MapPin size={16} className="input-left-icon" />
+                <input 
+                  type="text" 
+                  className="modern-input has-icon"
+                  placeholder="Native town, village, district, state..."
+                  value={nativeAddress}
+                  onChange={(e) => setNativeAddress(e.target.value)}
                 />
               </div>
             </div>

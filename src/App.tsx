@@ -797,7 +797,7 @@ function App() {
           )}
 
           {currentScreen === 'guests-directory' && (
-            <GuestsDirectoryPage onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }} />
+            <GuestsDirectoryPage onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }} showToast={showToast} />
           )}
 
           {currentScreen === 'success-rate' && (

@@ -14,7 +14,7 @@ interface ComplaintItem {
 
 interface OpenComplaintsPageProps {
   onBack: () => void;
-  showToast?: (msg: string) => void;
+  showToast?: (msg: string, onUndo?: () => void) => void;
 }
 
 export const OpenComplaintsPage: React.FC<OpenComplaintsPageProps> = ({ onBack, showToast }) => {
@@ -30,8 +30,18 @@ export const OpenComplaintsPage: React.FC<OpenComplaintsPageProps> = ({ onBack, 
   const [activeFilter, setActiveFilter] = useState<'All' | 'Open' | 'In Progress' | 'Resolved'>('Open');
 
   const updateStatus = (id: string, newStatus: 'In Progress' | 'Resolved') => {
+    const target = complaints.find(c => c.id === id);
+    if (!target) return;
+    const previousStatus = target.status;
+
     setComplaints(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
-    if (showToast) showToast(`Complaint marked as ${newStatus}`);
+    
+    if (showToast) {
+      showToast(`Complaint marked as ${newStatus}`, () => {
+        setComplaints(prev => prev.map(c => c.id === id ? { ...c, status: previousStatus } : c));
+        if (showToast) showToast(`Action undone. Reverted to ${previousStatus}`);
+      });
+    }
   };
 
   const filtered = complaints.filter(c => activeFilter === 'All' || c.status === activeFilter);

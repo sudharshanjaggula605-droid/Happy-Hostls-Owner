@@ -8,6 +8,7 @@ import {
   Smartphone, 
   Phone, 
   Building, 
+  Building2,
   Camera,
   Lock,
   X,
@@ -19,9 +20,10 @@ import {
 
 interface SettingsPageProps {
   showToast?: (msg: string) => void;
+  onNavigateScreen?: (screen: string) => void;
 }
 
-export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast }) => {
+export const SettingsPage: React.FC<SettingsPageProps> = ({ showToast, onNavigateScreen }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'hostel'>('profile');
 
   // Profile Form States

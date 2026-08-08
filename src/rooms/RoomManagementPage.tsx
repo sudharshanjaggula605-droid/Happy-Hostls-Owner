@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LiveCameraModal } from '../components/LiveCameraModal';
 import {
   Building,
   BedDouble,
@@ -275,6 +276,7 @@ export const RoomManagementPage: React.FC = () => {
   const [selectedFloorId, setSelectedFloorId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isLiveCameraOpen, setIsLiveCameraOpen] = useState(false);
 
   // Modals state
   const [isAddFloorModalOpen, setIsAddFloorModalOpen] = useState(false);
@@ -1559,38 +1561,71 @@ export const RoomManagementPage: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    <label style={{
-                      border: '2px dashed #CBD5E1',
-                      borderRadius: '8px',
-                      padding: '10px 12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      cursor: 'pointer',
-                      background: '#F8FAFC'
-                    }}>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        hidden
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => setAssignForm(prev => ({ ...prev, photoUrl: reader.result as string }));
-                            reader.readAsDataURL(file);
-                          }
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <label style={{
+                        border: '2px dashed #CBD5E1',
+                        borderRadius: '10px',
+                        padding: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        cursor: 'pointer',
+                        background: '#F8FAFC'
+                      }}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => setAssignForm(prev => ({ ...prev, photoUrl: reader.result as string }));
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Camera size={16} color="#2563EB" />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '11px', fontWeight: 700, color: '#1E293B' }}>Upload Image Input</div>
+                          <div style={{ fontSize: '9px', color: '#64748B' }}>Click to select photo</div>
+                        </div>
+                      </label>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsLiveCameraOpen(true)}
+                        style={{
+                          border: '2px dashed #93C5FD',
+                          borderRadius: '10px',
+                          padding: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          cursor: 'pointer',
+                          background: '#EFF6FF',
+                          textAlign: 'left'
                         }}
-                      />
-                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <Camera size={18} color="#2563EB" />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#1E293B' }}>Upload Image Input</div>
-                        <div style={{ fontSize: '10px', color: '#64748B' }}>Click to select tenant profile photo</div>
-                      </div>
-                    </label>
+                      >
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Camera size={16} color="#FFFFFF" />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '11px', fontWeight: 800, color: '#1E40AF' }}>📷 Live Camera</div>
+                          <div style={{ fontSize: '9px', color: '#2563EB', fontWeight: 600 }}>Snap live photo</div>
+                        </div>
+                      </button>
+                    </div>
                   )}
+
+                  {/* Live Camera Capture Modal */}
+                  <LiveCameraModal
+                    isOpen={isLiveCameraOpen}
+                    onClose={() => setIsLiveCameraOpen(false)}
+                    onCapture={(photoDataUrl) => setAssignForm(prev => ({ ...prev, photoUrl: photoDataUrl }))}
+                  />
                 </div>
 
                 <div>

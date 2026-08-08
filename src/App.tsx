@@ -21,7 +21,8 @@ import {
   Edit3,
   Trash2,
   Users,
-  RotateCcw
+  RotateCcw,
+  Building2
 } from 'lucide-react';
 import type {
   DayOfWeek,
@@ -73,6 +74,7 @@ import { LaundryPage, CreateLaundryOrderPage, initialLaundryOrders } from './lau
 import { SettingsPage } from './settings/SettingsPage';
 import { UsersHistoryPage } from './users/UsersHistoryPage';
 import { AddUserPage } from './users/AddUserPage';
+import { PropertyMarketplacePage } from './marketplace/PropertyMarketplacePage';
 import type { LaundryOrder } from './laundry';
 
 function App() {
@@ -81,7 +83,7 @@ function App() {
   const [currentPlan, setCurrentPlan] = useState<PlanType>('Gold');
   const [activeTab, setActiveTab] = useState<'home' | 'requests' | 'fees' | 'rooms' | 'laundry' | 'broadcast' | 'settings' | 'kitchen'>('home');
   const [kitchenTab, setKitchenTab] = useState<'menu' | 'pantry' | 'expenses' | 'suppliers'>('menu');
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'edit-menu' | 'add-pantry' | 'update-stock' | 'log-expense' | 'create-laundry-order' | 'add-user' | 'payment-verification' | 'payment-history' | 'due-payments' | 'collect-fee' | 'staff-management' | 'pay-staff-salary' | 'staff-attendance' | 'staff-payment-history' | 'expenses-management' | 'notifications' | 'occupancy-rate' | 'booking-requests' | 'overdue-dues' | 'open-complaints' | 'revenue-analytics' | 'guests-directory' | 'success-rate' | 'subscription-plans'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'edit-menu' | 'add-pantry' | 'update-stock' | 'log-expense' | 'create-laundry-order' | 'add-user' | 'payment-verification' | 'payment-history' | 'due-payments' | 'collect-fee' | 'staff-management' | 'pay-staff-salary' | 'staff-attendance' | 'staff-payment-history' | 'expenses-management' | 'notifications' | 'occupancy-rate' | 'booking-requests' | 'overdue-dues' | 'open-complaints' | 'revenue-analytics' | 'guests-directory' | 'success-rate' | 'subscription-plans' | 'property-marketplace'>('home');
   const [selectedVerificationFee, setSelectedVerificationFee] = useState<FeeTransaction | null>(null);
   const [selectedCollectResident, setSelectedCollectResident] = useState<{ id: string; name: string; roomNumber: string; amount?: number } | null>(null);
   const [selectedPayStaff, setSelectedPayStaff] = useState<{ name: string; role?: string; salaryMonthly: number; absentDays?: number } | null>(null);
@@ -804,6 +806,13 @@ function App() {
             <SuccessRatePage onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }} />
           )}
 
+          {currentScreen === 'property-marketplace' && (
+            <PropertyMarketplacePage
+              onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }}
+              showToast={showToast}
+            />
+          )}
+
           {/* SCREEN 2: USERS HISTORY PAGE (REQUESTS NAVIGATION) */}
           {currentScreen === 'home' && activeTab === 'requests' && (
             <div className="w-full">
@@ -1037,7 +1046,7 @@ function App() {
           {/* SCREEN 7: SYSTEM SETTINGS */}
           {currentScreen === 'home' && activeTab === 'settings' && (
             <div className="p-16">
-              <SettingsPage showToast={showToast} />
+              <SettingsPage showToast={showToast} onNavigateScreen={(scr) => setCurrentScreen(scr as any)} />
             </div>
           )}
 
@@ -1810,6 +1819,24 @@ function App() {
                   <div style={{ flex: 1, textAlign: 'left' }}>
                     <div style={{ fontSize: '13px', fontWeight: '700' }}>Broadcast Announcements</div>
                     <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Mass push &amp; notice alerts</div>
+                  </div>
+                  <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
+                </button>
+
+                <button
+                  className="announcement-card"
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+                  onClick={() => {
+                    setCurrentScreen('property-marketplace');
+                    setIsMoreMenuOpen(false);
+                  }}
+                >
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Building2 size={20} />
+                  </div>
+                  <div style={{ flex: 1, textAlign: 'left' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '700' }}>Property Marketplace</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Buy, Sell or Lease hostel properties</div>
                   </div>
                   <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
                 </button>

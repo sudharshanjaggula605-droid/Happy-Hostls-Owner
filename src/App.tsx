@@ -20,7 +20,8 @@ import {
   CheckCircle,
   Edit3,
   Trash2,
-  Users
+  Users,
+  RotateCcw
 } from 'lucide-react';
 import type {
   DayOfWeek,
@@ -197,12 +198,15 @@ function App() {
   };
 
   // UI Toast State
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const showToast = (message: string) => {
-    setToastMessage(message);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 2500);
+  const [toastState, setToastState] = useState<{ message: string; onUndo?: () => void } | null>(null);
+  const toastTimerRef = useRef<any>(null);
+
+  const showToast = (message: string, onUndo?: () => void) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToastState({ message, onUndo });
+    toastTimerRef.current = setTimeout(() => {
+      setToastState(null);
+    }, onUndo ? 4000 : 2500);
   };
 
   // Handlers for Request Actions (kept for future use)
@@ -658,13 +662,30 @@ function App() {
         <main className="app-content">
 
           {/* TOAST NOTIFICATION */}
-          {toastMessage && (
+          {toastState && (
             <div className="toast-msg" role="alert" aria-live="polite">
               <span className="toast-icon-wrap">
                 <CheckCircle size={15} strokeWidth={2.5} />
               </span>
-              <span className="toast-text">{toastMessage}</span>
-              <div className="toast-progress-bar" />
+              <span className="toast-text">{toastState.message}</span>
+              {toastState.onUndo && (
+                <button
+                  type="button"
+                  className="toast-undo-btn"
+                  onClick={() => {
+                    const undoFn = toastState.onUndo;
+                    setToastState(null);
+                    if (undoFn) undoFn();
+                  }}
+                >
+                  <RotateCcw size={12} />
+                  <span>Undo</span>
+                </button>
+              )}
+              <div 
+                className="toast-progress-bar" 
+                style={{ animationDuration: toastState.onUndo ? '4s' : '2.5s' }}
+              />
             </div>
           )}
 

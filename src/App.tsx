@@ -85,6 +85,7 @@ function App() {
   const [selectedCollectResident, setSelectedCollectResident] = useState<{ id: string; name: string; roomNumber: string; amount?: number } | null>(null);
   const [selectedPayStaff, setSelectedPayStaff] = useState<{ name: string; role?: string; salaryMonthly: number; absentDays?: number } | null>(null);
   const [selectedAttendanceStaff, setSelectedAttendanceStaff] = useState<{ name: string; role?: string; presentDays?: number; absentDays?: number } | null>(null);
+  const [selectedPaymentHistoryStaff, setSelectedPaymentHistoryStaff] = useState<{ name: string } | null>(null);
   const [laundryOrders, setLaundryOrders] = useState<LaundryOrder[]>(initialLaundryOrders);
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>(['m2', 'm3']);
 
@@ -98,6 +99,14 @@ function App() {
   // Search & Filter States
   const [requestSearchQuery] = useState('');
   const [requestFilter] = useState<'All' | RequestStatus>('All');
+
+  // Scroll to top on navigation
+  useEffect(() => {
+    const mainContainer = document.querySelector('.app-content');
+    if (mainContainer) {
+      mainContainer.scrollTo({ top: 0 });
+    }
+  }, [currentScreen, activeTab]);
   const [roomFloorFilter, setRoomFloorFilter] = useState<string>('All');
   void setRoomFloorFilter;
   const [feeSearchQuery, setFeeSearchQuery] = useState('');
@@ -914,25 +923,30 @@ function App() {
           )}
 
           {/* SCREEN: FULL-SCREEN STAFF MANAGEMENT */}
-          {currentScreen === 'staff-management' && (
-            <StaffManagementPage
-              onBack={() => {
-                setCurrentScreen('home');
-                setActiveTab('fees');
-              }}
-              onOpenHistory={() => setCurrentScreen('staff-payment-history')}
-              onNavigateToPaySalary={(staff) => {
-                setSelectedPayStaff(staff);
-                setCurrentScreen('pay-staff-salary');
-              }}
-              onNavigateToAttendance={(staff) => {
-                setSelectedAttendanceStaff(staff);
-                setCurrentScreen('staff-attendance');
-              }}
-              onPaySalary={(staffName, amount) => {
-                showToast(`Monthly salary payout of ₹${amount.toLocaleString('en-IN')} paid to ${staffName}.`);
-              }}
-            />
+          {['staff-management', 'pay-staff-salary', 'staff-attendance', 'staff-payment-history'].includes(currentScreen) && (
+            <div style={{ display: currentScreen === 'staff-management' ? 'block' : 'none', height: '100%' }}>
+              <StaffManagementPage
+                onBack={() => {
+                  setCurrentScreen('home');
+                  setActiveTab('fees');
+                }}
+                onOpenHistory={(staff) => {
+                  setSelectedPaymentHistoryStaff(staff ? { name: staff.name } : null);
+                  setCurrentScreen('staff-payment-history');
+                }}
+                onNavigateToPaySalary={(staff) => {
+                  setSelectedPayStaff(staff);
+                  setCurrentScreen('pay-staff-salary');
+                }}
+                onNavigateToAttendance={(staff) => {
+                  setSelectedAttendanceStaff(staff);
+                  setCurrentScreen('staff-attendance');
+                }}
+                onPaySalary={(staffName, amount) => {
+                  showToast(`Monthly salary payout of ₹${amount.toLocaleString('en-IN')} paid to ${staffName}.`);
+                }}
+              />
+            </div>
           )}
 
           {/* SCREEN: FULL-SCREEN PAY STAFF SALARY */}
@@ -965,7 +979,11 @@ function App() {
           {/* SCREEN: FULL-SCREEN STAFF PAYMENT HISTORY */}
           {currentScreen === 'staff-payment-history' && (
             <StaffPaymentHistoryPage
-              onBack={() => setCurrentScreen('staff-management')}
+              initialStaff={selectedPaymentHistoryStaff}
+              onBack={() => {
+                setSelectedPaymentHistoryStaff(null);
+                setCurrentScreen('staff-management');
+              }}
             />
           )}
 

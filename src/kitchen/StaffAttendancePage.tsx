@@ -11,6 +11,7 @@ interface StaffAttendanceOption {
   attendancePercentage: number;
   absentDates: number[];
   holidayDates?: number[];
+  pastMonthsAbsences?: { monthName: string; year: string; dates: number[] }[];
 }
 
 interface StaffAttendancePageProps {
@@ -37,7 +38,11 @@ export const StaffAttendancePage: React.FC<StaffAttendancePageProps> = ({
       absentDays: 1,
       attendancePercentage: 96,
       absentDates: [8],
-      holidayDates: []
+      holidayDates: [],
+      pastMonthsAbsences: [
+        { monthName: 'July', year: '2026', dates: [12, 4] },
+        { monthName: 'June', year: '2026', dates: [22] }
+      ]
     },
     {
       id: 'st-2',
@@ -48,7 +53,11 @@ export const StaffAttendancePage: React.FC<StaffAttendancePageProps> = ({
       absentDays: 2,
       attendancePercentage: 92,
       absentDates: [8, 14],
-      holidayDates: []
+      holidayDates: [],
+      pastMonthsAbsences: [
+        { monthName: 'July', year: '2026', dates: [25] },
+        { monthName: 'June', year: '2026', dates: [11, 2] }
+      ]
     },
     {
       id: 'st-3',
@@ -59,7 +68,11 @@ export const StaffAttendancePage: React.FC<StaffAttendancePageProps> = ({
       absentDays: 0,
       attendancePercentage: 100,
       absentDates: [],
-      holidayDates: []
+      holidayDates: [],
+      pastMonthsAbsences: [
+        { monthName: 'July', year: '2026', dates: [] },
+        { monthName: 'June', year: '2026', dates: [] }
+      ]
     },
     {
       id: 'st-4',
@@ -70,7 +83,10 @@ export const StaffAttendancePage: React.FC<StaffAttendancePageProps> = ({
       absentDays: 1,
       attendancePercentage: 96,
       absentDates: [18],
-      holidayDates: []
+      holidayDates: [],
+      pastMonthsAbsences: [
+        { monthName: 'July', year: '2026', dates: [5] }
+      ]
     }
   ];
 
@@ -78,7 +94,7 @@ export const StaffAttendancePage: React.FC<StaffAttendancePageProps> = ({
   const [staffAttendance, setStaffAttendance] = React.useState<{ [staffId: string]: { absentDates: number[]; holidayDates: number[] } }>(() => {
     const saved = localStorage.getItem('staffAttendanceDB');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try { return JSON.parse(saved); } catch (e) { }
     }
     return {
       'st-1': { absentDates: [8], holidayDates: [] },
@@ -102,7 +118,7 @@ export const StaffAttendancePage: React.FC<StaffAttendancePageProps> = ({
 
   const todayDate = 15;
   const currentAttendance = staffAttendance[selectedStaffId] || { absentDates: activeStaff.absentDates, holidayDates: activeStaff.holidayDates || [] };
-  
+
   const pastAbsent = currentAttendance.absentDates.filter(d => d <= todayDate);
   const pastHoliday = (currentAttendance.holidayDates || []).filter(d => d <= todayDate);
 
@@ -110,7 +126,7 @@ export const StaffAttendancePage: React.FC<StaffAttendancePageProps> = ({
   const holidayDaysCount = pastHoliday.length;
   const presentDaysCount = todayDate - absentDaysCount - holidayDaysCount;
   const totalWorkingDays = todayDate - holidayDaysCount;
-  
+
   const attendancePct = totalWorkingDays > 0 ? Math.round((presentDaysCount / totalWorkingDays) * 100) : 0;
 
   const [isEditingAttendance, setIsEditingAttendance] = useState(false);
@@ -160,15 +176,15 @@ export const StaffAttendancePage: React.FC<StaffAttendancePageProps> = ({
 
   return (
     <div className="staff-attendance-page-container">
-      
+
       {/* TOP HEADER BAR (EXACT MATCH TO REFERENCE PHOTO) */}
       <div className="sa-header-bar">
-        
+
         <h1 className="sa-header-title">Staff Attendance</h1>
       </div>
 
       <div className="sa-body-container">
-        
+
         {/* SELECT STAFF MEMBER DROPDOWN REMOVED */}
         <div style={{ textAlign: 'center', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-color)' }}>{activeStaff.label}</h2>
@@ -187,7 +203,7 @@ export const StaffAttendancePage: React.FC<StaffAttendancePageProps> = ({
           </div>
 
           <div className="sa-stat-col">
-            <span className="sa-stat-num" style={{ color: '#d97706' }}>{holidayDaysCount}</span>
+            <span className="sa-stat-num" style={{ color: '#9333ea' }}>{holidayDaysCount}</span>
             <span className="sa-stat-label">Holidays</span>
           </div>
 
@@ -197,85 +213,68 @@ export const StaffAttendancePage: React.FC<StaffAttendancePageProps> = ({
           </div>
         </div>
 
-        {/* MONTH TITLE & EDIT BUTTON */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <h2 className="sa-month-title" style={{ marginBottom: 0 }}>AUGUST 2026</h2>
-          <button 
-            onClick={() => setIsEditingAttendance(!isEditingAttendance)}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', 
-              background: isEditingAttendance ? '#22c55e' : '#f1f5f9', 
-              color: isEditingAttendance ? 'white' : '#64748b', 
-              border: 'none', cursor: 'pointer', fontWeight: '600', transition: 'all 0.2s' 
-            }}
-          >
-            {isEditingAttendance ? <><Check size={16} /> Done</> : <><Edit2 size={16} /> Edit</>}
-          </button>
+        {/* MONTH TITLE */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', marginTop: '24px' }}>
+          <h2 className="sa-month-title" style={{ marginBottom: 0 }}>AUGUST 2026 - ABSENT DATES</h2>
         </div>
 
-        {/* MONTHLY CALENDAR CARD (1:1 MATCH TO REFERENCE PHOTO) */}
-        <div className="sa-calendar-card">
-          
-          {/* WEEKDAYS HEADER ROW */}
-          <div className="sa-weekdays-row">
-            <span>Mo</span>
-            <span>Tu</span>
-            <span>We</span>
-            <span>Th</span>
-            <span>Fr</span>
-            <span>Sa</span>
-            <span>Su</span>
-          </div>
-
-          {/* DAYS GRID */}
-          <div className="sa-days-grid">
-            {/* Empty offset cells for Wed start */}
-            {emptyOffsetCells.map((_, idx) => (
-              <div key={`empty-${idx}`} className="sa-day-cell empty" />
-            ))}
-
-            {/* August 1 to 31 */}
-            {totalMonthDays.map(day => {
-              const status = getDayStatusType(day);
-              const isFuture = day > todayDate;
-              return (
-                <div
-                  key={day}
-                  className={`sa-day-cell ${isFuture ? '' : status}`}
-                  onClick={() => handleToggleDayStatus(day)}
-                  style={{ 
-                    cursor: (!isEditingAttendance || isFuture) ? 'default' : 'pointer', 
-                    transition: 'all 0.15s ease',
-                    color: isFuture ? '#cbd5e1' : undefined,
-                    background: isFuture ? 'transparent' : undefined,
-                    fontWeight: isFuture ? '400' : '600'
-                  }}
-                  title={isFuture ? 'Future date' : (status === 'absent' ? `Day ${day}: Absent (Click to set Present)` : `Day ${day}: Present (Click to set Absent)`)}
-                >
-                  {day}
+        {/* ABSENT DATES LIST */}
+        <div style={{ background: 'white', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+          {pastAbsent.length === 0 ? (
+            <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '15px' }}>
+              No absences recorded for this month.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {pastAbsent.sort((a, b) => b - a).map(dateNum => (
+                <div key={dateNum} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: '#fff1f2', borderRadius: '12px', border: '1px solid #ffe4e6' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#fecdd3', color: '#e11d48', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '16px' }}>
+                      {dateNum}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '15px', fontWeight: '700', color: '#9f1239' }}>August {dateNum}, 2026</span>
+                      <span style={{ fontSize: '13px', color: '#be123c', fontWeight: '500' }}>Marked Absent</span>
+                    </div>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
-
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* LEGEND ROW BELOW CALENDAR */}
-        <div className="sa-legend-row" style={{ marginTop: '20px' }}>
-          <div className="sa-legend-item">
-            <span className="sa-legend-text">Present</span>
-          </div>
+        {/* PAST MONTHS ABSENT DATES */}
+        {activeStaff.pastMonthsAbsences?.map((pastMonth, idx) => (
+          <React.Fragment key={idx}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', marginTop: '24px' }}>
+              <h2 className="sa-month-title" style={{ marginBottom: 0 }}>{pastMonth.monthName.toUpperCase()} {pastMonth.year} - ABSENT DATES</h2>
+            </div>
 
-          <div className="sa-legend-item">
-            <span className="sa-legend-dot-red" />
-            <span className="sa-legend-text-red">Absent</span>
-          </div>
-
-          <div className="sa-legend-item">
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block', marginRight: '6px' }} />
-            <span style={{ fontSize: '13px', color: '#b45309', fontWeight: '500' }}>Holiday</span>
-          </div>
-        </div>
+            <div style={{ background: 'white', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+              {pastMonth.dates.length === 0 ? (
+                <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '15px' }}>
+                  No absences recorded for this month.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {pastMonth.dates.sort((a, b) => b - a).map(dateNum => (
+                    <div key={dateNum} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: '#fff1f2', borderRadius: '12px', border: '1px solid #ffe4e6' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#fecdd3', color: '#e11d48', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '16px' }}>
+                          {dateNum}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '15px', fontWeight: '700', color: '#9f1239' }}>{pastMonth.monthName} {dateNum}, {pastMonth.year}</span>
+                          <span style={{ fontSize: '13px', color: '#be123c', fontWeight: '500' }}>Marked Absent</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </React.Fragment>
+        ))}
 
       </div>
 

@@ -30,18 +30,15 @@ import {
   Filter,
   Sparkles,
   CheckCircle2,
-<<<<<<< HEAD
   MapPin,
   Mail,
   CreditCard,
   LogOut,
-  Smartphone
-=======
+  Smartphone,
   Eye,
   EyeOff,
   Camera,
   Upload
->>>>>>> e7f9e7202adfec5ab28bbed18f20b2ab8c7698e7
 } from 'lucide-react';
 import type { BedStatus, BedResident, BedModel, RoomModel, FloorModel } from '../types';
 
@@ -2320,6 +2317,8 @@ export const RoomManagementPage: React.FC = () => {
                             address: res.address || '',
                             aadhaarNumber: res.aadhaarNumber || '',
                             email: res.email || '',
+                            password: '',
+                            photoUrl: '',
                             checkInDate: res.checkInDate || '',
                             rentAmount: res.rentAmount || 8000
                           });

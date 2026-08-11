@@ -29,24 +29,6 @@ export const StaffPaymentHistoryPage: React.FC<StaffPaymentHistoryPageProps> = (
   const [selectedRecord, setSelectedRecord] = useState<StaffPayRecord | null>(null);
 
   const payRecords: StaffPayRecord[] = [
-<<<<<<< HEAD
-    { id: 'sph-1', initials: 'SS', name: 'Sunitha Sharma', employeeId: 'EMP-001', designation: 'Hostel Manager', month: 'July 2026', paymentDate: '31 Jul 2026', dateLabel: '31 Jul', amount: 28000, paymentMethod: 'Bank Transfer (IMPS)', transactionId: 'TXN-SS-072026', status: 'Paid' },
-    { id: 'sph-2', initials: 'LD', name: 'Lakshmi Devi', employeeId: 'EMP-002', designation: 'Warden', month: 'July 2026', paymentDate: '30 Jul 2026', dateLabel: '30 Jul', amount: 22000, paymentMethod: 'UPI', transactionId: 'TXN-LD-072026', status: 'Paid' },
-    { id: 'sph-3', initials: 'RS', name: 'Raju Security', employeeId: 'EMP-003', designation: 'Security Guard', month: 'July 2026', paymentDate: '29 Jul 2026', dateLabel: '29 Jul', amount: 16000, paymentMethod: 'Bank Transfer', transactionId: 'TXN-RS-072026', status: 'Paid' },
-    { id: 'sph-4', initials: 'SC', name: 'Saroja Cleaner', employeeId: 'EMP-004', designation: 'Housekeeping Staff', month: 'July 2026', paymentDate: '28 Jul 2026', dateLabel: '28 Jul', amount: 14000, paymentMethod: 'UPI', transactionId: 'TXN-SC-072026', status: 'Paid' },
-    { id: 'sph-5', initials: 'AR', name: 'Anita Rao', employeeId: 'EMP-005', designation: 'Hostel Manager', month: 'July 2026', paymentDate: '31 Jul 2026', dateLabel: '31 Jul', amount: 27000, paymentMethod: 'Bank Transfer', transactionId: 'TXN-AR-072026', status: 'Paid' },
-    { id: 'sph-6', initials: 'SW', name: 'Savithri Warden', employeeId: 'EMP-006', designation: 'Warden', month: 'July 2026', paymentDate: '30 Jul 2026', dateLabel: '30 Jul', amount: 21000, paymentMethod: 'UPI', transactionId: 'TXN-SW-072026', status: 'Paid' },
-    { id: 'sph-7', initials: 'VS', name: 'Venkat Security', employeeId: 'EMP-007', designation: 'Security Guard', month: 'July 2026', paymentDate: '29 Jul 2026', dateLabel: '29 Jul', amount: 16000, paymentMethod: 'Bank Transfer', transactionId: 'TXN-VS-072026', status: 'Paid' },
-    { id: 'sph-8', initials: 'PC', name: 'Parvathi Cleaner', employeeId: 'EMP-008', designation: 'Housekeeping Staff', month: 'July 2026', paymentDate: '28 Jul 2026', dateLabel: '28 Jul', amount: 14000, paymentMethod: 'UPI', transactionId: 'TXN-PC-072026', status: 'Paid' },
-    { id: 'sph-9', initials: 'SK', name: 'Suresh Kumar', employeeId: 'EMP-009', designation: 'Hostel Manager', month: 'July 2026', paymentDate: '31 Jul 2026', dateLabel: '31 Jul', amount: 29000, paymentMethod: 'Bank Transfer', transactionId: 'TXN-SK-072026', status: 'Paid' },
-    { id: 'sph-10', initials: 'RW', name: 'Ramesh Warden', employeeId: 'EMP-010', designation: 'Warden', month: 'July 2026', paymentDate: '30 Jul 2026', dateLabel: '30 Jul', amount: 23000, paymentMethod: 'UPI', transactionId: 'TXN-RW-072026', status: 'Paid' },
-    { id: 'sph-11', initials: 'BS', name: 'Bahadur Singh', employeeId: 'EMP-011', designation: 'Security Guard', month: 'July 2026', paymentDate: '29 Jul 2026', dateLabel: '29 Jul', amount: 17000, paymentMethod: 'Bank Transfer', transactionId: 'TXN-BS-072026', status: 'Paid' },
-    { id: 'sph-12', initials: 'KC', name: 'Kumar Cook', employeeId: 'EMP-012', designation: 'Head Cook', month: 'July 2026', paymentDate: '28 Jul 2026', dateLabel: '28 Jul', amount: 20000, paymentMethod: 'UPI', transactionId: 'TXN-KC-072026', status: 'Paid' },
-    { id: 'sph-13', initials: 'MG', name: 'Mahesh Gupta', employeeId: 'EMP-013', designation: 'Hostel Manager', month: 'July 2026', paymentDate: '31 Jul 2026', dateLabel: '31 Jul', amount: 28000, paymentMethod: 'Bank Transfer', transactionId: 'TXN-MG-072026', status: 'Paid' },
-    { id: 'sph-14', initials: 'NW', name: 'Narayana Warden', employeeId: 'EMP-014', designation: 'Night Warden', month: 'July 2026', paymentDate: '30 Jul 2026', dateLabel: '30 Jul', amount: 22000, paymentMethod: 'UPI', transactionId: 'TXN-NW-072026', status: 'Paid' },
-    { id: 'sph-15', initials: 'SS', name: 'Shiva Security', employeeId: 'EMP-015', designation: 'Security Guard', month: 'July 2026', paymentDate: '29 Jul 2026', dateLabel: '29 Jul', amount: 16000, paymentMethod: 'Bank Transfer', transactionId: 'TXN-SS-072026', status: 'Paid' },
-    { id: 'sph-16', initials: 'KE', name: 'Krishna Electrician', employeeId: 'EMP-016', designation: 'Electrician & Maintenance', month: 'July 2026', paymentDate: '28 Jul 2026', dateLabel: '28 Jul', amount: 18000, paymentMethod: 'UPI', transactionId: 'TXN-KE-072026', status: 'Paid' }
-=======
     {
       id: 'sph-1',
       initials: 'RK',
@@ -215,7 +197,6 @@ export const StaffPaymentHistoryPage: React.FC<StaffPaymentHistoryPageProps> = (
       transactionId: 'TXN-SC-052026',
       status: 'Paid'
     }
->>>>>>> e7f9e7202adfec5ab28bbed18f20b2ab8c7698e7
   ];
 
   const filteredRecords = payRecords.filter(r => {

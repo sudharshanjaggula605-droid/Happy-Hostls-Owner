@@ -18,15 +18,18 @@ interface StaffPayRecord {
 
 interface StaffPaymentHistoryPageProps {
   onBack: () => void;
+  initialStaff?: { name: string } | null;
 }
 
 export const StaffPaymentHistoryPage: React.FC<StaffPaymentHistoryPageProps> = ({
-  onBack
+  onBack,
+  initialStaff
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialStaff ? initialStaff.name : '');
   const [selectedRecord, setSelectedRecord] = useState<StaffPayRecord | null>(null);
 
   const payRecords: StaffPayRecord[] = [
+<<<<<<< HEAD
     { id: 'sph-1', initials: 'SS', name: 'Sunitha Sharma', employeeId: 'EMP-001', designation: 'Hostel Manager', month: 'July 2026', paymentDate: '31 Jul 2026', dateLabel: '31 Jul', amount: 28000, paymentMethod: 'Bank Transfer (IMPS)', transactionId: 'TXN-SS-072026', status: 'Paid' },
     { id: 'sph-2', initials: 'LD', name: 'Lakshmi Devi', employeeId: 'EMP-002', designation: 'Warden', month: 'July 2026', paymentDate: '30 Jul 2026', dateLabel: '30 Jul', amount: 22000, paymentMethod: 'UPI', transactionId: 'TXN-LD-072026', status: 'Paid' },
     { id: 'sph-3', initials: 'RS', name: 'Raju Security', employeeId: 'EMP-003', designation: 'Security Guard', month: 'July 2026', paymentDate: '29 Jul 2026', dateLabel: '29 Jul', amount: 16000, paymentMethod: 'Bank Transfer', transactionId: 'TXN-RS-072026', status: 'Paid' },
@@ -43,6 +46,176 @@ export const StaffPaymentHistoryPage: React.FC<StaffPaymentHistoryPageProps> = (
     { id: 'sph-14', initials: 'NW', name: 'Narayana Warden', employeeId: 'EMP-014', designation: 'Night Warden', month: 'July 2026', paymentDate: '30 Jul 2026', dateLabel: '30 Jul', amount: 22000, paymentMethod: 'UPI', transactionId: 'TXN-NW-072026', status: 'Paid' },
     { id: 'sph-15', initials: 'SS', name: 'Shiva Security', employeeId: 'EMP-015', designation: 'Security Guard', month: 'July 2026', paymentDate: '29 Jul 2026', dateLabel: '29 Jul', amount: 16000, paymentMethod: 'Bank Transfer', transactionId: 'TXN-SS-072026', status: 'Paid' },
     { id: 'sph-16', initials: 'KE', name: 'Krishna Electrician', employeeId: 'EMP-016', designation: 'Electrician & Maintenance', month: 'July 2026', paymentDate: '28 Jul 2026', dateLabel: '28 Jul', amount: 18000, paymentMethod: 'UPI', transactionId: 'TXN-KE-072026', status: 'Paid' }
+=======
+    {
+      id: 'sph-1',
+      initials: 'RK',
+      name: 'Ramesh Kumar',
+      employeeId: 'EMP-001',
+      designation: 'Warden',
+      month: 'July',
+      paymentDate: '31 Jul 2026',
+      dateLabel: '31 Jul',
+      amount: 17308,
+      paymentMethod: 'UPI',
+      transactionId: 'TXN-RK-072026',
+      status: 'Paid'
+    },
+    {
+      id: 'sph-1a',
+      initials: 'RK',
+      name: 'Ramesh Kumar',
+      employeeId: 'EMP-001',
+      designation: 'Warden',
+      month: 'June 2026',
+      paymentDate: '30 Jun 2026',
+      dateLabel: '30 Jun',
+      amount: 18000,
+      paymentMethod: 'Bank Transfer',
+      transactionId: 'TXN-RK-062026',
+      status: 'Paid'
+    },
+    {
+      id: 'sph-1b',
+      initials: 'RK',
+      name: 'Ramesh Kumar',
+      employeeId: 'EMP-001',
+      designation: 'Warden',
+      month: 'May 2026',
+      paymentDate: '31 May 2026',
+      dateLabel: '31 May',
+      amount: 18000,
+      paymentMethod: 'UPI',
+      transactionId: 'TXN-RK-052026',
+      status: 'Paid'
+    },
+    {
+      id: 'sph-1c',
+      initials: 'RK',
+      name: 'Ramesh Kumar',
+      employeeId: 'EMP-001',
+      designation: 'Warden',
+      month: 'April 2026',
+      paymentDate: '30 Apr 2026',
+      dateLabel: '30 Apr',
+      amount: 18000,
+      paymentMethod: 'UPI',
+      transactionId: 'TXN-RK-042026',
+      status: 'Paid'
+    },
+    {
+      id: 'sph-2',
+      initials: 'SD',
+      name: 'Sita Devi',
+      employeeId: 'EMP-002',
+      designation: 'Cook/Cleaner',
+      month: 'July 2026',
+      paymentDate: '25 Jul 2026',
+      dateLabel: '25 Jul',
+      amount: 14000,
+      paymentMethod: 'Bank Transfer',
+      transactionId: 'TXN-SD-072026',
+      status: 'Paid'
+    },
+    {
+      id: 'sph-2a',
+      initials: 'SD',
+      name: 'Sita Devi',
+      employeeId: 'EMP-002',
+      designation: 'Cook/Cleaner',
+      month: 'June 2026',
+      paymentDate: '30 Jun 2026',
+      dateLabel: '30 Jun',
+      amount: 14000,
+      paymentMethod: 'Bank Transfer',
+      transactionId: 'TXN-SD-062026',
+      status: 'Paid'
+    },
+    {
+      id: 'sph-2b',
+      initials: 'SD',
+      name: 'Sita Devi',
+      employeeId: 'EMP-002',
+      designation: 'Cook/Cleaner',
+      month: 'May 2026',
+      paymentDate: '31 May 2026',
+      dateLabel: '31 May',
+      amount: 14000,
+      paymentMethod: 'Bank Transfer',
+      transactionId: 'TXN-SD-052026',
+      status: 'Paid'
+    },
+    {
+      id: 'sph-3',
+      initials: 'RR',
+      name: 'Raju Ram',
+      employeeId: 'EMP-003',
+      designation: 'Maintenance',
+      month: 'July 2026',
+      paymentDate: '24 Jul 2026',
+      dateLabel: '24 Jul',
+      amount: 10000,
+      paymentMethod: 'Bank Transfer',
+      transactionId: 'TXN-RR-072026',
+      status: 'Paid'
+    },
+    {
+      id: 'sph-4',
+      initials: 'BS',
+      name: 'Bahadur Singh',
+      employeeId: 'EMP-004',
+      designation: 'Security',
+      month: 'June 2026',
+      paymentDate: '30 Jun 2026',
+      dateLabel: '30 Jun',
+      amount: 12000,
+      paymentMethod: 'Cash',
+      transactionId: 'TXN-BS-062026',
+      status: 'Paid'
+    },
+    {
+      id: 'sph-5',
+      initials: 'SC',
+      name: 'Suresh Cook',
+      employeeId: 'EMP-005',
+      designation: 'Head Chef',
+      month: 'June 2026',
+      paymentDate: '28 Jun 2026',
+      dateLabel: '28 Jun',
+      amount: 15000,
+      paymentMethod: 'UPI',
+      transactionId: 'TXN-SC-062026',
+      status: 'Paid'
+    },
+    {
+      id: 'sph-6',
+      initials: 'BS',
+      name: 'Bahadur Singh',
+      employeeId: 'EMP-004',
+      designation: 'Security',
+      month: 'May 2026',
+      paymentDate: '31 May 2026',
+      dateLabel: '31 May',
+      amount: 12000,
+      paymentMethod: 'Cash',
+      transactionId: 'TXN-BS-052026',
+      status: 'Paid'
+    },
+    {
+      id: 'sph-7',
+      initials: 'SC',
+      name: 'Suresh Cook',
+      employeeId: 'EMP-005',
+      designation: 'Head Chef',
+      month: 'May 2026',
+      paymentDate: '31 May 2026',
+      dateLabel: '31 May',
+      amount: 15000,
+      paymentMethod: 'UPI',
+      transactionId: 'TXN-SC-052026',
+      status: 'Paid'
+    }
+>>>>>>> e7f9e7202adfec5ab28bbed18f20b2ab8c7698e7
   ];
 
   const filteredRecords = payRecords.filter(r => {
@@ -56,7 +229,7 @@ export const StaffPaymentHistoryPage: React.FC<StaffPaymentHistoryPageProps> = (
 
       {/* HEADER BAR (EXACT MATCH TO REFERENCE PHOTO) */}
       <div className="sph-header-bar">
-        
+
         <h1 className="sph-header-title">Staff Payment History</h1>
       </div>
 
@@ -120,7 +293,7 @@ export const StaffPaymentHistoryPage: React.FC<StaffPaymentHistoryPageProps> = (
                 <X size={18} />
               </button>
             </div>
-            
+
             <div className="sph-detail-card" style={{ boxShadow: 'none', margin: 0, borderRadius: 0, border: 'none', background: 'transparent' }}>
               {/* Avatar & Name */}
               <div className="sph-detail-top">

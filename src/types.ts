@@ -175,6 +175,8 @@ export interface BedResident {
   email?: string;
   address?: string;
   aadhaarNumber?: string;
+  password?: string;
+  photoUrl?: string;
 }
 
 export interface BedModel {

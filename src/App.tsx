@@ -20,7 +20,9 @@ import {
   CheckCircle,
   Edit3,
   Trash2,
-  Users
+  Users,
+  RotateCcw,
+  Building2
 } from 'lucide-react';
 import type {
   DayOfWeek,
@@ -73,6 +75,7 @@ import { LaundryPage, CreateLaundryOrderPage, initialLaundryOrders } from './lau
 import { SettingsPage } from './settings/SettingsPage';
 import { UsersHistoryPage } from './users/UsersHistoryPage';
 import { AddUserPage } from './users/AddUserPage';
+import { PropertyMarketplacePage } from './marketplace/PropertyMarketplacePage';
 import type { LaundryOrder } from './laundry';
 
 function App() {
@@ -81,11 +84,12 @@ function App() {
   const [currentPlan, setCurrentPlan] = useState<PlanType>('Gold');
   const [activeTab, setActiveTab] = useState<'home' | 'requests' | 'fees' | 'rooms' | 'laundry' | 'broadcast' | 'settings' | 'kitchen'>('home');
   const [kitchenTab, setKitchenTab] = useState<'menu' | 'pantry' | 'expenses' | 'suppliers'>('menu');
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'edit-menu' | 'add-pantry' | 'update-stock' | 'log-expense' | 'create-laundry-order' | 'add-user' | 'payment-verification' | 'payment-history' | 'due-payments' | 'collect-fee' | 'staff-management' | 'pay-staff-salary' | 'staff-attendance' | 'staff-payment-history' | 'expenses-management' | 'notifications' | 'occupancy-rate' | 'booking-requests' | 'overdue-dues' | 'open-complaints' | 'revenue-analytics' | 'guests-directory' | 'success-rate' | 'subscription-plans'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'edit-menu' | 'add-pantry' | 'update-stock' | 'log-expense' | 'create-laundry-order' | 'add-user' | 'payment-verification' | 'payment-history' | 'due-payments' | 'collect-fee' | 'staff-management' | 'pay-staff-salary' | 'staff-attendance' | 'staff-payment-history' | 'expenses-management' | 'notifications' | 'occupancy-rate' | 'booking-requests' | 'overdue-dues' | 'open-complaints' | 'revenue-analytics' | 'guests-directory' | 'success-rate' | 'subscription-plans' | 'property-marketplace'>('home');
   const [selectedVerificationFee, setSelectedVerificationFee] = useState<FeeTransaction | null>(null);
   const [selectedCollectResident, setSelectedCollectResident] = useState<{ id: string; name: string; roomNumber: string; amount?: number } | null>(null);
   const [selectedPayStaff, setSelectedPayStaff] = useState<{ name: string; role?: string; salaryMonthly: number; absentDays?: number } | null>(null);
   const [selectedAttendanceStaff, setSelectedAttendanceStaff] = useState<{ name: string; role?: string; presentDays?: number; absentDays?: number } | null>(null);
+  const [selectedPaymentHistoryStaff, setSelectedPaymentHistoryStaff] = useState<{ name: string } | null>(null);
   const [laundryOrders, setLaundryOrders] = useState<LaundryOrder[]>(initialLaundryOrders);
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>(['m2', 'm3']);
 
@@ -100,6 +104,14 @@ function App() {
   // Search & Filter States
   const [requestSearchQuery] = useState('');
   const [requestFilter] = useState<'All' | RequestStatus>('All');
+
+  // Scroll to top on navigation
+  useEffect(() => {
+    const mainContainer = document.querySelector('.app-content');
+    if (mainContainer) {
+      mainContainer.scrollTo({ top: 0 });
+    }
+  }, [currentScreen, activeTab]);
   const [roomFloorFilter, setRoomFloorFilter] = useState<string>('All');
   void setRoomFloorFilter;
   const [feeSearchQuery, setFeeSearchQuery] = useState('');
@@ -199,12 +211,15 @@ function App() {
   };
 
   // UI Toast State
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const showToast = (message: string) => {
-    setToastMessage(message);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 2500);
+  const [toastState, setToastState] = useState<{ message: string; onUndo?: () => void } | null>(null);
+  const toastTimerRef = useRef<any>(null);
+
+  const showToast = (message: string, onUndo?: () => void) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToastState({ message, onUndo });
+    toastTimerRef.current = setTimeout(() => {
+      setToastState(null);
+    }, onUndo ? 4000 : 2500);
   };
 
   // Handlers for Request Actions (kept for future use)
@@ -704,13 +719,30 @@ function App() {
         <main className="app-content">
 
           {/* TOAST NOTIFICATION */}
-          {toastMessage && (
+          {toastState && (
             <div className="toast-msg" role="alert" aria-live="polite">
               <span className="toast-icon-wrap">
                 <CheckCircle size={15} strokeWidth={2.5} />
               </span>
-              <span className="toast-text">{toastMessage}</span>
-              <div className="toast-progress-bar" />
+              <span className="toast-text">{toastState.message}</span>
+              {toastState.onUndo && (
+                <button
+                  type="button"
+                  className="toast-undo-btn"
+                  onClick={() => {
+                    const undoFn = toastState.onUndo;
+                    setToastState(null);
+                    if (undoFn) undoFn();
+                  }}
+                >
+                  <RotateCcw size={12} />
+                  <span>Undo</span>
+                </button>
+              )}
+              <div 
+                className="toast-progress-bar" 
+                style={{ animationDuration: toastState.onUndo ? '4s' : '2.5s' }}
+              />
             </div>
           )}
 
@@ -822,11 +854,18 @@ function App() {
           )}
 
           {currentScreen === 'guests-directory' && (
-            <GuestsDirectoryPage onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }} />
+            <GuestsDirectoryPage onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }} showToast={showToast} />
           )}
 
           {currentScreen === 'success-rate' && (
             <SuccessRatePage onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }} />
+          )}
+
+          {currentScreen === 'property-marketplace' && (
+            <PropertyMarketplacePage
+              onBack={() => { setCurrentScreen('home'); setActiveTab('home'); }}
+              showToast={showToast}
+            />
           )}
 
           {/* SCREEN 2: USERS HISTORY PAGE (REQUESTS NAVIGATION) */}
@@ -960,25 +999,30 @@ function App() {
           )}
 
           {/* SCREEN: FULL-SCREEN STAFF MANAGEMENT */}
-          {currentScreen === 'staff-management' && (
-            <StaffManagementPage
-              onBack={() => {
-                setCurrentScreen('home');
-                setActiveTab('fees');
-              }}
-              onOpenHistory={() => setCurrentScreen('staff-payment-history')}
-              onNavigateToPaySalary={(staff) => {
-                setSelectedPayStaff(staff);
-                setCurrentScreen('pay-staff-salary');
-              }}
-              onNavigateToAttendance={(staff) => {
-                setSelectedAttendanceStaff(staff);
-                setCurrentScreen('staff-attendance');
-              }}
-              onPaySalary={(staffName, amount) => {
-                showToast(`Monthly salary payout of ₹${amount.toLocaleString('en-IN')} paid to ${staffName}.`);
-              }}
-            />
+          {['staff-management', 'pay-staff-salary', 'staff-attendance', 'staff-payment-history'].includes(currentScreen) && (
+            <div style={{ display: currentScreen === 'staff-management' ? 'block' : 'none', height: '100%' }}>
+              <StaffManagementPage
+                onBack={() => {
+                  setCurrentScreen('home');
+                  setActiveTab('fees');
+                }}
+                onOpenHistory={(staff) => {
+                  setSelectedPaymentHistoryStaff(staff ? { name: staff.name } : null);
+                  setCurrentScreen('staff-payment-history');
+                }}
+                onNavigateToPaySalary={(staff) => {
+                  setSelectedPayStaff(staff);
+                  setCurrentScreen('pay-staff-salary');
+                }}
+                onNavigateToAttendance={(staff) => {
+                  setSelectedAttendanceStaff(staff);
+                  setCurrentScreen('staff-attendance');
+                }}
+                onPaySalary={(staffName, amount) => {
+                  showToast(`Monthly salary payout of ₹${amount.toLocaleString('en-IN')} paid to ${staffName}.`);
+                }}
+              />
+            </div>
           )}
 
           {/* SCREEN: FULL-SCREEN PAY STAFF SALARY */}
@@ -1011,7 +1055,11 @@ function App() {
           {/* SCREEN: FULL-SCREEN STAFF PAYMENT HISTORY */}
           {currentScreen === 'staff-payment-history' && (
             <StaffPaymentHistoryPage
-              onBack={() => setCurrentScreen('staff-management')}
+              initialStaff={selectedPaymentHistoryStaff}
+              onBack={() => {
+                setSelectedPaymentHistoryStaff(null);
+                setCurrentScreen('staff-management');
+              }}
             />
           )}
 
@@ -1062,7 +1110,7 @@ function App() {
           {/* SCREEN 7: SYSTEM SETTINGS */}
           {currentScreen === 'home' && activeTab === 'settings' && (
             <div className="p-16">
-              <SettingsPage showToast={showToast} />
+              <SettingsPage showToast={showToast} onNavigateScreen={(scr) => setCurrentScreen(scr as any)} />
             </div>
           )}
 
@@ -1835,6 +1883,24 @@ function App() {
                   <div style={{ flex: 1, textAlign: 'left' }}>
                     <div style={{ fontSize: '13px', fontWeight: '700' }}>Broadcast Announcements</div>
                     <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Mass push &amp; notice alerts</div>
+                  </div>
+                  <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
+                </button>
+
+                <button
+                  className="announcement-card"
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+                  onClick={() => {
+                    setCurrentScreen('property-marketplace');
+                    setIsMoreMenuOpen(false);
+                  }}
+                >
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Building2 size={20} />
+                  </div>
+                  <div style={{ flex: 1, textAlign: 'left' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '700' }}>Property Marketplace</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Buy, Sell or Lease hostel properties</div>
                   </div>
                   <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
                 </button>

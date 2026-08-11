@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { LiveCameraModal } from '../components/LiveCameraModal';
 import { 
   Search, 
   Plus, 
@@ -24,7 +25,10 @@ import {
   Briefcase,
   PhoneCall,
   Edit3,
-  MapPin
+  MapPin,
+  EyeOff,
+  Camera,
+  Upload
 } from 'lucide-react';
 
 export interface TenantUser {
@@ -35,6 +39,8 @@ export interface TenantUser {
   altMobile?: string;
   nativeAddress?: string;
   aadharNo?: string;
+  password?: string;
+  photoUrl?: string;
   purpose?: string;
   roomNumber: string;
   bedNumber: string;
@@ -5281,6 +5287,7 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
 
   // Modals state
   const [isAddWizardOpen, setIsAddWizardOpen] = useState<boolean>(false);
+  const [isLiveCameraOpen, setIsLiveCameraOpen] = useState<boolean>(false);
   const [viewingUser, setViewingUser] = useState<TenantUser | null>(null);
   const [checkoutUser, setCheckoutUser] = useState<TenantUser | null>(null);
 
@@ -5350,6 +5357,9 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
   const [wizEmail, setWizEmail] = useState('');
   const [wizJoinDate, setWizJoinDate] = useState('2026-08-05');
   const [wizRent, setWizRent] = useState<number>(7500);
+  const [wizPassword, setWizPassword] = useState('');
+  const [wizShowPassword, setWizShowPassword] = useState(false);
+  const [wizPhotoUrl, setWizPhotoUrl] = useState('');
 
   // Reset Add Wizard
   const openAddWizard = () => {
@@ -5366,6 +5376,9 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
     setWizEmail('');
     setWizJoinDate('2026-08-05');
     setWizRent(7500);
+    setWizPassword('');
+    setWizShowPassword(false);
+    setWizPhotoUrl('');
     setIsAddWizardOpen(true);
   };
 
@@ -5858,6 +5871,113 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
                   </div>
 
                   <div className="wizard-fields-grid">
+                    
+                    {/* Upload Image Input */}
+                    <div className="form-group-field" style={{ gridColumn: '1 / -1' }}>
+                      <label className="form-field-label">Upload Image / Photo</label>
+                      {wizPhotoUrl ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#F8FAFC', border: '1px solid #CBD5E1', padding: '8px 10px', borderRadius: '8px' }}>
+                          <img
+                            src={wizPhotoUrl}
+                            alt="Tenant preview"
+                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #2563EB' }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A' }}>Photo Uploaded</div>
+                            <div style={{ fontSize: '10px', color: '#16A34A', fontWeight: 600 }}>Ready to save</div>
+                          </div>
+                          <label style={{ cursor: 'pointer', background: '#EFF6FF', color: '#2563EB', padding: '5px 9px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Upload size={12} /> Change
+                            <input
+                              type="file"
+                              accept="image/*"
+                              hidden
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => setWizPhotoUrl(reader.result as string);
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setWizPhotoUrl('')}
+                            style={{ background: '#FEE2E2', color: '#EF4444', border: 'none', padding: '5px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          <label style={{
+                            border: '2px dashed #CBD5E1',
+                            borderRadius: '10px',
+                            padding: '10px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                            background: '#F8FAFC'
+                          }}>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              hidden
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => setWizPhotoUrl(reader.result as string);
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <Camera size={16} color="#2563EB" />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '11px', fontWeight: 700, color: '#1E293B' }}>Upload Image Input</div>
+                              <div style={{ fontSize: '9px', color: '#64748B' }}>Click to select photo</div>
+                            </div>
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={() => setIsLiveCameraOpen(true)}
+                            style={{
+                              border: '2px dashed #93C5FD',
+                              borderRadius: '10px',
+                              padding: '10px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              cursor: 'pointer',
+                              background: '#EFF6FF',
+                              textAlign: 'left'
+                            }}
+                          >
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <Camera size={16} color="#FFFFFF" />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '11px', fontWeight: 800, color: '#1E40AF' }}>📷 Live Camera</div>
+                              <div style={{ fontSize: '9px', color: '#2563EB', fontWeight: 600 }}>Snap live photo</div>
+                            </div>
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Live Camera Modal */}
+                      <LiveCameraModal
+                        isOpen={isLiveCameraOpen}
+                        onClose={() => setIsLiveCameraOpen(false)}
+                        onCapture={(photoDataUrl) => setWizPhotoUrl(photoDataUrl)}
+                      />
+                    </div>
+
                     <div className="form-group-field">
                       <label className="form-field-label">Full Name *</label>
                       <input 
@@ -5868,6 +5988,41 @@ export const UsersHistoryPage: React.FC<UsersHistoryPageProps> = ({
                         value={wizName}
                         onChange={(e) => setWizName(e.target.value)}
                       />
+                    </div>
+
+                    {/* Password Input */}
+                    <div className="form-group-field">
+                      <label className="form-field-label">Password *</label>
+                      <div style={{ position: 'relative' }}>
+                        <input 
+                          type={wizShowPassword ? 'text' : 'password'}
+                          required
+                          className="modal-text-input"
+                          placeholder="Enter tenant password (e.g. Pass@1234)"
+                          value={wizPassword}
+                          onChange={(e) => setWizPassword(e.target.value)}
+                          style={{ paddingRight: '36px' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setWizShowPassword(!wizShowPassword)}
+                          style={{
+                            position: 'absolute',
+                            right: '8px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            color: '#64748B',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          {wizShowPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
                     </div>
 
                     <div className="form-group-field">

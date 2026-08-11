@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, History, Calendar, Banknote, Phone, CalendarDays, Contact2, X, Check, MessageSquare, MessageCircle, AlertTriangle, User, Upload, MapPin, Plus } from 'lucide-react';
+import { ChevronLeft, History, Calendar, Banknote, Phone, CalendarDays, Contact2, X, Check, MessageSquare, MessageCircle, AlertTriangle, User, Upload, MapPin, Plus, Trash2 } from 'lucide-react';
 
 interface StaffMember {
   id: string;
@@ -19,7 +19,7 @@ interface StaffMember {
 
 interface StaffManagementPageProps {
   onBack: () => void;
-  onOpenHistory?: () => void;
+  onOpenHistory?: (staff?: any) => void;
   onPaySalary?: (staffName: string, amount: number) => void;
   onNavigateToPaySalary?: (staff: { name: string; role?: string; salaryMonthly: number; absentDays: number }) => void;
   onNavigateToAttendance?: (staff: { name: string; role?: string; presentDays: number; absentDays: number }) => void;
@@ -303,8 +303,8 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
     if (!newStaffName.trim() || !newStaffContact.trim() || !newStaffSalary) return;
 
     const names = newStaffName.trim().split(' ');
-    const initials = names.length > 1 
-      ? `${names[0][0]}${names[1][0]}`.toUpperCase() 
+    const initials = names.length > 1
+      ? `${names[0][0]}${names[1][0]}`.toUpperCase()
       : names[0].substring(0, 2).toUpperCase();
 
     const newStaff: StaffMember = {
@@ -360,7 +360,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
     const appContent = document.querySelector('.app-content') as HTMLElement;
     if (!appContent) return;
 
-    if (activeCalendarStaff || isGlobalAttendanceModalOpen || selectedStaff || showRemoveAlert || isAddStaffModalOpen) {
+    if (activeCalendarStaff || isGlobalAttendanceModalOpen || showRemoveAlert || isAddStaffModalOpen) {
       appContent.style.overflow = 'hidden';
     } else {
       appContent.style.overflow = 'auto';
@@ -369,7 +369,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
     return () => {
       appContent.style.overflow = 'auto';
     };
-  }, [activeCalendarStaff, isGlobalAttendanceModalOpen, selectedStaff, showRemoveAlert, isAddStaffModalOpen]);
+  }, [activeCalendarStaff, isGlobalAttendanceModalOpen, showRemoveAlert, isAddStaffModalOpen]);
 
   // Helper to get real present/absent counts
   const getAttendanceStats = (staffId: string) => {
@@ -419,8 +419,10 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
   };
 
   return (
-    <div className="staff-management-page-container" style={{ width: '100%', boxSizing: 'border-box' }}>
+    <div className="staff-management-page-container" style={{ width: '100%', boxSizing: 'border-box', padding: selectedStaff ? 0 : '16px' }}>
 
+      {!selectedStaff ? (
+        <>
       {/* TOP HEADER BAR */}
       <div style={{
         display: 'flex',
@@ -479,15 +481,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
         </div>
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
-        <button
-          className="quick-action-pill"
-          style={{ width: '100%', padding: '12px', background: 'var(--primary-gradient)', color: 'white', border: 'none', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: '600', fontSize: '15px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}
-          onClick={() => setIsGlobalAttendanceModalOpen(true)}
-        >
-          <Check size={18} /> Mark Today's Attendance
-        </button>
-      </div>
+
 
       {/* STAFF MEMBERS CARDS LIST (EXACT REFERENCE MATCH) */}
       <div className="sm-cards-list">
@@ -559,225 +553,159 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
         })}
       </div>
 
-      {/* ATTENDANCE CALENDAR MODAL */}
-      {activeCalendarStaff && (
-        <div className="ref-modal-overlay" onClick={() => setActiveCalendarStaff(null)}>
-          <div className="ref-modal-card" onClick={e => e.stopPropagation()}>
-            <div className="ref-modal-header">
-              <div>
-                <h3 className="ref-modal-title">{activeCalendarStaff.name} - July 2026</h3>
-                <p className="ref-modal-subtitle">Attendance Log ({activeCalendarStaff.presentDays} Present / {activeCalendarStaff.absentDays} Absent)</p>
-              </div>
-              <button className="ref-close-btn" onClick={() => setActiveCalendarStaff(null)}>
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="ref-modal-body">
-              <div className="sm-calendar-grid">
-                {Array.from({ length: 26 }).map((_, idx) => (
-                  <div key={idx} className="sm-cal-day present">
-                    <span className="sm-cal-num">{idx + 1}</span>
-                    <span className="sm-cal-tag">P</span>
-                  </div>
-                ))}
-                {Array.from({ length: activeCalendarStaff.absentDays }).map((_, idx) => (
-                  <div key={`abs-${idx}`} className="sm-cal-day absent">
-                    <span className="sm-cal-num">{27 + idx}</span>
-                    <span className="sm-cal-tag">A</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="ref-modal-actions">
-              <button className="ref-btn-cancel" onClick={() => setActiveCalendarStaff(null)}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* STAFF DETAIL MODAL */}
-      {selectedStaff && !showRemoveAlert && (
-        <div className="ref-modal-overlay" onClick={() => { setSelectedStaff(null); setIsEditingStaff(false); }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: 'white', borderRadius: '24px', width: '100%', maxWidth: '400px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
-            
-            {/* Colorful Header */}
-            <div style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', padding: '32px 24px', position: 'relative', color: 'white', flexShrink: 0 }}>
-              <button
-                style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', cursor: 'pointer', backdropFilter: 'blur(4px)' }}
+        </>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh', background: '#f8fafc', margin: 0, padding: '0', boxSizing: 'border-box', width: '100%' }}>
+           
+           {/* Top Navigation */}
+           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', background: 'white', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 10 }}>
+             <button
                 onClick={() => { setSelectedStaff(null); setIsEditingStaff(false); }}
-              >
-                ✕
-              </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '64px', height: '64px', borderRadius: '18px', background: 'white', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
-                  {selectedStaff.initials}
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '700', letterSpacing: '-0.5px' }}>{isEditingStaff ? 'Edit Details' : selectedStaff.name}</h3>
-                  <p style={{ margin: 0, fontSize: '14px', color: 'rgba(255,255,255,0.8)', marginTop: '4px' }}>{selectedStaff.id}</p>
-                </div>
-              </div>
-            </div>
+                style={{ background: '#f1f5f9', border: 'none', borderRadius: '12px', padding: '8px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', color: '#334155', fontWeight: '600', transition: 'background 0.2s' }}
+             >
+                <ChevronLeft size={20} /> <span style={{ fontSize: '15px' }}>Back</span>
+             </button>
+             {!isEditingStaff && (
+               <button
+                  onClick={handleEditStaff}
+                  style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '12px', padding: '8px 16px', cursor: 'pointer', color: '#2563eb', fontWeight: '600', fontSize: '14px', transition: 'background 0.2s' }}
+               >
+                 Edit Profile
+               </button>
+             )}
+           </div>
 
-            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}>
-              
-              {/* Name */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <User size={22} color="#3b82f6" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Name</div>
-                  {isEditingStaff ? (
-                    <input
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
-                      value={editedStaffData?.name || ''}
-                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, name: e.target.value } : prev)}
-                    />
-                  ) : (
-                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedStaff.name}</div>
-                  )}
-                </div>
-              </div>
+           <div style={{ padding: '20px' }}>
+             {/* Hero Section */}
+             <div style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', borderRadius: '24px', padding: '32px 24px', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '0 10px 25px -5px rgba(79, 70, 229, 0.4)', marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
+               {!isEditingStaff && (
+                 <button 
+                   onClick={() => setShowRemoveAlert(true)}
+                   style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white', zIndex: 10, backdropFilter: 'blur(4px)' }}
+                 >
+                   <Trash2 size={18} />
+                 </button>
+               )}
+               <div style={{ width: '88px', height: '88px', borderRadius: '24px', background: 'white', color: '#6d28d9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: '800', boxShadow: '0 8px 16px rgba(0,0,0,0.1)', marginBottom: '16px', zIndex: 1 }}>
+                 {selectedStaff.initials}
+               </div>
+               {isEditingStaff ? (
+                 <input
+                   style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '12px', padding: '8px 16px', color: 'white', fontSize: '20px', fontWeight: '700', textAlign: 'center', width: '80%', marginBottom: '8px', outline: 'none' }}
+                   value={editedStaffData?.name || ''}
+                   onChange={e => setEditedStaffData(prev => prev ? { ...prev, name: e.target.value } : prev)}
+                 />
+               ) : (
+                 <h2 style={{ margin: 0, fontSize: '26px', fontWeight: '800', letterSpacing: '-0.5px', marginBottom: '6px', zIndex: 1, textAlign: 'center' }}>{selectedStaff.name}</h2>
+               )}
+               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', zIndex: 1, opacity: 0.9 }}>
+                  <span style={{ fontSize: '13px', background: 'rgba(255,255,255,0.25)', padding: '5px 12px', borderRadius: '20px', fontWeight: '500' }}>ID: {selectedStaff.id}</span>
+                  <span style={{ fontSize: '13px', background: 'rgba(255,255,255,0.25)', padding: '5px 12px', borderRadius: '20px', fontWeight: '500' }}>Joined {selectedStaff.joinedDate}</span>
+               </div>
+             </div>
 
-              {/* Joined Date */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CalendarDays size={22} color="#8b5cf6" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Date of Joined</div>
-                  {isEditingStaff ? (
-                    <input
-                      type="date"
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
-                      value={editedStaffData?.joinedDate || ''}
-                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, joinedDate: e.target.value } : prev)}
-                    />
-                  ) : (
-                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedStaff.joinedDate}</div>
-                  )}
-                </div>
-              </div>
+             {/* Info Cards */}
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+               
+               {/* Compensation Card */}
+               <div style={{ background: 'white', borderRadius: '20px', padding: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                 <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#334155', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}><Banknote size={18} color="#10b981" /> Compensation</h3>
+                 
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <span style={{ color: '#64748b', fontSize: '14px', fontWeight: '500' }}>Monthly Salary</span>
+                   {isEditingStaff ? (
+                     <input type="number" style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '8px', width: '120px', textAlign: 'right', outline: 'none', fontWeight: '600' }} value={editedStaffData?.salaryMonthly || ''} onChange={e => setEditedStaffData(prev => prev ? { ...prev, salaryMonthly: Number(e.target.value) } : prev)} />
+                   ) : (
+                     <span style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>₹{selectedStaff.salaryMonthly.toLocaleString('en-IN')}</span>
+                   )}
+                 </div>
+               </div>
 
-              {/* Salary */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fdf4ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Banknote size={22} color="#d946ef" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Salary</div>
-                  {isEditingStaff ? (
-                    <input
-                      type="number"
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
-                      value={editedStaffData?.salaryMonthly || ''}
-                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, salaryMonthly: Number(e.target.value) } : prev)}
-                    />
-                  ) : (
-                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>₹{selectedStaff.salaryMonthly.toLocaleString('en-IN')}</div>
-                  )}
-                </div>
-              </div>
+               {/* Contact Details Card */}
+               <div style={{ background: 'white', borderRadius: '20px', padding: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                 <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#334155', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}><Phone size={18} color="#3b82f6" /> Contact Information</h3>
+                 
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                     <span style={{ color: '#64748b', fontSize: '14px', fontWeight: '500' }}>Primary Phone</span>
+                     {isEditingStaff ? (
+                       <input style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '8px', width: '150px', textAlign: 'right', outline: 'none', fontWeight: '600' }} value={editedStaffData?.contact || ''} onChange={e => setEditedStaffData(prev => prev ? { ...prev, contact: e.target.value } : prev)} />
+                     ) : (
+                       <span style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a' }}>{selectedStaff.contact}</span>
+                     )}
+                   </div>
+                   <div style={{ height: '1px', background: '#f1f5f9' }} />
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                     <span style={{ color: '#64748b', fontSize: '14px', fontWeight: '500' }}>Alt. Phone</span>
+                     {isEditingStaff ? (
+                       <input style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '8px', width: '150px', textAlign: 'right', outline: 'none', fontWeight: '600' }} value={editedStaffData?.altContact || ''} onChange={e => setEditedStaffData(prev => prev ? { ...prev, altContact: e.target.value } : prev)} />
+                     ) : (
+                       <span style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a' }}>{selectedStaff.altContact || 'N/A'}</span>
+                     )}
+                   </div>
+                 </div>
+               </div>
 
-              {/* Contact */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Phone size={22} color="#10b981" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Contact No.</div>
-                  {isEditingStaff ? (
-                    <input
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
-                      value={editedStaffData?.contact || ''}
-                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, contact: e.target.value } : prev)}
-                    />
-                  ) : (
-                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedStaff.contact}</div>
-                  )}
-                </div>
-              </div>
+               {/* Identity & Address */}
+               <div style={{ background: 'white', borderRadius: '20px', padding: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                 <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#334155', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}><Contact2 size={18} color="#f59e0b" /> Identity & Address</h3>
+                 
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                     <span style={{ color: '#64748b', fontSize: '14px', fontWeight: '500' }}>Aadhaar No.</span>
+                     {isEditingStaff ? (
+                       <input style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '8px', width: '150px', textAlign: 'right', outline: 'none', fontWeight: '600' }} value={editedStaffData?.aadhaarNumber || ''} onChange={e => setEditedStaffData(prev => prev ? { ...prev, aadhaarNumber: e.target.value } : prev)} />
+                     ) : (
+                       <span style={{ fontSize: '15px', fontWeight: '600', color: '#0f172a' }}>{selectedStaff.aadhaarNumber || 'N/A'}</span>
+                     )}
+                   </div>
+                   <div style={{ height: '1px', background: '#f1f5f9' }} />
+                   <div>
+                     <span style={{ color: '#64748b', fontSize: '14px', fontWeight: '500', display: 'block', marginBottom: '8px' }}>Address</span>
+                     {isEditingStaff ? (
+                       <textarea style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '8px', width: '100%', boxSizing: 'border-box', outline: 'none' }} rows={2} value={editedStaffData?.address || ''} onChange={e => setEditedStaffData(prev => prev ? { ...prev, address: e.target.value } : prev)} />
+                     ) : (
+                       <span style={{ fontSize: '15px', fontWeight: '500', color: '#0f172a', lineHeight: 1.5, display: 'block' }}>{selectedStaff.address || 'N/A'}</span>
+                     )}
+                   </div>
+                 </div>
+               </div>
 
-              {/* Alternate Contact */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Phone size={22} color="#f59e0b" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Alternate Contact Number</div>
-                  {isEditingStaff ? (
-                    <input
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
-                      value={editedStaffData?.altContact || ''}
-                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, altContact: e.target.value } : prev)}
-                    />
-                  ) : (
-                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedStaff.altContact}</div>
-                  )}
-                </div>
-              </div>
+             </div>
 
-              {/* Aadhaar Number */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Contact2 size={22} color="#ef4444" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Adhaar Number</div>
-                  {isEditingStaff ? (
-                    <input
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '15px' }}
-                      value={editedStaffData?.aadhaarNumber || ''}
-                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, aadhaarNumber: e.target.value } : prev)}
-                    />
-                  ) : (
-                    <div style={{ fontSize: '16px', color: '#0f172a', fontWeight: '600' }}>{selectedStaff.aadhaarNumber}</div>
-                  )}
-                </div>
-              </div>
+             {/* History & Attendance Buttons */}
+             {!isEditingStaff && (
+               <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                 <button 
+                   onClick={() => onOpenHistory && onOpenHistory(selectedStaff)}
+                   style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: '600', color: '#4f46e5', background: '#e0e7ff', border: '1px solid #c7d2fe', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 4px rgba(79,70,229,0.1)' }}
+                 >
+                   <History size={22} /> <span style={{ fontSize: '13px' }}>Payment History</span>
+                 </button>
+                 <button 
+                   onClick={() => onNavigateToAttendance && onNavigateToAttendance({ name: selectedStaff.name, presentDays: selectedStaff.presentDays, absentDays: selectedStaff.absentDays })}
+                   style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: '600', color: '#ea580c', background: '#ffedd5', border: '1px solid #fed7aa', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 4px rgba(234,88,12,0.1)' }}
+                 >
+                   <Calendar size={22} /> <span style={{ fontSize: '13px' }}>Attendance Log</span>
+                 </button>
+               </div>
+             )}
 
-              {/* Address */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <MapPin size={22} color="#16a34a" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Address</div>
-                  {isEditingStaff ? (
-                    <textarea
-                      rows={2}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', fontFamily: 'inherit', resize: 'vertical' }}
-                      value={editedStaffData?.address || ''}
-                      onChange={e => setEditedStaffData(prev => prev ? { ...prev, address: e.target.value } : prev)}
-                    />
-                  ) : (
-                    <div style={{ fontSize: '15px', color: '#0f172a', fontWeight: '500', lineHeight: '1.4' }}>{selectedStaff.address || 'N/A'}</div>
-                  )}
-                </div>
-              </div>
+             {/* Action Buttons (Inline rather than fixed to avoid overlap with bottom nav) */}
+             <div style={{ marginTop: '24px', display: 'flex', gap: '12px', paddingBottom: '32px' }}>
+                {isEditingStaff ? (
+                  <>
+                    <button style={{ flex: 1, padding: '16px', borderRadius: '16px', fontWeight: '700', color: '#64748b', background: 'white', border: '1px solid #cbd5e1', cursor: 'pointer', fontSize: '15px' }} onClick={() => setIsEditingStaff(false)}>Cancel</button>
+                    <button style={{ flex: 1, padding: '16px', borderRadius: '16px', fontWeight: '700', color: 'white', background: '#4f46e5', border: 'none', cursor: 'pointer', fontSize: '15px', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)' }} onClick={handleSaveStaff}>Save Changes</button>
+                  </>
+                ) : (
+                  <>
+                    <button style={{ flex: 1, padding: '16px', borderRadius: '16px', fontWeight: '700', color: 'white', background: '#10b981', border: 'none', cursor: 'pointer', fontSize: '15px', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)' }} onClick={() => handlePay(selectedStaff)}>Pay Salary</button>
+                  </>
+                )}
+             </div>
 
-            </div>
-
-            <div style={{ padding: '20px 24px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', gap: '12px' }}>
-              {isEditingStaff ? (
-                <>
-                  <button style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '600', color: '#64748b', background: 'white', border: '1px solid #cbd5e1', cursor: 'pointer' }} onClick={() => setIsEditingStaff(false)}>Cancel</button>
-                  <button style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '600', color: 'white', background: '#6366f1', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' }} onClick={handleSaveStaff}>Save</button>
-                </>
-              ) : (
-                <>
-                  <button style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '600', color: '#64748b', background: '#f8fafc', border: '1px solid #e2e8f0', cursor: 'pointer' }} onClick={() => setShowRemoveAlert(true)}>Remove</button>
-                  <button style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '600', color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', cursor: 'pointer' }} onClick={handleEditStaff}>Edit</button>
-                </>
-              )}
-            </div>
-
-          </div>
+           </div>
         </div>
       )}
 
@@ -785,7 +713,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
       {isAddStaffModalOpen && (
         <div className="ref-modal-overlay" onClick={() => setIsAddStaffModalOpen(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 1100 }}>
           <div style={{ background: 'white', borderRadius: '24px', width: '100%', maxWidth: '420px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
-            
+
             {/* Modal Header */}
             <div style={{ background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)', padding: '24px', position: 'relative', color: 'white', flexShrink: 0 }}>
               <button
@@ -806,7 +734,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
             </div>
 
             <form onSubmit={handleAddStaffSubmit} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto' }}>
-              
+
               {/* Name Input */}
               <div>
                 <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', display: 'block' }}>Name *</label>
@@ -994,39 +922,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                       </div>
                     </div>
 
-                    {status === 'absent' && (
-                      <div style={{ padding: '16px', background: '#fef2f2', borderTop: '1px solid #fee2e2' }}>
-                        <p style={{ fontSize: '13px', color: '#991b1b', marginBottom: '12px', fontWeight: '500' }}>Notify {staff.name.split(' ')[0]} about absence:</p>
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                          <button
-                            onClick={() => setNotificationPrefs(prev => ({ ...prev, [staff.id]: { ...prev[staff.id], whatsapp: !(prev[staff.id]?.whatsapp ?? false) } }))}
-                            style={{
-                              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px',
-                              background: notificationPrefs[staff.id]?.whatsapp ? '#25d366' : 'transparent',
-                              color: notificationPrefs[staff.id]?.whatsapp ? 'white' : '#16a34a',
-                              border: notificationPrefs[staff.id]?.whatsapp ? '1px solid #25d366' : '1px solid #16a34a',
-                              borderRadius: '10px', cursor: 'pointer', fontWeight: '600',
-                              boxShadow: notificationPrefs[staff.id]?.whatsapp ? '0 4px 10px rgba(37, 211, 102, 0.3)' : 'none',
-                              transition: 'all 0.2s'
-                            }}>
-                            <MessageCircle size={18} /> WhatsApp
-                          </button>
-                          <button
-                            onClick={() => setNotificationPrefs(prev => ({ ...prev, [staff.id]: { ...prev[staff.id], sms: !(prev[staff.id]?.sms ?? false) } }))}
-                            style={{
-                              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px',
-                              background: notificationPrefs[staff.id]?.sms ? '#3b82f6' : 'transparent',
-                              color: notificationPrefs[staff.id]?.sms ? 'white' : '#2563eb',
-                              border: notificationPrefs[staff.id]?.sms ? '1px solid #3b82f6' : '1px solid #2563eb',
-                              borderRadius: '10px', cursor: 'pointer', fontWeight: '600',
-                              boxShadow: notificationPrefs[staff.id]?.sms ? '0 4px 10px rgba(59, 130, 246, 0.3)' : 'none',
-                              transition: 'all 0.2s'
-                            }}>
-                            <MessageSquare size={18} /> SMS
-                          </button>
-                        </div>
-                      </div>
-                    )}
+
                   </div>
                 );
               })}
@@ -1053,8 +949,6 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                   const todayDate = 15;
                   const db = JSON.parse(JSON.stringify(attendanceDB));
 
-                  let notificationsSent = 0;
-
                   Object.keys(globalAttendanceState).forEach(staffId => {
                     const status = globalAttendanceState[staffId];
                     if (!db[staffId]) db[staffId] = { absentDates: [], holidayDates: [] };
@@ -1065,9 +959,6 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                     if (status === 'absent') {
                       absentSet.add(todayDate);
                       holidaySet.delete(todayDate);
-                      if (notificationPrefs[staffId]?.whatsapp || notificationPrefs[staffId]?.sms) {
-                        notificationsSent++;
-                      }
                     } else if (status === 'present') {
                       absentSet.delete(todayDate);
                       holidaySet.delete(todayDate);
@@ -1083,11 +974,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                   setGlobalAttendanceState({});
                   setNotificationPrefs({});
 
-                  if (notificationsSent > 0) {
-                    setToastMessage(`Attendance saved. Sent notification to ${notificationsSent} absent staff.`);
-                  } else {
-                    setToastMessage('Attendance saved successfully.');
-                  }
+                  setToastMessage('Attendance saved successfully.');
                   setTimeout(() => setToastMessage(null), 3000);
                 }}
               >

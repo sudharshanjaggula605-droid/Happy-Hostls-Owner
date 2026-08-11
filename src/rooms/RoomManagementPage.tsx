@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LiveCameraModal } from '../components/LiveCameraModal';
 import {
   Building,
   BedDouble,
@@ -29,11 +30,18 @@ import {
   Filter,
   Sparkles,
   CheckCircle2,
+<<<<<<< HEAD
   MapPin,
   Mail,
   CreditCard,
   LogOut,
   Smartphone
+=======
+  Eye,
+  EyeOff,
+  Camera,
+  Upload
+>>>>>>> e7f9e7202adfec5ab28bbed18f20b2ab8c7698e7
 } from 'lucide-react';
 import type { BedStatus, BedResident, BedModel, RoomModel, FloorModel } from '../types';
 
@@ -567,6 +575,7 @@ export const RoomManagementPage: React.FC = () => {
   const [selectedFloorId, setSelectedFloorId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isLiveCameraOpen, setIsLiveCameraOpen] = useState(false);
 
   // Modals state
   const [isAddFloorModalOpen, setIsAddFloorModalOpen] = useState(false);
@@ -612,9 +621,12 @@ export const RoomManagementPage: React.FC = () => {
     address: '',
     aadhaarNumber: '',
     email: '',
+    password: '',
+    photoUrl: '',
     checkInDate: new Date().toISOString().split('T')[0],
     rentAmount: 8000
   });
+  const [showAssignPassword, setShowAssignPassword] = useState(false);
   const [maintenanceForm, setMaintenanceForm] = useState({ reason: '' });
   const [reservedForm, setReservedForm] = useState({ reservedFor: '', untilDate: '' });
 
@@ -937,7 +949,9 @@ export const RoomManagementPage: React.FC = () => {
       emergencyContact: assignForm.altPhone.trim() || assignForm.phone.trim(),
       email: assignForm.email.trim(),
       address: assignForm.address.trim(),
-      aadhaarNumber: assignForm.aadhaarNumber.trim()
+      aadhaarNumber: assignForm.aadhaarNumber.trim(),
+      password: assignForm.password.trim(),
+      photoUrl: assignForm.photoUrl
     };
 
     updateBedInState(activeBedAction.floorId, activeBedAction.roomId, activeBedAction.bed.id, {
@@ -1718,6 +1732,8 @@ export const RoomManagementPage: React.FC = () => {
                     address: '',
                     aadhaarNumber: '',
                     email: '',
+                    password: '',
+                    photoUrl: '',
                     checkInDate: new Date().toISOString().split('T')[0],
                     rentAmount: activeRoom ? getBedPrice(activeRoom, activeBedAction.bed) : 8000
                   });
@@ -1828,6 +1844,113 @@ export const RoomManagementPage: React.FC = () => {
 
               {/* Form Fields */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                
+                {/* Upload Image Input */}
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px', display: 'block' }}>Upload Image / Photo</label>
+                  {assignForm.photoUrl ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#F8FAFC', border: '1px solid #CBD5E1', padding: '8px 10px', borderRadius: '8px' }}>
+                      <img
+                        src={assignForm.photoUrl}
+                        alt="Profile preview"
+                        style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #2563EB' }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A' }}>Photo Uploaded</div>
+                        <div style={{ fontSize: '10px', color: '#16A34A', fontWeight: 600 }}>Ready to save</div>
+                      </div>
+                      <label style={{ cursor: 'pointer', background: '#EFF6FF', color: '#2563EB', padding: '5px 9px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Upload size={12} /> Change
+                        <input
+                          type="file"
+                          accept="image/*"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => setAssignForm(prev => ({ ...prev, photoUrl: reader.result as string }));
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setAssignForm(prev => ({ ...prev, photoUrl: '' }))}
+                        style={{ background: '#FEE2E2', color: '#EF4444', border: 'none', padding: '5px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <label style={{
+                        border: '2px dashed #CBD5E1',
+                        borderRadius: '10px',
+                        padding: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        cursor: 'pointer',
+                        background: '#F8FAFC'
+                      }}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => setAssignForm(prev => ({ ...prev, photoUrl: reader.result as string }));
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Camera size={16} color="#2563EB" />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '11px', fontWeight: 700, color: '#1E293B' }}>Upload Image Input</div>
+                          <div style={{ fontSize: '9px', color: '#64748B' }}>Click to select photo</div>
+                        </div>
+                      </label>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsLiveCameraOpen(true)}
+                        style={{
+                          border: '2px dashed #93C5FD',
+                          borderRadius: '10px',
+                          padding: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          cursor: 'pointer',
+                          background: '#EFF6FF',
+                          textAlign: 'left'
+                        }}
+                      >
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Camera size={16} color="#FFFFFF" />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '11px', fontWeight: 800, color: '#1E40AF' }}>📷 Live Camera</div>
+                          <div style={{ fontSize: '9px', color: '#2563EB', fontWeight: 600 }}>Snap live photo</div>
+                        </div>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Live Camera Capture Modal */}
+                  <LiveCameraModal
+                    isOpen={isLiveCameraOpen}
+                    onClose={() => setIsLiveCameraOpen(false)}
+                    onCapture={(photoDataUrl) => setAssignForm(prev => ({ ...prev, photoUrl: photoDataUrl }))}
+                  />
+                </div>
+
                 <div>
                   <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px', display: 'block' }}>Full Name *</label>
                   <input
@@ -1837,6 +1960,38 @@ export const RoomManagementPage: React.FC = () => {
                     onChange={(e) => setAssignForm({ ...assignForm, name: e.target.value })}
                     style={{ width: '100%', padding: '9px 11px', fontSize: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
                   />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px', display: 'block' }}>Password *</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showAssignPassword ? 'text' : 'password'}
+                      placeholder="Enter tenant password (e.g. Pass@1234)"
+                      value={assignForm.password}
+                      onChange={(e) => setAssignForm({ ...assignForm, password: e.target.value })}
+                      style={{ width: '100%', padding: '9px 34px 9px 11px', fontSize: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAssignPassword(!showAssignPassword)}
+                      style={{
+                        position: 'absolute',
+                        right: '8px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        color: '#64748B',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {showAssignPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>

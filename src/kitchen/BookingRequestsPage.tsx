@@ -36,6 +36,7 @@ export interface BookingRequestItem {
   requestedDate: string;
   status: 'Pending' | 'Approved' | 'Rejected';
   notes?: string;
+  rejectionReason?: string;
 }
 
 export interface CheckoutRequestItem {
@@ -50,11 +51,14 @@ export interface CheckoutRequestItem {
   bedNumber: string;
   hostelName: string;
   sharingType: string;
+  joinDate?: string;
+  checkoutDate?: string;
   requestedDate: string;
   reason: string;
   pendingDues: number;
   earnings: number;
   status: 'Pending' | 'Approved' | 'Rejected';
+  rejectionReason?: string;
 }
 
 export interface TransferRequestItem {
@@ -72,6 +76,7 @@ export interface TransferRequestItem {
   reason: string;
   requestedDate: string;
   status: 'Pending' | 'Approved' | 'Rejected';
+  rejectionReason?: string;
 }
 
 export interface InventoryBed {
@@ -195,13 +200,13 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
 
   // Checkout Requests State
   const [checkoutRequests, setCheckoutRequests] = useState<CheckoutRequestItem[]>([
-    { id: 'cr-1', tenantId: 'u1', name: 'Aarav Sharma', phone: '+91 98765 43210', alternatePhone: '+91 98765 40000', email: 'aarav.s@gmail.com', aadhaar: '8901 2345 6789', roomNumber: '101', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '2-Sharing', requestedDate: '2026-08-06', reason: 'Course Completed & Relocating', pendingDues: 0, earnings: 14500, status: 'Pending' },
-    { id: 'cr-2', tenantId: 'u2', name: 'Kabir Verma', phone: '+91 91234 56780', alternatePhone: '+91 91234 50000', email: 'kabir.v@gmail.com', aadhaar: '1234 5678 9012', roomNumber: '204', bedNumber: 'Bed B', hostelName: 'Happy Hostels', sharingType: '3-Sharing', requestedDate: '2026-08-08', reason: 'Job Location Change', pendingDues: 2500, earnings: 12000, status: 'Pending' },
-    { id: 'cr-3', tenantId: 'u4', name: 'Rohit Rajpoot', phone: '+91 62657 75558', alternatePhone: '+91 62657 70000', email: 'rohit.r@gmail.com', aadhaar: '3456 7890 1234', roomNumber: '105', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '2-Sharing', requestedDate: '2026-08-04', reason: 'Moving to rented flat', pendingDues: 1200, earnings: 8500, status: 'Pending' },
-    { id: 'cr-4', tenantId: 'u5', name: 'Ankit Kumar', phone: '+91 90321 09876', alternatePhone: '+91 90321 00000', email: 'ankit.k@gmail.com', aadhaar: '5678 9012 3456', roomNumber: '202', bedNumber: 'Bed B', hostelName: 'Happy Hostels', sharingType: '4-Sharing', requestedDate: '2026-08-01', reason: 'Completed internship', pendingDues: 0, earnings: 15000, status: 'Approved' },
-    { id: 'cr-5', tenantId: 'u6', name: 'Meera Joshi', phone: '+91 91234 98765', alternatePhone: '+91 91234 90000', email: 'meera.j@gmail.com', aadhaar: '4321 8765 2109', roomNumber: '103', bedNumber: 'Bed B', hostelName: 'Happy Hostels', sharingType: '3-Sharing', requestedDate: '2026-08-09', reason: 'Semester Break & Returning Home', pendingDues: 0, earnings: 11000, status: 'Pending' },
-    { id: 'cr-6', tenantId: 'u7', name: 'Siddharth Rao', phone: '+91 92345 87654', alternatePhone: '+91 92345 80000', email: 'siddharth.r@gmail.com', aadhaar: '8765 4321 0987', roomNumber: '201', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '1-Sharing', requestedDate: '2026-08-11', reason: 'Flat Transfer with Colleagues', pendingDues: 3000, earnings: 24000, status: 'Pending' },
-    { id: 'cr-7', tenantId: 'u8', name: 'Pooja Hegde', phone: '+91 93456 76543', alternatePhone: '+91 93456 70000', email: 'pooja.h@gmail.com', aadhaar: '6543 2109 8765', roomNumber: '301', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '2-Sharing', requestedDate: '2026-08-03', reason: 'Project Completion', pendingDues: 0, earnings: 16000, status: 'Rejected' },
+    { id: 'cr-1', tenantId: 'u1', name: 'Aarav Sharma', phone: '+91 98765 43210', alternatePhone: '+91 98765 40000', email: 'aarav.s@gmail.com', aadhaar: '8901 2345 6789', roomNumber: '101', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '2-Sharing', joinDate: '2025-08-01', checkoutDate: '2026-08-06', requestedDate: '2026-08-06', reason: 'Course Completed & Relocating', pendingDues: 0, earnings: 14500, status: 'Pending' },
+    { id: 'cr-2', tenantId: 'u2', name: 'Kabir Verma', phone: '+91 91234 56780', alternatePhone: '+91 91234 50000', email: 'kabir.v@gmail.com', aadhaar: '1234 5678 9012', roomNumber: '204', bedNumber: 'Bed B', hostelName: 'Happy Hostels', sharingType: '3-Sharing', joinDate: '2025-09-15', checkoutDate: '2026-08-08', requestedDate: '2026-08-08', reason: 'Job Location Change', pendingDues: 2500, earnings: 12000, status: 'Pending' },
+    { id: 'cr-3', tenantId: 'u4', name: 'Rohit Rajpoot', phone: '+91 62657 75558', alternatePhone: '+91 62657 70000', email: 'rohit.r@gmail.com', aadhaar: '3456 7890 1234', roomNumber: '105', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '2-Sharing', joinDate: '2025-10-01', checkoutDate: '2026-08-04', requestedDate: '2026-08-04', reason: 'Moving to rented flat', pendingDues: 1200, earnings: 8500, status: 'Pending' },
+    { id: 'cr-4', tenantId: 'u5', name: 'Ankit Kumar', phone: '+91 90321 09876', alternatePhone: '+91 90321 00000', email: 'ankit.k@gmail.com', aadhaar: '5678 9012 3456', roomNumber: '202', bedNumber: 'Bed B', hostelName: 'Happy Hostels', sharingType: '4-Sharing', joinDate: '2025-02-10', checkoutDate: '2026-08-01', requestedDate: '2026-08-01', reason: 'Completed internship', pendingDues: 0, earnings: 15000, status: 'Approved' },
+    { id: 'cr-5', tenantId: 'u6', name: 'Meera Joshi', phone: '+91 91234 98765', alternatePhone: '+91 91234 90000', email: 'meera.j@gmail.com', aadhaar: '4321 8765 2109', roomNumber: '103', bedNumber: 'Bed B', hostelName: 'Happy Hostels', sharingType: '3-Sharing', joinDate: '2025-11-20', checkoutDate: '2026-08-09', requestedDate: '2026-08-09', reason: 'Semester Break & Returning Home', pendingDues: 0, earnings: 11000, status: 'Pending' },
+    { id: 'cr-6', tenantId: 'u7', name: 'Siddharth Rao', phone: '+91 92345 87654', alternatePhone: '+91 92345 80000', email: 'siddharth.r@gmail.com', aadhaar: '8765 4321 0987', roomNumber: '201', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '1-Sharing', joinDate: '2025-06-01', checkoutDate: '2026-08-11', requestedDate: '2026-08-11', reason: 'Flat Transfer with Colleagues', pendingDues: 3000, earnings: 24000, status: 'Pending' },
+    { id: 'cr-7', tenantId: 'u8', name: 'Pooja Hegde', phone: '+91 93456 76543', alternatePhone: '+91 93456 70000', email: 'pooja.h@gmail.com', aadhaar: '6543 2109 8765', roomNumber: '301', bedNumber: 'Bed A', hostelName: 'Happy Hostels', sharingType: '2-Sharing', joinDate: '2025-07-15', checkoutDate: '2026-08-03', requestedDate: '2026-08-03', reason: 'Project Completion', pendingDues: 0, earnings: 16000, status: 'Rejected' },
   ]);
 
   // Transfer Requests State
@@ -292,16 +297,26 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
     setWizRent(7500);
   };
 
+  // Rejection Reason Modal State
+  const [rejectModalTarget, setRejectModalTarget] = useState<{
+    type: 'booking' | 'checkout' | 'transfer';
+    id: string;
+    name: string;
+  } | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+
   // Reject Booking Request
-  const handleRejectBooking = (id: string, name: string) => {
-    setBookingRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Rejected' } : r));
-    if (showToast) showToast(`Rejected booking request for ${name}.`);
+  const handleRejectBooking = (id: string, name: string, reason: string = '') => {
+    const finalReason = reason.trim() || 'No specific reason provided';
+    setBookingRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Rejected', rejectionReason: finalReason } : r));
+    if (showToast) showToast(`Rejected booking request for ${name}. Reason: ${finalReason}`);
   };
 
   // Reject Checkout Request
-  const handleRejectCheckout = (id: string, name: string) => {
-    setCheckoutRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Rejected' } : r));
-    if (showToast) showToast(`Rejected checkout request for ${name}.`);
+  const handleRejectCheckout = (id: string, name: string, reason: string = '') => {
+    const finalReason = reason.trim() || 'No specific reason provided';
+    setCheckoutRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Rejected', rejectionReason: finalReason } : r));
+    if (showToast) showToast(`Rejected checkout request for ${name}. Reason: ${finalReason}`);
   };
 
   // Complete Booking Approval Wizard
@@ -441,9 +456,10 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
   };
 
   // Reject Transfer Request
-  const handleRejectTransfer = (id: string, name: string) => {
-    setTransferRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Rejected' } : r));
-    if (showToast) showToast(`Rejected transfer request for ${name}.`);
+  const handleRejectTransfer = (id: string, name: string, reason: string = '') => {
+    const finalReason = reason.trim() || 'No specific reason provided';
+    setTransferRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Rejected', rejectionReason: finalReason } : r));
+    if (showToast) showToast(`Rejected transfer request for ${name}. Reason: ${finalReason}`);
   };
 
   // Counts for Booking Requests
@@ -732,6 +748,12 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                   <span className="view-detail-label">Date of Joining</span>
                   <span className="view-detail-value">{viewBookingReq.requestedDate}</span>
                 </div>
+
+                {viewBookingReq.rejectionReason && (
+                  <div style={{ gridColumn: '1 / -1', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '10px 12px', color: '#991b1b', fontSize: '12px', fontWeight: 600 }}>
+                    🚫 Rejection Reason: {viewBookingReq.rejectionReason}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -743,7 +765,8 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                 onClick={() => {
                   const req = viewBookingReq;
                   setViewBookingReq(null);
-                  handleRejectBooking(req.id, req.name);
+                  setRejectModalTarget({ type: 'booking', id: req.id, name: req.name });
+                  setRejectReason('');
                 }}
               >
                 <XCircle size={16} />
@@ -829,8 +852,13 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                 </div>
 
                 <div className="view-detail-card">
-                  <span className="view-detail-label">Date of Joining / Move-out</span>
-                  <span className="view-detail-value">{viewCheckoutReq.requestedDate}</span>
+                  <span className="view-detail-label">Date of Joining</span>
+                  <span className="view-detail-value">{viewCheckoutReq.joinDate || '2025-08-01'}</span>
+                </div>
+
+                <div className="view-detail-card">
+                  <span className="view-detail-label">User Checkout Date</span>
+                  <span className="view-detail-value font-bold" style={{ color: '#dc2626' }}>{viewCheckoutReq.checkoutDate || viewCheckoutReq.requestedDate}</span>
                 </div>
 
                 {viewCheckoutReq.pendingDues > 0 ? (
@@ -840,6 +868,12 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                 ) : (
                   <div className="dues-clear-pill mt-4">
                     ✓ Clear Bill (No Dues)
+                  </div>
+                )}
+
+                {viewCheckoutReq.rejectionReason && (
+                  <div style={{ gridColumn: '1 / -1', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '10px 12px', color: '#991b1b', fontSize: '12px', fontWeight: 600 }}>
+                    🚫 Rejection Reason: {viewCheckoutReq.rejectionReason}
                   </div>
                 )}
               </div>
@@ -853,7 +887,8 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                 onClick={() => {
                   const req = viewCheckoutReq;
                   setViewCheckoutReq(null);
-                  handleRejectCheckout(req.id, req.name);
+                  setRejectModalTarget({ type: 'checkout', id: req.id, name: req.name });
+                  setRejectReason('');
                 }}
               >
                 <XCircle size={16} />
@@ -862,15 +897,15 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
 
               <button 
                 type="button" 
-                className="view-btn-approve red-bg"
+                className="view-btn-approve"
                 onClick={() => {
                   const req = viewCheckoutReq;
                   setViewCheckoutReq(null);
                   setActiveCheckoutReq(req);
                 }}
               >
-                <LogOut size={16} />
-                <span>Checkout</span>
+                <CheckCircle size={16} />
+                <span>Approve</span>
               </button>
             </div>
 
@@ -942,6 +977,12 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                   <span className="view-detail-label">Date of Joining / Request</span>
                   <span className="view-detail-value">{viewTransferReq.requestedDate}</span>
                 </div>
+
+                {viewTransferReq.rejectionReason && (
+                  <div style={{ gridColumn: '1 / -1', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '10px 12px', color: '#991b1b', fontSize: '12px', fontWeight: 600 }}>
+                    🚫 Rejection Reason: {viewTransferReq.rejectionReason}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -953,7 +994,8 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
                 onClick={() => {
                   const req = viewTransferReq;
                   setViewTransferReq(null);
-                  handleRejectTransfer(req.id, req.name);
+                  setRejectModalTarget({ type: 'transfer', id: req.id, name: req.name });
+                  setRejectReason('');
                 }}
               >
                 <XCircle size={16} />
@@ -1500,6 +1542,166 @@ export const BookingRequestsPage: React.FC<BookingRequestsPageProps> = ({ onBack
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* REJECTION REASON INPUT POPUP MODAL                                        */}
+      {/* ========================================================================= */}
+      {rejectModalTarget && (
+        <div className="wizard-modal-backdrop" onClick={() => setRejectModalTarget(null)}>
+          <div className="booking-view-modal-card" style={{ maxWidth: '420px', borderRadius: '20px' }} onClick={(e) => e.stopPropagation()}>
+            
+            {/* MODAL HEADER */}
+            <div className="view-modal-header" style={{ borderBottom: '1px solid #fee2e2', background: '#fef2f2' }}>
+              <div className="view-modal-title-wrap">
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <XCircle size={18} color="#ef4444" />
+                </div>
+                <h3 className="view-modal-title" style={{ color: '#991b1b', fontSize: '16px', fontWeight: 800 }}>Reason for Rejection</h3>
+              </div>
+              <button 
+                type="button" 
+                className="wizard-close-btn"
+                onClick={() => setRejectModalTarget(null)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* MODAL BODY */}
+            <div className="view-modal-body" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ fontSize: '13px', color: '#334155', lineHeight: '1.4' }}>
+                Please state the reason for rejecting the {rejectModalTarget.type} request for <strong style={{ color: '#0f172a' }}>{rejectModalTarget.name}</strong>:
+              </div>
+
+              {/* Quick Suggestion Chips */}
+              <div>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                  Quick Selection:
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {(rejectModalTarget.type === 'checkout' ? [
+                    'Pending Rent Dues Unsettled',
+                    'Notice Period Not Served (30 Days)',
+                    'Lock-in Period Active',
+                    'Key Handover / Room Damage Pending',
+                    'No Advance Notice Received',
+                    'Clearance Certificate Pending'
+                  ] : rejectModalTarget.type === 'transfer' ? [
+                    'Requested Room / Bed Not Available',
+                    'Minimum Stay Duration Pending',
+                    'Pending Dues on Current Room',
+                    'Duplicate Transfer Request',
+                    'Hostel Transfer Policy Mismatch'
+                  ] : [
+                    'No Rooms / Beds Available',
+                    'Incomplete / Invalid Details',
+                    'Duplicate Booking Request',
+                    'Failed Identity Verification',
+                    'Policy Non-compliance'
+                  ]).map(chip => (
+                    <button
+                      key={chip}
+                      type="button"
+                      onClick={() => setRejectReason(chip)}
+                      style={{
+                        background: rejectReason === chip ? '#fee2e2' : '#f1f5f9',
+                        color: rejectReason === chip ? '#991b1b' : '#475569',
+                        border: rejectReason === chip ? '1px solid #fca5a5' : '1px solid #cbd5e1',
+                        borderRadius: '20px',
+                        padding: '5px 10px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Reason Textarea */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>
+                  Rejection Reason *
+                </label>
+                <textarea
+                  rows={3}
+                  className="modal-text-input"
+                  style={{ width: '100%', padding: '10px', fontSize: '13px', borderRadius: '10px', border: '1px solid #cbd5e1', resize: 'vertical', boxSizing: 'border-box' }}
+                  placeholder={
+                    rejectModalTarget.type === 'checkout'
+                      ? "e.g. Pending dues unpaid / Minimum 30-day notice period required..."
+                      : rejectModalTarget.type === 'transfer'
+                      ? "e.g. Target bed currently occupied / Transfer policy mismatch..."
+                      : "e.g. No rooms available / Invalid document details..."
+                  }
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {/* MODAL FOOTER ACTIONS */}
+            <div className="view-modal-footer" style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', background: '#ffffff', display: 'flex', gap: '10px' }}>
+              <button 
+                type="button" 
+                style={{
+                  flex: 1,
+                  padding: '11px',
+                  borderRadius: '10px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#475569',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+                onClick={() => setRejectModalTarget(null)}
+              >
+                Cancel
+              </button>
+
+              <button 
+                type="button" 
+                style={{
+                  flex: 1,
+                  padding: '11px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: rejectReason.trim() ? '#dc2626' : '#f87171',
+                  color: '#ffffff',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: rejectReason.trim() ? 'pointer' : 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)'
+                }}
+                onClick={() => {
+                  if (!rejectReason.trim()) return;
+                  if (rejectModalTarget.type === 'booking') {
+                    handleRejectBooking(rejectModalTarget.id, rejectModalTarget.name, rejectReason.trim());
+                  } else if (rejectModalTarget.type === 'checkout') {
+                    handleRejectCheckout(rejectModalTarget.id, rejectModalTarget.name, rejectReason.trim());
+                  } else if (rejectModalTarget.type === 'transfer') {
+                    handleRejectTransfer(rejectModalTarget.id, rejectModalTarget.name, rejectReason.trim());
+                  }
+                  setRejectModalTarget(null);
+                }}
+              >
+                <XCircle size={16} />
+                <span>Confirm Rejection</span>
+              </button>
+            </div>
+
           </div>
         </div>
       )}

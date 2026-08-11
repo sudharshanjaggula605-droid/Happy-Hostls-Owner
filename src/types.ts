@@ -203,3 +203,24 @@ export interface FloorModel {
   rooms: RoomModel[];
 }
 
+export interface HostelModel {
+  id: string;
+  name: string;
+  type: 'Girls Hostel' | 'Boys Hostel' | 'Co-Living';
+  owner: string;
+  manager: string;
+  contact: string;
+  email: string;
+  address: string;
+  capacity: number;
+  currentOccupancy: number;
+  floorsCount: number;
+  roomsCount: number;
+  status: 'Operational' | 'Maintenance' | 'Full';
+  facilities: string[];
+  rules: string[];
+  description: string;
+  createdDate: string;
+}
+
+

@@ -30,6 +30,11 @@ import {
   Filter,
   Sparkles,
   CheckCircle2,
+  MapPin,
+  Mail,
+  CreditCard,
+  LogOut,
+  Smartphone,
   Eye,
   EyeOff,
   Camera,
@@ -42,215 +47,506 @@ import type { BedStatus, BedResident, BedModel, RoomModel, FloorModel } from '..
 /* ─────────────────────────────────────────────────────────────────────────── */
 const initialFloorsData: FloorModel[] = [
   {
-    id: 'f1',
-    floorNumber: 'Floor 1',
-    rooms: [
+    "id": "f1",
+    "floorNumber": "Floor 1",
+    "rooms": [
       {
-        id: 'r101',
-        roomNumber: '101',
-        floorId: 'f1',
-        sharingType: '2-Sharing (Double)',
-        features: ['Attached Bathroom', 'Air Conditioning (AC)', 'High-Speed WiFi'],
-        rentPerMonth: 8500,
-        beds: [
+        "id": "r101",
+        "roomNumber": "101",
+        "floorId": "f1",
+        "sharingType": "1-Sharing (Single)",
+        "features": [
+          "Attached Bathroom",
+          "Air Conditioning (AC)",
+          "Private Balcony",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 12500,
+        "beds": [
           {
-            id: 'b101a',
-            bedNumber: 'Bed 101-A',
-            status: 'occupied',
-            resident: {
-              id: 'res1',
-              name: 'Rahul Sharma',
-              phone: '+91 98765 43210',
-              checkInDate: '2024-01-15',
-              course: 'B.Tech CSE',
-              rentAmount: 8500,
-              paymentStatus: 'Paid',
-              emergencyContact: '+91 98765 00000'
+            "id": "b101a",
+            "bedNumber": "Bed 101-A",
+            "status": "occupied",
+            "resident": {
+              "id": "u1",
+              "name": "Ananya Sharma",
+              "phone": "9876510002",
+              "checkInDate": "1 Jan 2025",
+              "course": "B.Tech CSE",
+              "rentAmount": 12500,
+              "paymentStatus": "Paid",
+              "emergencyContact": "9876520002",
+              "email": "ananya.sharma0@example.com",
+              "address": "H.No 1-45, Main Road, Hyderabad, AP",
+              "aadhaarNumber": "3000 4000 5002"
             }
-          },
-          {
-            id: 'b101b',
-            bedNumber: 'Bed 101-B',
-            status: 'vacant'
           }
         ]
       },
       {
-        id: 'r102',
-        roomNumber: '102',
-        floorId: 'f1',
-        sharingType: '3-Sharing (Triple)',
-        features: ['Attached Bathroom', 'Hot Water Geyser', 'Study Desk & Chair'],
-        rentPerMonth: 7000,
-        beds: [
+        "id": "r102",
+        "roomNumber": "102",
+        "floorId": "f1",
+        "sharingType": "2-Sharing (Double)",
+        "features": [
+          "Attached Bathroom",
+          "Air Conditioning (AC)",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 8500,
+        "beds": [
           {
-            id: 'b102a',
-            bedNumber: 'Bed 102-A',
-            status: 'occupied',
-            resident: {
-              id: 'res2',
-              name: 'Vikram Singh',
-              phone: '+91 98123 45678',
-              checkInDate: '2024-02-01',
-              course: 'MBA Marketing',
-              rentAmount: 7000,
-              paymentStatus: 'Paid',
-              emergencyContact: '+91 98123 11111'
-            }
+            "id": "b102a",
+            "bedNumber": "Bed 102-A",
+            "status": "vacant"
           },
           {
-            id: 'b102b',
-            bedNumber: 'Bed 102-B',
-            status: 'occupied',
-            resident: {
-              id: 'res3',
-              name: 'Amit Kumar',
-              phone: '+91 97111 22334',
-              checkInDate: '2024-03-10',
-              course: 'B.Com Finance',
-              rentAmount: 7000,
-              paymentStatus: 'Pending',
-              emergencyContact: '+91 97111 99999'
-            }
-          },
-          {
-            id: 'b102c',
-            bedNumber: 'Bed 102-C',
-            status: 'maintenance',
-            maintenanceReason: 'AC Servicing & Electrical Maintenance'
+            "id": "b102b",
+            "bedNumber": "Bed 102-B",
+            "status": "vacant"
           }
         ]
       },
       {
-        id: 'r103',
-        roomNumber: '103',
-        floorId: 'f1',
-        sharingType: '1-Sharing (Single)',
-        features: ['Attached Bathroom', 'Air Conditioning (AC)', 'Private Balcony', 'High-Speed WiFi'],
-        rentPerMonth: 12500,
-        beds: [
+        "id": "r103",
+        "roomNumber": "103",
+        "floorId": "f1",
+        "sharingType": "3-Sharing (Triple)",
+        "features": [
+          "Attached Bathroom",
+          "Hot Water Geyser",
+          "Study Desk & Chair"
+        ],
+        "rentPerMonth": 7000,
+        "beds": [
           {
-            id: 'b103a',
-            bedNumber: 'Bed 103-A',
-            status: 'reserved',
-            reservedFor: 'Priya S.',
-            reservedUntil: '15th Aug 2026'
+            "id": "b103a",
+            "bedNumber": "Bed 103-A",
+            "status": "vacant"
+          },
+          {
+            "id": "b103b",
+            "bedNumber": "Bed 103-B",
+            "status": "vacant"
+          },
+          {
+            "id": "b103c",
+            "bedNumber": "Bed 103-C",
+            "status": "vacant"
+          }
+        ]
+      },
+      {
+        "id": "r104",
+        "roomNumber": "104",
+        "floorId": "f1",
+        "sharingType": "4-Sharing (Quad)",
+        "features": [
+          "Common Bathroom",
+          "Lockers & Cupboard",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 5500,
+        "beds": [
+          {
+            "id": "b104a",
+            "bedNumber": "Bed 104-A",
+            "status": "vacant"
+          },
+          {
+            "id": "b104b",
+            "bedNumber": "Bed 104-B",
+            "status": "vacant"
+          },
+          {
+            "id": "b104c",
+            "bedNumber": "Bed 104-C",
+            "status": "vacant"
+          },
+          {
+            "id": "b104d",
+            "bedNumber": "Bed 104-D",
+            "status": "maintenance",
+            "maintenanceReason": "Plumbing overhaul & Paint touchup"
           }
         ]
       }
     ]
   },
   {
-    id: 'f2',
-    floorNumber: 'Floor 2',
-    rooms: [
+    "id": "f2",
+    "floorNumber": "Floor 2",
+    "rooms": [
       {
-        id: 'r201',
-        roomNumber: '201',
-        floorId: 'f2',
-        sharingType: '2-Sharing (Double)',
-        features: ['Attached Bathroom', 'Air Conditioning (AC)'],
-        rentPerMonth: 8500,
-        beds: [
+        "id": "r201",
+        "roomNumber": "201",
+        "floorId": "f2",
+        "sharingType": "1-Sharing (Single)",
+        "features": [
+          "Attached Bathroom",
+          "Air Conditioning (AC)",
+          "Private Balcony",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 12500,
+        "beds": [
           {
-            id: 'b201a',
-            bedNumber: 'Bed 201-A',
-            status: 'occupied',
-            resident: {
-              id: 'res4',
-              name: 'Suresh Patel',
-              phone: '+91 99887 76655',
-              checkInDate: '2024-01-10',
-              course: 'M.Tech IT',
-              rentAmount: 8500,
-              paymentStatus: 'Paid',
-              emergencyContact: '+91 99887 00000'
-            }
-          },
-          {
-            id: 'b201b',
-            bedNumber: 'Bed 201-B',
-            status: 'vacant'
+            "id": "b201a",
+            "bedNumber": "Bed 201-A",
+            "status": "vacant"
           }
         ]
       },
       {
-        id: 'r202',
-        roomNumber: '202',
-        floorId: 'f2',
-        sharingType: '4-Sharing (Quad)',
-        features: ['Hot Water Geyser', 'Study Desk & Chair', 'High-Speed WiFi'],
-        rentPerMonth: 6000,
-        beds: [
+        "id": "r202",
+        "roomNumber": "202",
+        "floorId": "f2",
+        "sharingType": "2-Sharing (Double)",
+        "features": [
+          "Attached Bathroom",
+          "Air Conditioning (AC)",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 8500,
+        "beds": [
           {
-            id: 'b202a',
-            bedNumber: 'Bed 202-A',
-            status: 'vacant'
+            "id": "b202a",
+            "bedNumber": "Bed 202-A",
+            "status": "vacant"
           },
           {
-            id: 'b202b',
-            bedNumber: 'Bed 202-B',
-            status: 'vacant'
-          },
-          {
-            id: 'b202c',
-            bedNumber: 'Bed 202-C',
-            status: 'occupied',
-            resident: {
-              id: 'res5',
-              name: 'Deepak Verma',
-              phone: '+91 95554 43322',
-              checkInDate: '2024-05-01',
-              course: 'BCA',
-              rentAmount: 6000,
-              paymentStatus: 'Paid'
+            "id": "b202b",
+            "bedNumber": "Bed 202-B",
+            "status": "occupied",
+            "resident": {
+              "id": "u2",
+              "name": "Riya Verma",
+              "phone": "9876510003",
+              "checkInDate": "2 Feb 2025",
+              "course": "B.Tech ECE",
+              "rentAmount": 8500,
+              "paymentStatus": "Paid",
+              "emergencyContact": "9876520003",
+              "email": "riya.verma1@example.com",
+              "address": "H.No 2-45, Main Road, Vijayawada, AP",
+              "aadhaarNumber": "3001 4001 5003"
             }
+          }
+        ]
+      },
+      {
+        "id": "r203",
+        "roomNumber": "203",
+        "floorId": "f2",
+        "sharingType": "3-Sharing (Triple)",
+        "features": [
+          "Attached Bathroom",
+          "Hot Water Geyser",
+          "Study Desk & Chair"
+        ],
+        "rentPerMonth": 7000,
+        "beds": [
+          {
+            "id": "b203a",
+            "bedNumber": "Bed 203-A",
+            "status": "vacant"
           },
           {
-            id: 'b202d',
-            bedNumber: 'Bed 202-D',
-            status: 'vacant'
+            "id": "b203b",
+            "bedNumber": "Bed 203-B",
+            "status": "vacant"
+          },
+          {
+            "id": "b203c",
+            "bedNumber": "Bed 203-C",
+            "status": "vacant"
+          }
+        ]
+      },
+      {
+        "id": "r204",
+        "roomNumber": "204",
+        "floorId": "f2",
+        "sharingType": "4-Sharing (Quad)",
+        "features": [
+          "Common Bathroom",
+          "Lockers & Cupboard",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 5500,
+        "beds": [
+          {
+            "id": "b204a",
+            "bedNumber": "Bed 204-A",
+            "status": "vacant"
+          },
+          {
+            "id": "b204b",
+            "bedNumber": "Bed 204-B",
+            "status": "vacant"
+          },
+          {
+            "id": "b204c",
+            "bedNumber": "Bed 204-C",
+            "status": "vacant"
+          },
+          {
+            "id": "b204d",
+            "bedNumber": "Bed 204-D",
+            "status": "maintenance",
+            "maintenanceReason": "Plumbing overhaul & Paint touchup"
           }
         ]
       }
     ]
   },
   {
-    id: 'f3',
-    floorNumber: 'Floor 3',
-    rooms: [
+    "id": "f3",
+    "floorNumber": "Floor 3",
+    "rooms": [
       {
-        id: 'r301',
-        roomNumber: '301',
-        floorId: 'f3',
-        sharingType: '2-Sharing (Double)',
-        features: ['Attached Bathroom', 'Private Balcony'],
-        rentPerMonth: 8000,
-        beds: [
-          { id: 'b301a', bedNumber: 'Bed 301-A', status: 'vacant' },
-          { id: 'b301b', bedNumber: 'Bed 301-B', status: 'vacant' }
+        "id": "r301",
+        "roomNumber": "301",
+        "floorId": "f3",
+        "sharingType": "1-Sharing (Single)",
+        "features": [
+          "Attached Bathroom",
+          "Air Conditioning (AC)",
+          "Private Balcony",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 12500,
+        "beds": [
+          {
+            "id": "b301a",
+            "bedNumber": "Bed 301-A",
+            "status": "vacant"
+          }
         ]
       },
       {
-        id: 'r302',
-        roomNumber: '302',
-        floorId: 'f3',
-        sharingType: '1-Sharing (Single)',
-        features: ['Air Conditioning (AC)', 'High-Speed WiFi'],
-        rentPerMonth: 12000,
-        beds: [
+        "id": "r302",
+        "roomNumber": "302",
+        "floorId": "f3",
+        "sharingType": "2-Sharing (Double)",
+        "features": [
+          "Attached Bathroom",
+          "Air Conditioning (AC)",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 8500,
+        "beds": [
           {
-            id: 'b302a',
-            bedNumber: 'Bed 302-A',
-            status: 'occupied',
-            resident: {
-              id: 'res6',
-              name: 'Rohan Gupta',
-              phone: '+91 91234 56789',
-              checkInDate: '2024-04-12',
-              course: 'BBA',
-              rentAmount: 12000,
-              paymentStatus: 'Paid'
+            "id": "b302a",
+            "bedNumber": "Bed 302-A",
+            "status": "vacant"
+          },
+          {
+            "id": "b302b",
+            "bedNumber": "Bed 302-B",
+            "status": "vacant"
+          }
+        ]
+      },
+      {
+        "id": "r303",
+        "roomNumber": "303",
+        "floorId": "f3",
+        "sharingType": "3-Sharing (Triple)",
+        "features": [
+          "Attached Bathroom",
+          "Hot Water Geyser",
+          "Study Desk & Chair"
+        ],
+        "rentPerMonth": 7000,
+        "beds": [
+          {
+            "id": "b303a",
+            "bedNumber": "Bed 303-A",
+            "status": "vacant"
+          },
+          {
+            "id": "b303b",
+            "bedNumber": "Bed 303-B",
+            "status": "vacant"
+          },
+          {
+            "id": "b303c",
+            "bedNumber": "Bed 303-C",
+            "status": "occupied",
+            "resident": {
+              "id": "u3",
+              "name": "Sneha Reddy",
+              "phone": "9876510004",
+              "checkInDate": "3 Mar 2025",
+              "course": "B.Tech IT",
+              "rentAmount": 7000,
+              "paymentStatus": "Paid",
+              "emergencyContact": "9876520004",
+              "email": "sneha.reddy2@example.com",
+              "address": "H.No 3-45, Main Road, Visakhapatnam, AP",
+              "aadhaarNumber": "3002 4002 5004"
+            }
+          }
+        ]
+      },
+      {
+        "id": "r304",
+        "roomNumber": "304",
+        "floorId": "f3",
+        "sharingType": "4-Sharing (Quad)",
+        "features": [
+          "Common Bathroom",
+          "Lockers & Cupboard",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 5500,
+        "beds": [
+          {
+            "id": "b304a",
+            "bedNumber": "Bed 304-A",
+            "status": "vacant"
+          },
+          {
+            "id": "b304b",
+            "bedNumber": "Bed 304-B",
+            "status": "vacant"
+          },
+          {
+            "id": "b304c",
+            "bedNumber": "Bed 304-C",
+            "status": "vacant"
+          },
+          {
+            "id": "b304d",
+            "bedNumber": "Bed 304-D",
+            "status": "maintenance",
+            "maintenanceReason": "Plumbing overhaul & Paint touchup"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "f4",
+    "floorNumber": "Floor 4",
+    "rooms": [
+      {
+        "id": "r401",
+        "roomNumber": "401",
+        "floorId": "f4",
+        "sharingType": "1-Sharing (Single)",
+        "features": [
+          "Attached Bathroom",
+          "Air Conditioning (AC)",
+          "Private Balcony",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 12500,
+        "beds": [
+          {
+            "id": "b401a",
+            "bedNumber": "Bed 401-A",
+            "status": "vacant"
+          }
+        ]
+      },
+      {
+        "id": "r402",
+        "roomNumber": "402",
+        "floorId": "f4",
+        "sharingType": "2-Sharing (Double)",
+        "features": [
+          "Attached Bathroom",
+          "Air Conditioning (AC)",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 8500,
+        "beds": [
+          {
+            "id": "b402a",
+            "bedNumber": "Bed 402-A",
+            "status": "vacant"
+          },
+          {
+            "id": "b402b",
+            "bedNumber": "Bed 402-B",
+            "status": "vacant"
+          }
+        ]
+      },
+      {
+        "id": "r403",
+        "roomNumber": "403",
+        "floorId": "f4",
+        "sharingType": "3-Sharing (Triple)",
+        "features": [
+          "Attached Bathroom",
+          "Hot Water Geyser",
+          "Study Desk & Chair"
+        ],
+        "rentPerMonth": 7000,
+        "beds": [
+          {
+            "id": "b403a",
+            "bedNumber": "Bed 403-A",
+            "status": "vacant"
+          },
+          {
+            "id": "b403b",
+            "bedNumber": "Bed 403-B",
+            "status": "vacant"
+          },
+          {
+            "id": "b403c",
+            "bedNumber": "Bed 403-C",
+            "status": "vacant"
+          }
+        ]
+      },
+      {
+        "id": "r404",
+        "roomNumber": "404",
+        "floorId": "f4",
+        "sharingType": "4-Sharing (Quad)",
+        "features": [
+          "Common Bathroom",
+          "Lockers & Cupboard",
+          "High-Speed WiFi"
+        ],
+        "rentPerMonth": 5500,
+        "beds": [
+          {
+            "id": "b404a",
+            "bedNumber": "Bed 404-A",
+            "status": "vacant"
+          },
+          {
+            "id": "b404b",
+            "bedNumber": "Bed 404-B",
+            "status": "vacant"
+          },
+          {
+            "id": "b404c",
+            "bedNumber": "Bed 404-C",
+            "status": "vacant"
+          },
+          {
+            "id": "b404d",
+            "bedNumber": "Bed 404-D",
+            "status": "occupied",
+            "resident": {
+              "id": "u4",
+              "name": "Kavya Nair",
+              "phone": "9876510005",
+              "checkInDate": "4 Apr 2025",
+              "course": "B.Tech Mechanical",
+              "rentAmount": 5500,
+              "paymentStatus": "Pending",
+              "emergencyContact": "9876520005",
+              "email": "kavya.nair3@example.com",
+              "address": "H.No 4-45, Main Road, Guntur, AP",
+              "aadhaarNumber": "3003 4003 5005"
             }
           }
         ]
@@ -346,6 +642,26 @@ export const RoomManagementPage: React.FC = () => {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const getBedPrice = (room: RoomModel, bed: BedModel): number => {
+    if (bed.resident && bed.resident.rentAmount) return bed.resident.rentAmount;
+    if (room.rentPerMonth) return room.rentPerMonth;
+    const sharing = room.sharingType.toLowerCase();
+    if (sharing.includes('single') || sharing.includes('1-sharing')) return 10000;
+    if (sharing.includes('double') || sharing.includes('2-sharing')) return 7500;
+    if (sharing.includes('triple') || sharing.includes('3-sharing')) return 6000;
+    if (sharing.includes('quad') || sharing.includes('4-sharing')) return 5000;
+    return 7500;
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return 'TN';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
   };
 
   /* ───────────────────────────────────────────────────────────────────────── */
@@ -1336,11 +1652,15 @@ export const RoomManagementPage: React.FC = () => {
                       transition: 'all 0.15s'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                       <span style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A' }}>{bed.bedNumber}</span>
                       <span style={{ fontSize: '10px', fontWeight: 700, background: statusBadgeBg, color: statusTextColor, padding: '2px 6px', borderRadius: '10px' }}>
                         {statusLabel}
                       </span>
+                    </div>
+
+                    <div style={{ fontSize: '12px', fontWeight: 800, color: '#2563EB', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      ₹{getBedPrice(activeRoom, bed).toLocaleString('en-IN')}<span style={{ fontSize: '10px', fontWeight: 600, color: '#64748B' }}>/mo</span>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
@@ -1412,7 +1732,7 @@ export const RoomManagementPage: React.FC = () => {
                     password: '',
                     photoUrl: '',
                     checkInDate: new Date().toISOString().split('T')[0],
-                    rentAmount: activeRoom?.rentPerMonth || 8000
+                    rentAmount: activeRoom ? getBedPrice(activeRoom, activeBedAction.bed) : 8000
                   });
                   setActiveBedAction({ ...activeBedAction, type: 'assign' });
                 }}
@@ -1830,41 +2150,206 @@ export const RoomManagementPage: React.FC = () => {
         </div>
       )}
 
-      {/* ── VIEW RESIDENT MODAL (GREEN BED) ── */}
+      {/* ── TENANT DETAILS MODAL (ASSIGNED BED USER POPUP) ── */}
       {activeBedAction?.type === 'view_resident' && (
-        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1100, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '380px', borderRadius: '16px', padding: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#DEF7EC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#03543F' }}>
-                  <User size={18} />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 800, margin: 0 }}>{activeBedAction.bed.resident?.name}</h3>
-                  <span style={{ fontSize: '11px', color: '#10B981', fontWeight: 700 }}>Occupying {activeBedAction.bed.bedNumber}</span>
-                </div>
-              </div>
-              <button onClick={() => setActiveBedAction(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+        <div style={{ position: 'fixed', top: '44px', left: 0, right: 0, bottom: '64px', zIndex: 1200, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#FFFFFF', width: '100%', maxWidth: '390px', borderRadius: '24px', padding: '20px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', maxHeight: '90vh', overflowY: 'auto' }}>
+            
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: '#0F172A', textAlign: 'center', flex: 1 }}>
+                Tenant Details
+              </h3>
+              <button
+                onClick={() => setActiveBedAction(null)}
+                style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748B' }}
+              >
                 <X size={18} />
               </button>
             </div>
 
-            <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0', marginBottom: '14px', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <div><strong>Phone:</strong> {activeBedAction.bed.resident?.phone}</div>
-              <div><strong>Check-In Date:</strong> {activeBedAction.bed.resident?.checkInDate}</div>
-              <div><strong>Course:</strong> {activeBedAction.bed.resident?.course || 'N/A'}</div>
-              <div><strong>Rent Amount:</strong> ₹{activeBedAction.bed.resident?.rentAmount?.toLocaleString('en-IN')}/mo</div>
-              <div><strong>Payment Status:</strong> <span style={{ color: '#10B981', fontWeight: 700 }}>{activeBedAction.bed.resident?.paymentStatus}</span></div>
-            </div>
+            {/* Resident Top Profile Banner */}
+            {(() => {
+              const res = activeBedAction.bed.resident;
+              const bedNum = activeBedAction.bed.bedNumber;
+              const roomNum = activeRoom?.roomNumber ? `Room ${activeRoom.roomNumber}` : '';
+              const hostelName = 'Happy Hostels';
+              const initials = getInitials(res?.name);
 
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                onClick={() => handleUnassignResident(activeBedAction.floorId, activeBedAction.roomId, activeBedAction.bed.id)}
-                style={{ flex: 1, background: '#FEF2F2', color: '#EF4444', border: '1px solid #FCA5A5', padding: '10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
-              >
-                Unassign / Vacate Resident
-              </button>
-            </div>
+              return (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
+                    <div
+                      style={{
+                        width: '58px',
+                        height: '58px',
+                        borderRadius: '20px',
+                        background: '#2563EB',
+                        color: '#FFFFFF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '22px',
+                        fontWeight: 900,
+                        boxShadow: '0 8px 16px rgba(37, 99, 235, 0.3)',
+                        flexShrink: 0
+                      }}
+                    >
+                      {initials}
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: '0 0 2px 0', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        {res?.name || 'Resident'}
+                      </h2>
+                      <div style={{ fontSize: '12px', color: '#64748B', fontWeight: 500, marginBottom: '6px' }}>
+                        {hostelName} • {roomNum} ({bedNum})
+                      </div>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#DEF7EC', color: '#03543F', padding: '3px 10px', borderRadius: '14px', fontSize: '11px', fontWeight: 700 }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }} /> Active
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Fields Container Grid */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                    
+                    {/* NAME */}
+                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '12px 14px', borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563EB', flexShrink: 0 }}>
+                        <User size={18} />
+                      </div>
+                      <div style={{ overflow: 'hidden' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: '#94A3B8', letterSpacing: '0.05em' }}>NAME</div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#0F172A' }}>{res?.name || 'N/A'}</div>
+                      </div>
+                    </div>
+
+                    {/* CONTACT NUMBER */}
+                    <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '12px 14px', borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563EB', flexShrink: 0, boxShadow: '0 2px 4px rgba(37,99,235,0.1)' }}>
+                        <Phone size={18} />
+                      </div>
+                      <div style={{ overflow: 'hidden' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: '#60A5FA', letterSpacing: '0.05em' }}>CONTACT NUMBER</div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#1E3A8A' }}>{res?.phone || 'N/A'}</div>
+                      </div>
+                    </div>
+
+                    {/* ALTERNATE NUMBER */}
+                    <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '12px 14px', borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', flexShrink: 0, boxShadow: '0 2px 4px rgba(16,185,129,0.1)' }}>
+                        <Smartphone size={18} />
+                      </div>
+                      <div style={{ overflow: 'hidden' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: '#34D399', letterSpacing: '0.05em' }}>ALTERNATE NUMBER</div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#064E3B' }}>{res?.emergencyContact || res?.phone || 'N/A'}</div>
+                      </div>
+                    </div>
+
+                    {/* NATIVE ADDRESS */}
+                    <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', padding: '12px 14px', borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#EF4444', flexShrink: 0, boxShadow: '0 2px 4px rgba(239,68,68,0.1)' }}>
+                        <MapPin size={18} />
+                      </div>
+                      <div style={{ overflow: 'hidden' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: '#F87171', letterSpacing: '0.05em' }}>NATIVE ADDRESS</div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#7F1D1D', wordBreak: 'break-word' }}>{res?.address || 'N/A'}</div>
+                      </div>
+                    </div>
+
+                    {/* EMAIL */}
+                    <div style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', padding: '12px 14px', borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED', flexShrink: 0, boxShadow: '0 2px 4px rgba(124,58,237,0.1)' }}>
+                        <Mail size={18} />
+                      </div>
+                      <div style={{ overflow: 'hidden' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: '#A78BFA', letterSpacing: '0.05em' }}>EMAIL</div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#4C1D95', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{res?.email || `${res?.name?.toLowerCase().replace(/\s+/g, '')}@example.com`}</div>
+                      </div>
+                    </div>
+
+                    {/* AADHAAR NUMBER */}
+                    {res?.aadhaarNumber && (
+                      <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '12px 14px', borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D97706', flexShrink: 0, boxShadow: '0 2px 4px rgba(217,119,6,0.1)' }}>
+                          <CreditCard size={18} />
+                        </div>
+                        <div style={{ overflow: 'hidden' }}>
+                          <div style={{ fontSize: '10px', fontWeight: 800, color: '#F59E0B', letterSpacing: '0.05em' }}>AADHAAR NUMBER</div>
+                          <div style={{ fontSize: '13px', fontWeight: 800, color: '#78350F' }}>{res.aadhaarNumber}</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer Buttons: Checkout & Edit */}
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                      onClick={() => handleUnassignResident(activeBedAction.floorId, activeBedAction.roomId, activeBedAction.bed.id)}
+                      style={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        background: '#FEF2F2',
+                        color: '#DC2626',
+                        border: '1px solid #FCA5A5',
+                        padding: '12px',
+                        borderRadius: '24px',
+                        fontSize: '14px',
+                        fontWeight: 800,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <LogOut size={18} />
+                      Checkout
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        if (res) {
+                          setAssignForm({
+                            name: res.name || '',
+                            phone: res.phone || '',
+                            altPhone: res.emergencyContact || '',
+                            address: res.address || '',
+                            aadhaarNumber: res.aadhaarNumber || '',
+                            email: res.email || '',
+                            password: '',
+                            photoUrl: '',
+                            checkInDate: res.checkInDate || '',
+                            rentAmount: res.rentAmount || 8000
+                          });
+                        }
+                        setActiveBedAction({ ...activeBedAction, type: 'assign' });
+                      }}
+                      style={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        background: '#2563EB',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        padding: '12px',
+                        borderRadius: '24px',
+                        fontSize: '14px',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)'
+                      }}
+                    >
+                      <Edit3 size={18} />
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
           </div>
         </div>
       )}

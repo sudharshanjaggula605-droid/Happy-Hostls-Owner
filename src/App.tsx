@@ -43,7 +43,8 @@ import {
   initialHostelStats,
   initialHostelRooms,
   initialResidentRequests,
-  initialFeeTransactions
+  initialFeeTransactions,
+  initialHostelsData
 } from './mockData';
 import { KitchenHomePage } from './kitchen/HomePage';
 import { KitchenBroadcastPage } from './kitchen/BroadcastPage';
@@ -95,6 +96,7 @@ function App() {
   // Drawer & Modal States
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isHostelDropdownOpen, setIsHostelDropdownOpen] = useState(false);
   const [selectedRoomModal, setSelectedRoomModal] = useState<HostelRoom | null>(null);
   const [isNewRequestModalOpen, setIsNewRequestModalOpen] = useState(false);
   const [isPayModalOpen, setIsPayModalOpen] = useState<FeeTransaction | null>(null);
@@ -592,9 +594,53 @@ function App() {
               <Building size={18} />
             </span>
 
-            <h1 className="header-title">
-              {currentHostelName}
-            </h1>
+            <div style={{ position: 'relative' }}>
+              <button 
+                type="button"
+                onClick={() => setIsHostelDropdownOpen(prev => !prev)}
+                style={{ background: 'none', border: 'none', color: 'inherit', font: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', padding: 0 }}
+              >
+                <h1 className="header-title" style={{ margin: 0 }}>
+                  {currentHostelName}
+                </h1>
+                <ChevronRight size={14} style={{ transform: isHostelDropdownOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+              </button>
+
+              {isHostelDropdownOpen && (
+                <>
+                  <div style={{ position: 'fixed', inset: 0, zIndex: 49 }} onClick={() => setIsHostelDropdownOpen(false)} />
+                  <div className="profile-dropdown" style={{ left: 0, right: 'auto', minWidth: '260px' }}>
+                    <div style={{ padding: '8px 12px', fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Select Hostel</div>
+                    {initialHostelsData.map(h => (
+                      <button
+                        key={h.id}
+                        type="button"
+                        className={`profile-dropdown-item ${currentHostelName === h.name ? 'active' : ''}`}
+                        onClick={() => {
+                          setCurrentHostelName(h.name);
+                          setIsHostelDropdownOpen(false);
+                          showToast(`Switched view to ${h.name}`);
+                        }}
+                      >
+                        <span>{h.name}</span>
+                      </button>
+                    ))}
+                    <div className="profile-dropdown-divider" />
+                    <button
+                      type="button"
+                      className="profile-dropdown-item"
+                      onClick={() => {
+                        setCurrentHostelName('Happy Hostels (All Hostels)');
+                        setIsHostelDropdownOpen(false);
+                        showToast('Switched view to All Hostels');
+                      }}
+                    >
+                      <span>All Hostels (Overview)</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="header-right">

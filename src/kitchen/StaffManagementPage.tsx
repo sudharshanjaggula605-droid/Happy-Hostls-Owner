@@ -86,6 +86,7 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
   onNavigateToAttendance
 }) => {
   const [activeCalendarStaff, setActiveCalendarStaff] = useState<StaffMember | null>(null);
+  const [activeLogStaff, setActiveLogStaff] = useState<StaffMember | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isGlobalAttendanceModalOpen, setIsGlobalAttendanceModalOpen] = useState(false);
   const [globalAttendanceState, setGlobalAttendanceState] = useState<Record<string, 'present' | 'absent' | null>>({});
@@ -160,10 +161,21 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
     };
   });
 
-  // Keep localStorage in sync when attendanceDB changes
+  // Keep localStorage in sync when attendanceDB changes and listen for external updates
   React.useEffect(() => {
     localStorage.setItem('staffAttendanceDB', JSON.stringify(attendanceDB));
   }, [attendanceDB]);
+
+  React.useEffect(() => {
+    const handleStorageUpdate = () => {
+      const saved = localStorage.getItem('staffAttendanceDB');
+      if (saved) {
+        try { setAttendanceDB(JSON.parse(saved)); } catch (e) { }
+      }
+    };
+    window.addEventListener('storage', handleStorageUpdate);
+    return () => window.removeEventListener('storage', handleStorageUpdate);
+  }, []);
 
   // Prevent background scrolling when any modal is open
   React.useEffect(() => {
@@ -493,10 +505,10 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                    <History size={22} /> <span style={{ fontSize: '13px' }}>Payment History</span>
                  </button>
                  <button 
-                   onClick={() => onNavigateToAttendance && onNavigateToAttendance({ name: selectedStaff.name, presentDays: selectedStaff.presentDays, absentDays: selectedStaff.absentDays })}
+                   onClick={() => setActiveLogStaff(selectedStaff)}
                    style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: '600', color: '#ea580c', background: '#ffedd5', border: '1px solid #fed7aa', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 4px rgba(234,88,12,0.1)' }}
                  >
-                   <Calendar size={22} /> <span style={{ fontSize: '13px' }}>Attendance Log</span>
+                   <Calendar size={22} color="#ea580c" /> <span style={{ fontSize: '13px' }}>Attendance Log</span>
                  </button>
                </div>
              )}
@@ -791,6 +803,151 @@ export const StaffManagementPage: React.FC<StaffManagementPageProps> = ({
                 Save Attendance
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ATTENDANCE LOG POPUP MODAL */}
+      {activeLogStaff && (
+        <div className="ref-modal-overlay" onClick={() => setActiveLogStaff(null)} style={{ zIndex: 9999 }}>
+          <div className="ref-modal-card" style={{ maxHeight: '85vh', display: 'flex', flexDirection: 'column', width: '92%', maxWidth: '480px' }} onClick={e => e.stopPropagation()}>
+            
+            {/* Header */}
+            <div className="ref-modal-header" style={{ flexShrink: 0, paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+              <div>
+                <h3 className="ref-modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: '800', color: '#ea580c' }}>
+                  <Calendar size={20} color="#ea580c" />
+                  Attendance Log
+                </h3>
+                <p className="ref-modal-subtitle" style={{ color: '#64748b', fontSize: '13px', marginTop: '2px', fontWeight: '600' }}>
+                  {activeLogStaff.name}
+                </p>
+              </div>
+              <button className="ref-close-btn" onClick={() => setActiveLogStaff(null)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="ref-modal-body" style={{ overflowY: 'auto', flex: 1, paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '12px' }}>
+              
+              {/* AUGUST 2026 RECORDED ABSENCES */}
+              <div>
+                <h4 style={{ fontSize: '13px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  AUGUST 2026 - RECORDED ABSENCES
+                </h4>
+                {(() => {
+                  const todayDate = 15;
+                  const staffData = attendanceDB[activeLogStaff.id] || { absentDates: [8], holidayDates: [] };
+                  const pastAbsent = (staffData.absentDates || []).filter(d => d <= todayDate);
+
+                  if (pastAbsent.length === 0) {
+                    return (
+                      <div style={{ padding: '16px', textAlign: 'center', color: '#166534', background: '#f0fdf4', borderRadius: '14px', border: '1px solid #bbf7d0', fontSize: '13.5px', fontWeight: '600' }}>
+                        🎉 No absences recorded for August 2026.
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {pastAbsent.sort((a, b) => b - a).map(dateNum => (
+                        <div key={dateNum} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: '#fff1f2', borderRadius: '14px', border: '1px solid #ffe4e6' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#fee2e2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '14px', border: '1px solid #fca5a5' }}>
+                              {dateNum}
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '14px', fontWeight: '700', color: '#9f1239' }}>August {dateNum}, 2026</div>
+                              <div style={{ fontSize: '12px', color: '#be123c', fontWeight: '600' }}>Marked Absent by Owner</div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const newAbsent = staffData.absentDates.filter(d => d !== dateNum);
+                              const updated = {
+                                ...attendanceDB,
+                                [activeLogStaff.id]: {
+                                  ...staffData,
+                                  absentDates: newAbsent
+                                }
+                              };
+                              setAttendanceDB(updated);
+                              localStorage.setItem('staffAttendanceDB', JSON.stringify(updated));
+                              window.dispatchEvent(new Event('storage'));
+                            }}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '10px',
+                              background: 'white',
+                              border: '1px solid #fca5a5',
+                              color: '#dc2626',
+                              fontWeight: '700',
+                              fontSize: '12px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Mark Present
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* JULY 2026 - ABSENT DATES */}
+              <div>
+                <h4 style={{ fontSize: '13px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  JULY 2026 - ABSENT DATES
+                </h4>
+                <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#e2e8f0', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '13px' }}>12</div>
+                      <span style={{ fontSize: '13.5px', fontWeight: '600', color: '#334155' }}>July 12, 2026</span>
+                    </div>
+                    <span style={{ fontSize: '11.5px', color: '#dc2626', fontWeight: '700', background: '#fee2e2', padding: '3px 8px', borderRadius: '8px' }}>Absent</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#e2e8f0', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '13px' }}>4</div>
+                      <span style={{ fontSize: '13.5px', fontWeight: '600', color: '#334155' }}>July 4, 2026</span>
+                    </div>
+                    <span style={{ fontSize: '11.5px', color: '#dc2626', fontWeight: '700', background: '#fee2e2', padding: '3px 8px', borderRadius: '8px' }}>Absent</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* JUNE 2026 - ABSENT DATES */}
+              <div>
+                <h4 style={{ fontSize: '13px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  JUNE 2026 - ABSENT DATES
+                </h4>
+                <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#e2e8f0', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '13px' }}>22</div>
+                      <span style={{ fontSize: '13.5px', fontWeight: '600', color: '#334155' }}>June 22, 2026</span>
+                    </div>
+                    <span style={{ fontSize: '11.5px', color: '#dc2626', fontWeight: '700', background: '#fee2e2', padding: '3px 8px', borderRadius: '8px' }}>Absent</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Footer */}
+            <div className="ref-modal-actions" style={{ flexShrink: 0, marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+              <button
+                className="ref-btn-cancel"
+                style={{ width: '100%', padding: '12px', borderRadius: '12px', fontWeight: '700', background: '#f1f5f9', border: 'none', color: '#334155', cursor: 'pointer' }}
+                onClick={() => setActiveLogStaff(null)}
+              >
+                Close Log
+              </button>
+            </div>
+
           </div>
         </div>
       )}
